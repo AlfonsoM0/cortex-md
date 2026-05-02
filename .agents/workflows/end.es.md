@@ -78,4 +78,26 @@ Prepara el entorno para que la próxima sesión inicie sin fricción cognitiva.
 2. Limpia las tareas que fueron completadas exitosamente durante esta sesión.
 3. **Define el próximo paso:** Escribe de manera clara y concisa cuál debería ser la primera acción lógica para la siguiente iteración de desarrollo.
 
-*Nota interna para el LLM: Una vez ejecutadas estas 4 fases y modificados los archivos correspondientes en el sistema, informa al usuario con un mensaje breve que la memoria ha sido consolidada exitosamente y que la sesión puede cerrarse.*
+## Fase 5: Enrutamiento de Conocimiento (Aprendizaje Continuo)
+
+Si durante la sesión descubriste un nuevo patrón, una solución a un bug recurrente, o una mejora arquitectónica:
+
+1. **NO lo agregues directamente a `AGENTS.md`.** El system prompt raíz debe mantenerse liviano y estable.
+2. **Identificá el destino correcto:** Determiná si el aprendizaje pertenece a:
+   - Un **archivo de memoria semántica** (`conventions.md`, `architecture.md`, `stack.md`, `business-rules.md`) — si altera una verdad global.
+   - Un **archivo de skill** (`.agents/skills/[nombre]/SKILL.md`) — si es una técnica reutilizable o un patrón específico de dominio.
+   - Un **archivo de documentación** (`docs/`) — si es una explicación o especificación a nivel de producto.
+3. **Enrutá el conocimiento** al archivo apropiado. Solo agregá a `AGENTS.md` si constituye una nueva regla universal o requiere la creación de una nueva entrada de skill.
+
+*Fundamento: Esto previene el "system prompt bloat" — una inflación gradual del archivo raíz que degrada la economía de tokens y diluye las directivas centrales del agente.*
+
+## Fase 6: Sincronización de Documentos de Planificación (Opcional)
+
+Si el proyecto mantiene un roadmap maestro, tablero de tareas o documento de planificación (ej. `docs/ROADMAP.md`, `docs/00-MASTER-ROADMAP.md`):
+
+1. Revisá el documento de planificación.
+2. Si la sesión de hoy completó un hito, marcálo como completado.
+3. Si la sesión reveló nuevos pasos, bloqueos o pivotes arquitectónicos, actualizá el documento en consecuencia.
+4. **El documento de planificación, como la memoria semántica, debe reflejar siempre la verdad actual** — no un registro histórico.
+
+*Nota interna para el LLM: Una vez ejecutadas estas 6 fases y modificados los archivos correspondientes en el sistema, informá al usuario con un mensaje breve que la memoria ha sido consolidada exitosamente y que la sesión puede cerrarse.*

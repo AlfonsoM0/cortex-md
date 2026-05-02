@@ -78,4 +78,26 @@ Prepare the environment so the next session starts without cognitive friction.
 2. Clear the tasks that were successfully completed during this session.
 3. **Define the next step:** Write clearly and concisely what the first logical action should be for the next development iteration.
 
-*Internal note for the LLM: Once these 4 phases have been executed and the corresponding files in the system have been modified, inform the user with a brief message that memory has been successfully consolidated and the session can be closed.*
+## Phase 5: Knowledge Routing (Continuous Learning)
+
+If during the session you discovered a new pattern, a recurring bug solution, or an architectural improvement:
+
+1. **Do NOT add it directly to `AGENTS.md`.** The root system prompt should remain lean and stable.
+2. **Identify the correct destination:** Determine whether the learning belongs to:
+   - A **semantic memory file** (`conventions.md`, `architecture.md`, `stack.md`, `business-rules.md`) — if it alters a global truth.
+   - A **skill file** (`.agents/skills/[name]/SKILL.md`) — if it is a reusable technique or domain-specific pattern.
+   - A **documentation file** (`docs/`) — if it is a product-level explanation or specification.
+3. **Route the knowledge** to the appropriate file. Only add to `AGENTS.md` if it constitutes a new universal rule or requires the creation of a new skill entry.
+
+*Rationale: This prevents "system prompt bloat" — a gradual inflation of the root file that degrades token economy and dilutes the agent's core directives.*
+
+## Phase 6: Planning Document Sync (Optional)
+
+If the project maintains a master roadmap, task board, or planning document (e.g., `docs/ROADMAP.md`, `docs/00-MASTER-ROADMAP.md`):
+
+1. Review the planning document.
+2. If today's session completed a milestone, mark it as done.
+3. If the session revealed new steps, blockers, or architectural pivots, update the document accordingly.
+4. **The planning document, like semantic memory, must always reflect the current truth** — not a historical record.
+
+*Internal note for the LLM: Once these 6 phases have been executed and the corresponding files in the system have been modified, inform the user with a brief message that memory has been successfully consolidated and the session can be closed.*

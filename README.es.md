@@ -115,6 +115,8 @@ Al finalizar tu sesión de código, el LLM consolida la memoria a largo plazo:
 - **Actualización del Índice:** Añade una entrada etiquetada a `timeline.md` (máx. 50 sesiones). Las etiquetas provienen estrictamente de `taxonomy.md`.
 - **Consolidación Semántica (Crítico):** Evalúa si las acciones de hoy alteraron la arquitectura, reglas o convenciones globales. De ser así, sobrescribe el archivo semántico correspondiente.
 - **Vaciado de Memoria de Trabajo:** Actualiza `active-tasks.md` para la próxima sesión.
+- **Enrutamiento de Conocimiento:** Si se descubrió un nuevo patrón o solución a un bug, lo enruta al archivo correcto (memoria semántica, skill o docs) en vez de inflar `AGENTS.md`.
+- **Sincronización de Planificación (Opcional):** Si el proyecto tiene un roadmap o documento de planificación maestro, lo actualiza para reflejar hitos completados o nuevos pasos.
 
 ## Cómo Contribuir
 

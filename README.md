@@ -115,6 +115,8 @@ At the end of your coding session, the LLM consolidates long-term memory:
 - **Index Update:** Adds a tagged entry to `timeline.md` (max 50 sessions). Tags come strictly from `taxonomy.md`.
 - **Semantic Consolidation (Critical):** Evaluates whether today's actions altered the global architecture, rules, or conventions. If so, overwrites the corresponding semantic file.
 - **Working Memory Flush:** Updates `active-tasks.md` for the next session.
+- **Knowledge Routing:** If a new pattern or bug solution was discovered, routes it to the correct file (semantic memory, skill, or docs) instead of bloating `AGENTS.md`.
+- **Planning Sync (Optional):** If the project has a master roadmap or planning doc, updates it to reflect completed milestones or new steps.
 
 ## How to Contribute
 
