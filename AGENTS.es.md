@@ -36,8 +36,16 @@ Para interactuar de forma segura y evitar alucinaciones, estás obligado a utili
 - **Archivo a invocar:** `.agents/workflows/end.md`
 - **Instrucción:** Lee el archivo `end.md` y ejecuta la síntesis de tus acciones de hoy. Escribe en el sistema de archivos tu razonamiento técnico, actualiza el índice y modifica el estado del proyecto. Es tu responsabilidad asegurarte de que tu instancia futura herede un conocimiento arquitectónico preciso.
 
+#### C. Workflow de Desfragmentación (Bajo Demanda)
+
+- **Cuándo usarlo:** Cuando el usuario solicite explícitamente optimización de memoria, desfragmentación, o pida "ejecutar defrag".
+- **Archivo a invocar:** `.agents/workflows/defrag.md`
+- **Instrucción:** Es una operación de mantenimiento profundo que audita y reestructura todo el sistema de memoria. Requiere un modelo de razonamiento de alta capacidad. Siempre esperá la confirmación del usuario antes de proceder.
+
 ## 4. Reglas Estrictas de Modificación de Archivos
 
 - Al modificar código, asegúrate de mantener el estilo y las convenciones establecidas en tu memoria semántica.
 - Al modificar los archivos de la carpeta `.agents/memory/`, asegúrate de utilizar el formato Markdown requerido sin alterar la estructura de etiquetas o directorios preexistentes.
 - **Taxonomía Estricta:** Siempre que añadas entradas al índice histórico, debes consultar y utilizar obligatoriamente las etiquetas definidas en `.agents/memory/semantic/taxonomy.md`. Si consideras que una etiqueta nueva es necesaria, **recomiéndala al usuario y espera su aprobación** antes de agregarla.
+- **Regla de Omisión `[CortexMD]`:** Durante el enrutamiento hipocampal (búsqueda de contexto al inicio de sesión), **omitir** las entradas del timeline etiquetadas exclusivamente con `[CortexMD]`. Son sesiones de mantenimiento de memoria y no contienen contexto relevante para el proyecto.
+

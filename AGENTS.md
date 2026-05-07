@@ -36,8 +36,16 @@ To interact safely and avoid hallucinations, you are obligated to use the follow
 - **File to invoke:** `.agents/workflows/end.md`
 - **Instruction:** Read the `end.md` file and execute the synthesis of today's actions. Write your technical reasoning to the file system, update the index, and modify the project state. It is your responsibility to ensure that your future instance inherits precise architectural knowledge.
 
+#### C. Defragmentation Workflow (On Demand)
+
+- **When to use it:** When the user explicitly requests memory optimization, defragmentation, or asks to "run defrag".
+- **File to invoke:** `.agents/workflows/defrag.md`
+- **Instruction:** This is a deep maintenance operation that audits and restructures the entire memory system. It requires a high-capability reasoning model. Always wait for user confirmation before proceeding.
+
 ## 4. Strict File Modification Rules
 
 - When modifying code, ensure you maintain the style and conventions established in your semantic memory.
 - When modifying files in the `.agents/memory/` folder, ensure you use the required Markdown format without altering the pre-existing tag or directory structure.
 - **Strict Taxonomy:** Whenever you add entries to the historical index, you must consult and mandatorily use the tags defined in `.agents/memory/semantic/taxonomy.md`. If you consider a new tag is necessary, **recommend it to the user and wait for their approval** before adding it.
+- **`[CortexMD]` Skip Rule:** During hippocampal routing (context search at session start), **skip** timeline entries tagged exclusively with `[CortexMD]`. These are memory maintenance sessions and do not contain project-relevant context.
+

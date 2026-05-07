@@ -23,6 +23,7 @@ Analyze the initial request the user has given you for this session. Mentally ex
 1. **Read the file:** `.agents/memory/episodic/timeline.md`
    - **Objective:** Scan the historical index looking exclusively for tags (`[Tags]`) that match the domains of your current task.
    - **Strict rule:** Do not read the entire history — perform a visual search (*pattern matching*) for the relevant tags.
+   - **Skip rule:** Ignore entries tagged exclusively with `[CortexMD]` — these are memory maintenance sessions and contain no project-relevant context.
 
 ## Phase 3: Selective Episodic Retrieval (Deep Context)
 

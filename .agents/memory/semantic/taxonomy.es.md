@@ -16,3 +16,4 @@ Este documento define la lista **estricta** de etiquetas `[Tags]` que pueden uti
 - `[Refactor]`: Reestructuración de código sin cambios en funcionalidad externa.
 - `[Bugfix]`: Resolución de errores y fallos detectados.
 - `[Docs]`: Actualización de documentación, memoria semántica, README.
+- `[CortexMD]`: Sesiones de mantenimiento de memoria (defrag, optimización). Las sesiones etiquetadas **únicamente** con `[CortexMD]` no son relevantes para el proyecto y deben omitirse durante el enrutamiento hipocampal.

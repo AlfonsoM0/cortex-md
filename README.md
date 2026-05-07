@@ -72,7 +72,8 @@ Cortex-MD integrates within the standard `.agents/` convention (based on [Anthro
 ├── workflows/                         # Agent orchestration flows
 │   ├── init.md                        # ★ Cortex-MD: First-time bootstrap ("Onboarding")
 │   ├── start.md                       # ★ Cortex-MD: Session start ("Wake Up")
-│   └── end.md                         # ★ Cortex-MD: Session end ("Sleep")
+│   ├── end.md                         # ★ Cortex-MD: Session end ("Sleep")
+│   └── defrag.md                      # ★ Cortex-MD: Memory optimization ("Defrag")
 ├── memory/                            # ★ Cortex-MD: Persistent memory system
 │   ├── semantic/                      #   Neocortex: Global project state
 │   │   ├── taxonomy.md                #     Strict tag taxonomy for the index
@@ -93,7 +94,7 @@ Additionally, `AGENTS.md` is located at the **repository root**. It acts as the 
 
 ## Workflows
 
-The core of Cortex-MD consists of three workflows:
+The core of Cortex-MD consists of four workflows:
 
 ### 0. First-time bootstrap: `init.md`
 
@@ -118,6 +119,19 @@ At the end of your coding session, the LLM consolidates long-term memory:
 - **Knowledge Routing:** If a new pattern or bug solution was discovered, routes it to the correct file (semantic memory, skill, or docs) instead of bloating `AGENTS.md`.
 - **Planning Sync (Optional):** If the project has a master roadmap or planning doc, updates it to reflect completed milestones or new steps.
 
+### 3. Memory Defragmentation: `defrag.md`
+
+Triggered on demand when the user detects that memory files have grown with redundancies, format inefficiencies, or cross-file inconsistencies. This is analogous to disk defragmentation — reorganizing data for optimal performance without losing information.
+
+- **Safety Gate:** Warns the user and requires explicit confirmation that a high-capability reasoning model is active.
+- **Full Inventory:** Reads all semantic and recent episodic memory to build a complete picture.
+- **Semantic Compression:** Rewrites each semantic file for optimal LLM token consumption — dense lists over prose, imperative voice, zero filler words.
+- **Episodic Optimization:** Audits the timeline for tag inflation and enforces the 50-session limit.
+- **Cross-File Validation:** Detects contradictions and drift between `architecture.md`, `stack.md`, `conventions.md`, and `business-rules.md`.
+- **Defrag Report:** Presents a summary of all changes for user review.
+
+> **When to run it:** Every 15-20 sessions, or when semantic memory files grow beyond what feels reasonable for the project's complexity. The workflow is idempotent — running it on already-optimized memory produces no changes.
+
 ## How to Contribute
 
 Cortex-MD is an open architecture licensed under [MIT](LICENSE). Current research areas include:
@@ -125,5 +139,6 @@ Cortex-MD is an open architecture licensed under [MIT](LICENSE). Current researc
 - Optimization of the tag taxonomy in `taxonomy.md`.
 - Creation of automation scripts (Bash/Node.js) to initialize the folder structure.
 - Impact evaluation on context retention in projects with over 100k lines of code.
+- **Token metrics for defrag:** Adding estimated token count (before vs. after) to the defrag report would help users quantify optimization impact. This could be implemented as an optional phase in `defrag.md`.
 
 If you have improvements to the workflow prompts, please open a Pull Request or start an Issue to discuss the cognitive approach.

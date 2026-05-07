@@ -16,3 +16,4 @@ This document defines the **strict** list of `[Tags]` that can be used in `timel
 - `[Refactor]`: Code restructuring without changes to external functionality.
 - `[Bugfix]`: Resolution of detected errors and failures.
 - `[Docs]`: Documentation updates, semantic memory, README.
+- `[CortexMD]`: Memory maintenance sessions (defrag, optimization). Sessions tagged **only** with `[CortexMD]` are not project-relevant and should be skipped during hippocampal routing.

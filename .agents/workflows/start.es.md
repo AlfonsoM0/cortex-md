@@ -23,6 +23,7 @@ Analiza la solicitud inicial que te ha dado el usuario para esta sesión. Extrae
 1. **Lee el archivo:** `.agents/memory/episodic/timeline.md`
    - **Objetivo:** Escanear el índice histórico buscando exclusivamente las etiquetas (`[Tags]`) que coincidan con los dominios de tu tarea actual.
    - **Regla estricta:** No leas todo el historial, haz una búsqueda visual (*pattern matching*) de las etiquetas relevantes.
+   - **Regla de omisión:** Ignorá las entradas etiquetadas exclusivamente con `[CortexMD]` — son sesiones de mantenimiento de memoria y no contienen contexto relevante para el proyecto.
 
 ## Fase 3: Recuperación Episódica Selectiva (Deep Context)
 
