@@ -39,26 +39,37 @@ Read and execute .agents/workflows/init.md
 
 Ensure your IDE/agent reads `AGENTS.md` automatically at session start:
 
-| Tool | Configuration |
-|---|---|
-| **Claude Code** | Reads `AGENTS.md` automatically from root. No config needed. |
-| **Cursor** | Add `AGENTS.md` to your project rules, or place content in `.cursorrules`. |
-| **Gemini CLI** | In `.gemini/settings.json`: `{ "context": { "fileName": "AGENTS.md" } }` |
-| **Aider** | In `.aider.conf.yml`: `read: AGENTS.md` |
-| **VS Code Copilot** | Add reference in `.github/copilot-instructions.md`. |
-| **Other agents** | Instruct the agent to read `AGENTS.md` as its first action. |
+| Tool                | Configuration                                                              |
+| ------------------- | -------------------------------------------------------------------------- |
+| **Claude Code**     | Reads `AGENTS.md` automatically from root. No config needed.               |
+| **Cursor**          | Add `AGENTS.md` to your project rules, or place content in `.cursorrules`. |
+| **Gemini CLI**      | In `.gemini/settings.json`: `{ "context": { "fileName": "AGENTS.md" } }`   |
+| **Aider**           | In `.aider.conf.yml`: `read: AGENTS.md`                                    |
+| **VS Code Copilot** | Add reference in `.github/copilot-instructions.md`.                        |
+| **Other agents**    | Instruct the agent to read `AGENTS.md` as its first action.                |
 
 ### 4. Use the daily workflows
 
 - **Session start:** The agent reads `AGENTS.md` → executes `start.md` → loads context.
-- **Session end:** Tell the agent: *"Consolidate memory"* or *"Execute `.agents/workflows/end.md`"*.
+- **Session end:** Tell the agent: _"Consolidate memory"_ or _"Execute `.agents/workflows/end.md`"_.
+
+## Recommended Environment: Direct API + Agentic Extensions
+
+For maximum performance and cost-efficiency with Cortex-MD, we recommend using **agentic tools connected directly to model APIs** rather than standard chat interfaces or commercial subscription-based IDEs.
+
+- **Prompt Caching Efficiency (Start):** Cortex-MD injects constant static context (`architecture.md`, `stack.md`, etc.) at the start of each session. By using modern APIs, this context is cached, **dropping token read costs drastically** (often by more than 90%). Commercial tools cannot always guarantee predictable control over this cache, rapidly consuming premium usage quotas.
+- **Autonomous Memory Updates (End):** The end-of-session cycle demands autonomous reading and writing across multiple files (`YYYY/MM/DD.md`, `timeline.md`, etc.). An agentic extension has granular permissions to manage the local file system and stage commits. Traditional chat interfaces often force manual copying, pasting, and file creation.
+- **Intact Context Windows:** Architectural planning requires the full context window (many models today offer hundreds of thousands of tokens). A raw API connection gives you 100% of this capacity without the compression or silent information discarding that some tools apply in the background to save costs.
+- **Strict Workflow Execution:** The protocol requires rigorous audits and validations. A well-configured autonomous agent enforces instruction compliance without drifting. Closed tools sometimes prioritize speed, which often causes the model to "forget" or ignore long system instructions.
+
+For an optimal implementation, simply connect your own API key to your preferred agentic extension and point the agent to read `AGENTS.md` at the root of your repository.
 
 ## Neuroscientific Foundations
 
 Pre-trained LLMs lack neuroplasticity; they cannot alter their parametric weights to remember a conversation from yesterday. To mitigate this, Cortex-MD structures an "external brain" (exocortex) using the repository's file system:
 
 - **Prefrontal Cortex (Context Window):** Kept clean and strictly focused on the current task.
-- **Neocortex (Semantic Memory):** Stores the "state of things" (architecture, conventions, business rules, stack, and taxonomy). It is not a historical record — it is the absolute and current truth of the project. Divided into multiple modular files to scale without generating *context bloat*.
+- **Neocortex (Semantic Memory):** Stores the "state of things" (architecture, conventions, business rules, stack, and taxonomy). It is not a historical record — it is the absolute and current truth of the project. Divided into multiple modular files to scale without generating _context bloat_.
 - **Hippocampus (Episodic Memory):** Stores the daily record of actions and reasoning (linked to Git commits), efficiently indexed in a limited timeline (last 50 sessions) for rapid retrieval when deep context is needed.
 
 ## Directory Architecture
@@ -90,7 +101,7 @@ Cortex-MD integrates within the standard `.agents/` convention (based on [Anthro
 └── .mcp.json                          # (Convention) Local MCP server configuration
 ```
 
-Additionally, `AGENTS.md` is located at the **repository root**. It acts as the entry point (*system prompt*) that the IDE automatically injects into the agent, and is responsible for directing the LLM to Cortex-MD's workflows. This follows the [AGENTS.md standard](https://agents.md) adopted by 60k+ open-source projects and supported by tools like Codex, Jules, Cursor, VS Code Copilot, and many more.
+Additionally, `AGENTS.md` is located at the **repository root**. It acts as the entry point (_system prompt_) that the IDE automatically injects into the agent, and is responsible for directing the LLM to Cortex-MD's workflows. This follows the [AGENTS.md standard](https://agents.md) adopted by 60k+ open-source projects and supported by tools like Codex, Jules, Cursor, VS Code Copilot, and many more.
 
 ## Workflows
 
