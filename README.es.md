@@ -81,10 +81,12 @@ Cortex-MD se integra dentro de la convención estándar `.agents/` (basada en co
 ├── skills/                            # (Convención) Habilidades reutilizables (instrucciones + código)
 │   └── ...
 ├── workflows/                         # Flujos de orquestación del agente
-│   ├── init.md                        # ★ Cortex-MD: Bootstrap inicial ("Onboarding")
-│   ├── start.md                       # ★ Cortex-MD: Inicio de sesión ("Despertar")
-│   ├── end.md                         # ★ Cortex-MD: Fin de sesión ("Dormir")
-│   └── defrag.md                      # ★ Cortex-MD: Optimización de memoria ("Defrag")
+│   ├── init.md                        # ★ Core: Bootstrap inicial ("Onboarding")
+│   ├── start.md                       # ★ Core: Inicio de sesión ("Despertar")
+│   ├── end.md                         # ★ Core: Fin de sesión ("Dormir")
+│   ├── defrag.md                      # ★ Core: Optimización de memoria ("Defrag")
+│   ├── deep-plan.md                   # ★ Extensión: Planificación profunda con Prueba de Trabajo
+│   └── audit.md                       # ★ Extensión: Auditoría post-feature con evidencia
 ├── memory/                            # ★ Cortex-MD: Sistema de memoria persistente
 │   ├── semantic/                      #   Neocorteza: Estado global del proyecto
 │   │   ├── taxonomy.md                #     Taxonomía estricta de etiquetas para el índice
@@ -105,7 +107,7 @@ Adicionalmente, `AGENTS.md` se ubica en la **raíz del repositorio**. Actúa com
 
 ## Flujos de Trabajo (Workflows)
 
-El núcleo de Cortex-MD consiste en cuatro workflows:
+Cortex-MD provee **cuatro workflows core** (el ciclo de vida de la memoria) y **dos workflows de extensión** (metodología de desarrollo):
 
 ### 0. Bootstrap inicial: `init.md`
 
@@ -143,6 +145,55 @@ Se ejecuta bajo demanda cuando el usuario detecta que los archivos de memoria ha
 
 > **Cuándo ejecutarlo:** Cada 15-20 sesiones, o cuando los archivos de memoria semántica crezcan más allá de lo razonable para la complejidad del proyecto. El workflow es idempotente — ejecutarlo sobre memoria ya optimizada no produce cambios.
 
+## Workflows de Extensión: Modos de Ejecución Adaptativos
+
+Mientras los cuatro workflows core gestionan el ciclo de vida de la memoria, Cortex-MD también provee **workflows de extensión** que se adaptan a las capacidades del modelo que los ejecuta. Resuelven dos problemas simultáneamente:
+
+1. **Degradación de calidad** cuando modelos ligeros (Haiku, Flash, mini) procesan tareas de ingeniería complejas.
+2. **Overhead de latencia** cuando modelos pesados (Opus, o1) son forzados a través de pasos de micro-gestión innecesarios.
+
+### El Espectro del Problema
+
+Distintos modelos fallan de distintas formas:
+
+| Tier del Modelo | Modo de Falla | Causa Raíz |
+|---|---|---|
+| **Ligero** (Haiku, Flash, mini) | Amnesia de atención, evaluación perezosa, alucinación de contexto | FLOPs limitados por token — no puede resolver complejidad en espacio latente |
+| **Medio** (Sonnet, GPT-4o, Gemini Pro) | Salto ocasional basado en suposiciones | Profundidad suficiente pero puede desviarse sin checkpoints |
+| **Pesado** (Opus, o1, Deep Research) | Penalización de latencia, razonamiento holístico suprimido | La micro-gestión bloquea el pensamiento arquitectónico paralelo |
+
+### La Solución: Tres Modos de Ejecución
+
+Cada workflow de extensión soporta **tres modos** que el usuario selecciona al invocarlo (ej. "Creá un plan estricto", "Ejecutá una auditoría autónoma"). Si el usuario no especifica, el agente pregunta.
+
+| Modo | Nivel de Confianza | Para Modelos Como | Cómo Funciona |
+|---|---|---|---|
+| **`strict`** | Bajo — externalizar todo | Haiku, Flash, mini | Evidencia impresa completa. Puertas bloqueantes entre fases. Cada afirmación requiere output impreso de herramienta. Compensa profundidad de razonamiento limitada. |
+| **`standard`** | Medio — confiar con checkpoints | Sonnet, GPT-4o, Gemini Pro | Todas las fases se ejecutan pero pueden consolidarse. Evidencia requerida en checkpoints clave, no en todos lados. Balance entre velocidad y rigor. |
+| **`autonomous`** | Alto — confiar en el juicio del modelo | Opus, o1, Deep Research | Ejecución holística. El modelo recibe los objetivos de cada fase pero elige cómo alcanzarlos. Máxima velocidad y profundidad arquitectónica. |
+
+> **Innegociable en todos los modos:** El gateway de Validación Técnica (lint, typecheck, build) es siempre obligatorio y bloqueante. Ningún modelo — sin importar su capacidad — puede saltear la verificación objetiva del compilador.
+
+### 4. Planificación Profunda: `deep-plan.md`
+
+Un workflow de planificación estructurada con tres fases (Descubrimiento → Restricciones → Partición) que adapta su rigor:
+
+- **`strict`:** Resultados de búsqueda impresos, puertas bloqueantes entre fases, etapas de máx 3-5 archivos.
+- **`standard`:** Resúmenes consolidados, sin puertas bloqueantes, etapas de hasta 8-10 archivos.
+- **`autonomous`:** Análisis holístico, fases pueden combinarse, planes monolíticos permitidos si se justifican.
+
+> **Cuándo usarlo:** Antes de implementar cualquier funcionalidad que abarque más de 3 archivos o cruce límites entre módulos.
+
+### 5. Auditoría Post-Feature: `audit.md`
+
+Un workflow de validación basado en evidencia con seis fases (Inventario → Modularidad → Redundancia → Convenciones → Validación Técnica → Reporte):
+
+- **`strict`:** Output de grep para cada check, conteo de líneas para cada archivo, evidencia impresa en cada fase.
+- **`standard`:** Evidencia impresa solo para hallazgos y violaciones de umbrales. Formato resumen.
+- **`autonomous`:** Evaluación holística con herramientas usadas solo en áreas de incertidumbre. Solo la fase gateway es obligatoria.
+
+> **Cuándo usarlo:** Después de completar cualquier funcionalidad o bloque de trabajo significativo, antes de la consolidación de memoria (`end.md`).
+
 ## Cómo Contribuir
 
 Cortex-MD es una arquitectura abierta licenciada bajo [MIT](LICENSE). Las áreas de investigación actual incluyen:
@@ -151,5 +202,6 @@ Cortex-MD es una arquitectura abierta licenciada bajo [MIT](LICENSE). Las áreas
 - Creación de scripts de automatización (Bash/Node.js) para inicializar la estructura de carpetas.
 - Evaluación de impacto en la retención de contexto en proyectos de más de 100k líneas de código.
 - **Métricas de tokens para defrag:** Agregar un conteo estimado de tokens (antes vs. después) al reporte de desfragmentación ayudaría a los usuarios a cuantificar el impacto de la optimización. Esto podría implementarse como una fase opcional en `defrag.md`.
+- **Investigación de workflows de extensión:** Testear y refinar la metodología de Prueba de Trabajo en distintas familias de modelos (Claude, GPT, Gemini, open-source) y distintos tamaños de proyecto.
 
 Si tienes mejoras en los prompts de los workflows, por favor abre un Pull Request o inicia una Issue para debatir el enfoque cognitivo.

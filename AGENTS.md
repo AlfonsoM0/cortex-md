@@ -42,6 +42,22 @@ To interact safely and avoid hallucinations, you are obligated to use the follow
 - **File to invoke:** `.agents/workflows/defrag.md`
 - **Instruction:** This is a deep maintenance operation that audits and restructures the entire memory system. It requires a high-capability reasoning model. Always wait for user confirmation before proceeding.
 
+### Optional Extension Workflows
+
+These workflows are **not part of the core memory lifecycle** but provide development methodology support. Projects may adopt them as needed. Each supports three execution modes (`strict`, `standard`, `autonomous`) that the user specifies when invoking the workflow. If the user does not specify a mode, the agent must ask.
+
+#### D. Deep Planning Workflow (Before Complex Features)
+
+- **When to use it:** Before implementing any feature that spans more than 3 files or crosses module boundaries.
+- **File to invoke:** `.agents/workflows/deep-plan.md`
+- **Instruction:** Forces you to map the repository, contrast findings with architectural rules, and partition work into atomic stages. The level of evidence printing and blocking gates adapts to the selected mode.
+
+#### E. Post-Feature Audit Workflow (After Code Changes)
+
+- **When to use it:** After completing a feature or significant block of work, before consolidating memory with `end.md`.
+- **File to invoke:** `.agents/workflows/audit.md`
+- **Instruction:** Validates all changes against project standards. The depth of evidence required adapts to the selected mode, but the Technical Validation gateway (lint/build/typecheck) is always mandatory regardless of mode.
+
 ## 4. Strict File Modification Rules
 
 - When modifying code, ensure you maintain the style and conventions established in your semantic memory.

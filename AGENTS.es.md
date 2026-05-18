@@ -42,6 +42,22 @@ Para interactuar de forma segura y evitar alucinaciones, estás obligado a utili
 - **Archivo a invocar:** `.agents/workflows/defrag.md`
 - **Instrucción:** Es una operación de mantenimiento profundo que audita y reestructura todo el sistema de memoria. Requiere un modelo de razonamiento de alta capacidad. Siempre esperá la confirmación del usuario antes de proceder.
 
+### Workflows de Extensión Opcionales
+
+Estos workflows **no forman parte del ciclo de vida core de la memoria** pero proveen soporte metodológico para el desarrollo. Los proyectos pueden adoptarlos según sus necesidades. Cada uno soporta tres modos de ejecución (`strict`, `standard`, `autonomous`) que el usuario especifica al invocar el workflow. Si el usuario no especifica un modo, el agente debe preguntar.
+
+#### D. Workflow de Planificación Profunda (Antes de Features Complejas)
+
+- **Cuándo usarlo:** Antes de implementar cualquier funcionalidad que abarque más de 3 archivos o cruce límites entre módulos.
+- **Archivo a invocar:** `.agents/workflows/deep-plan.md`
+- **Instrucción:** Te fuerza a mapear el repositorio, contrastar los hallazgos con las reglas arquitectónicas y particionar el trabajo en etapas atómicas. El nivel de evidencia impresa y puertas bloqueantes se adapta al modo seleccionado.
+
+#### E. Workflow de Auditoría Post-Feature (Después de Cambios de Código)
+
+- **Cuándo usarlo:** Después de completar una funcionalidad o bloque de trabajo significativo, antes de consolidar la memoria con `end.md`.
+- **Archivo a invocar:** `.agents/workflows/audit.md`
+- **Instrucción:** Valida todos los cambios contra los estándares del proyecto. La profundidad de evidencia requerida se adapta al modo seleccionado, pero el gateway de Validación Técnica (lint/build/typecheck) es siempre obligatorio sin importar el modo.
+
 ## 4. Reglas Estrictas de Modificación de Archivos
 
 - Al modificar código, asegúrate de mantener el estilo y las convenciones establecidas en tu memoria semántica.

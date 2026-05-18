@@ -81,10 +81,12 @@ Cortex-MD integrates within the standard `.agents/` convention (based on [Anthro
 ├── skills/                            # (Convention) Reusable skills (instructions + code)
 │   └── ...
 ├── workflows/                         # Agent orchestration flows
-│   ├── init.md                        # ★ Cortex-MD: First-time bootstrap ("Onboarding")
-│   ├── start.md                       # ★ Cortex-MD: Session start ("Wake Up")
-│   ├── end.md                         # ★ Cortex-MD: Session end ("Sleep")
-│   └── defrag.md                      # ★ Cortex-MD: Memory optimization ("Defrag")
+│   ├── init.md                        # ★ Core: First-time bootstrap ("Onboarding")
+│   ├── start.md                       # ★ Core: Session start ("Wake Up")
+│   ├── end.md                         # ★ Core: Session end ("Sleep")
+│   ├── defrag.md                      # ★ Core: Memory optimization ("Defrag")
+│   ├── deep-plan.md                   # ★ Extension: Deep planning with Proof of Work
+│   └── audit.md                       # ★ Extension: Post-feature audit with evidence
 ├── memory/                            # ★ Cortex-MD: Persistent memory system
 │   ├── semantic/                      #   Neocortex: Global project state
 │   │   ├── taxonomy.md                #     Strict tag taxonomy for the index
@@ -105,7 +107,7 @@ Additionally, `AGENTS.md` is located at the **repository root**. It acts as the 
 
 ## Workflows
 
-The core of Cortex-MD consists of four workflows:
+Cortex-MD provides **four core workflows** (the memory lifecycle) and **two extension workflows** (development methodology):
 
 ### 0. First-time bootstrap: `init.md`
 
@@ -143,6 +145,55 @@ Triggered on demand when the user detects that memory files have grown with redu
 
 > **When to run it:** Every 15-20 sessions, or when semantic memory files grow beyond what feels reasonable for the project's complexity. The workflow is idempotent — running it on already-optimized memory produces no changes.
 
+## Extension Workflows: Adaptive Execution Modes
+
+While the four core workflows manage the memory lifecycle, Cortex-MD also provides **extension workflows** that adapt to the capabilities of the model executing them. They solve two problems simultaneously:
+
+1. **Quality degradation** when lightweight models (Haiku, Flash, mini) process complex engineering tasks.
+2. **Latency overhead** when heavyweight models (Opus, o1) are forced through unnecessary micro-management steps.
+
+### The Problem Spectrum
+
+Different models fail in different ways:
+
+| Model Tier | Failure Mode | Root Cause |
+|---|---|---|
+| **Lightweight** (Haiku, Flash, mini) | Attention amnesia, lazy evaluation, context hallucination | Limited FLOPs per token — can't resolve complexity in latent space |
+| **Mid-tier** (Sonnet, GPT-4o, Gemini Pro) | Occasional assumption-based skipping | Sufficient depth but can drift without checkpoints |
+| **Heavyweight** (Opus, o1, Deep Research) | Latency penalty, suppressed holistic reasoning | Micro-management blocks parallel architectural thinking |
+
+### The Solution: Three Execution Modes
+
+Each extension workflow supports **three modes** that the user selects at invocation time (e.g., "Create a strict plan", "Run an autonomous audit"). If the user doesn't specify, the agent asks.
+
+| Mode | Trust Level | For Models Like | How It Works |
+|---|---|---|---|
+| **`strict`** | Low — externalize everything | Haiku, Flash, mini | Full evidence printing. Blocking gates between phases. Every claim requires printed tool output. Designed to compensate for limited reasoning depth. |
+| **`standard`** | Medium — trust with checkpoints | Sonnet, GPT-4o, Gemini Pro | All phases execute but may be consolidated. Evidence required at key checkpoints, not everywhere. Balanced speed and rigor. |
+| **`autonomous`** | High — trust the model's judgment | Opus, o1, Deep Research | Holistic execution. The model receives phase objectives but chooses how to achieve them. Maximum speed and architectural depth. |
+
+> **Non-negotiable across all modes:** The Technical Validation gateway (lint, typecheck, build) is always mandatory and blocking. No model — regardless of capability — can skip objective compiler verification.
+
+### 4. Deep Planning: `deep-plan.md`
+
+A structured planning workflow with three phases (Discovery → Constraints → Partition) that adapts its rigor:
+
+- **`strict`:** Printed search results, blocking gates between phases, stages of max 3-5 files.
+- **`standard`:** Consolidated summaries, no blocking gates, stages up to 8-10 files.
+- **`autonomous`:** Holistic analysis, phases may be combined, monolithic plans permitted if justified.
+
+> **When to use it:** Before implementing any feature that spans more than 3 files or crosses module boundaries.
+
+### 5. Post-Feature Audit: `audit.md`
+
+An evidence-based validation workflow with six phases (Inventory → Modularity → Redundancy → Conventions → Technical Validation → Report):
+
+- **`strict`:** Grep output for every check, line counts for every file, printed evidence at every phase.
+- **`standard`:** Evidence printed only for findings and threshold violations. Summary format.
+- **`autonomous`:** Holistic evaluation with tools used only for uncertainty areas. Only the gateway phase is mandatory.
+
+> **When to use it:** After completing any feature or significant block of work, before memory consolidation (`end.md`).
+
 ## How to Contribute
 
 Cortex-MD is an open architecture licensed under [MIT](LICENSE). Current research areas include:
@@ -151,5 +202,6 @@ Cortex-MD is an open architecture licensed under [MIT](LICENSE). Current researc
 - Creation of automation scripts (Bash/Node.js) to initialize the folder structure.
 - Impact evaluation on context retention in projects with over 100k lines of code.
 - **Token metrics for defrag:** Adding estimated token count (before vs. after) to the defrag report would help users quantify optimization impact. This could be implemented as an optional phase in `defrag.md`.
+- **Extension workflow research:** Testing and refining the Proof of Work methodology across different model families (Claude, GPT, Gemini, open-source) and project sizes.
 
 If you have improvements to the workflow prompts, please open a Pull Request or start an Issue to discuss the cognitive approach.
