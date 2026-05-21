@@ -100,7 +100,9 @@ Cortex-MD integrates within the standard `.agents/` convention (based on [Anthro
 │       └── YYYY/
 │           └── MM/
 │               └── DD.md              #     Detailed session record (files, commits, decisions)
-└── .mcp.json                          # (Convention) Local MCP server configuration
+├── .mcp.json                          # (Convention) Local MCP server configuration
+├── ai-helpers/                        # ★ Cortex-MD: Stepwise Execution Pipeline module
+└── docs/                              # ★ Cortex-MD: Guides and documentation
 ```
 
 Additionally, `AGENTS.md` is located at the **repository root**. It acts as the entry point (_system prompt_) that the IDE automatically injects into the agent, and is responsible for directing the LLM to Cortex-MD's workflows. This follows the [AGENTS.md standard](https://agents.md) adopted by 60k+ open-source projects and supported by tools like Codex, Jules, Cursor, VS Code Copilot, and many more.
@@ -193,6 +195,24 @@ An evidence-based validation workflow with six phases (Inventory → Modularity 
 - **`autonomous`:** Holistic evaluation with tools used only for uncertainty areas. Only the gateway phase is mandatory.
 
 > **When to use it:** After completing any feature or significant block of work, before memory consolidation (`end.md`).
+
+## AI Helpers: Stepwise Execution Pipeline
+
+While Cortex-MD excels at managing global memory and episodic context, it doesn't prescribe how to do the actual coding *during* the session. The **AI Helpers** module (`ai-helpers/`) fills this operational gap.
+
+It provides a stepwise execution pipeline (`Brief → Breakdown → Spec → Prompt → Audit → end.md`) that allows developers and AI orchestrators to take a high-level idea and transform it into audited code through an iterative, repeatable process. 
+
+For full details, read the [AI Helpers Documentation](file:///home/alfonsom0/repos/cortex-md/ai-helpers/README.md).
+
+## Multi-Developer Scalability
+
+When working in teams with more than one developer, using Cortex-MD out-of-the-box can lead to Git merge conflicts in the episodic memory files (`timeline.md` and `YYYY/MM/DD.md`). 
+
+To solve this, the architecture can be divided into two layers:
+1. **Centralized Neocortex (Project Repo):** Semantic memory shared by the team.
+2. **Distributed Hippocampus (Personal Memory Repo):** An independent repository for each developer's daily episodic logs.
+
+For setup instructions, read the [Multi-Developer Guide](file:///home/alfonsom0/repos/cortex-md/docs/multi-dev-guide.md).
 
 ## How to Contribute
 

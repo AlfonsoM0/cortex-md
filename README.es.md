@@ -100,7 +100,9 @@ Cortex-MD se integra dentro de la convención estándar `.agents/` (basada en co
 │       └── YYYY/
 │           └── MM/
 │               └── DD.md              #     Registro detallado de la sesión (archivos, commits, decisiones)
-└── .mcp.json                          # (Convención) Configuración de servidores MCP local
+├── .mcp.json                          # (Convención) Configuración de servidores MCP local
+├── ai-helpers/                        # ★ Cortex-MD: Módulo Pipeline de Ejecución Stepwise
+└── docs/                              # ★ Cortex-MD: Guías y documentación
 ```
 
 Adicionalmente, `AGENTS.md` se ubica en la **raíz del repositorio**. Actúa como el punto de entrada (_system prompt_) que el IDE inyecta automáticamente al agente, y es responsable de dirigir al LLM hacia los workflows de Cortex-MD. Esto sigue el [estándar AGENTS.md](https://agents.md) adoptado por más de 60k proyectos open source y soportado por herramientas como Codex, Jules, Cursor, VS Code Copilot, y muchas más.
@@ -193,6 +195,24 @@ Un workflow de validación basado en evidencia con seis fases (Inventario → Mo
 - **`autonomous`:** Evaluación holística con herramientas usadas solo en áreas de incertidumbre. Solo la fase gateway es obligatoria.
 
 > **Cuándo usarlo:** Después de completar cualquier funcionalidad o bloque de trabajo significativo, antes de la consolidación de memoria (`end.md`).
+
+## AI Helpers: Pipeline de Ejecución Stepwise
+
+Mientras que Cortex-MD destaca en la gestión de memoria global y contexto episódico, no prescribe cómo hacer la programación real *durante* la sesión. El módulo **AI Helpers** (`ai-helpers/`) llena este vacío operacional.
+
+Provee un pipeline de ejecución por pasos (`Brief → Breakdown → Spec → Prompt → Audit → end.md`) que permite a los desarrolladores y orquestadores de IA tomar una idea de alto nivel y transformarla en código auditado a través de un proceso iterativo y repetible.
+
+Para todos los detalles, lee la [Documentación de AI Helpers](file:///home/alfonsom0/repos/cortex-md/ai-helpers/README.es.md).
+
+## Escalabilidad Multi-Desarrollador
+
+Al trabajar en equipos con más de un desarrollador, usar Cortex-MD por defecto puede generar conflictos de mezcla (merge conflicts) en Git en los archivos de memoria episódica (`timeline.md` y `YYYY/MM/DD.md`).
+
+Para solucionar esto, la arquitectura puede dividirse en dos capas:
+1. **Neocorteza Centralizada (Repo del Proyecto):** Memoria semántica compartida por el equipo.
+2. **Hipocampo Distribuido (Repo de Memoria Personal):** Un repositorio independiente para los registros episódicos diarios de cada desarrollador.
+
+Para instrucciones de configuración, lee la [Guía Multi-Desarrollador](file:///home/alfonsom0/repos/cortex-md/docs/multi-dev-guide.es.md).
 
 ## Cómo Contribuir
 
