@@ -1,5 +1,5 @@
 ---
-description: Post-feature audit with evidence-based validation. Verifies changes against semantic memory rules using real tool output. Supports three execution modes (strict, standard, autonomous) to adapt to different model capabilities.
+description: Post-feature audit with evidence-based validation. Verifies changes against semantic memory rules using real tool output. Supports three execution modes (strict, standard, autonomous) to adapt to different model capabilities. Note: autonomous mode can be removed in projects that do not use high-capacity models.
 ---
 
 # Workflow: Post-Feature Audit with Evidence
@@ -27,6 +27,8 @@ Determine the execution mode based on the user's request.
 > Which mode should I use? (Next time, you can specify it directly, e.g., "Run a strict audit" or "Audit autonomously".)
 
 **Wait for the user's response before proceeding.**
+
+> **Customization:** If your team does not use high-capacity reasoning models (Opus, o1, Deep Research), you can remove the `autonomous` mode from this workflow to reduce selection friction. Fewer options = less cognitive overhead for the user.
 
 ---
 

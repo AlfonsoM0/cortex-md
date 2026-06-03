@@ -200,7 +200,13 @@ Un workflow de validación basado en evidencia con seis fases (Inventario → Mo
 
 Mientras que Cortex-MD destaca en la gestión de memoria global y contexto episódico, no prescribe cómo hacer la programación real *durante* la sesión. El módulo **AI Helpers** (`ai-helpers/`) llena este vacío operacional.
 
-Provee un pipeline de ejecución por pasos (`Brief → Breakdown → Spec → Prompt → Audit → end.md`) que permite a los desarrolladores y orquestadores de IA tomar una idea de alto nivel y transformarla en código auditado a través de un proceso iterativo y repetible.
+El módulo soporta **tres modos de trabajo**:
+
+- **Flujo Manual:** El usuario controla cada paso del pipeline (`Brief → Breakdown → Spec → Prompt → Audit`).
+- **Flujo Orquestado:** Un agente Orquestador ejecuta el ciclo completo delegando a sub-agentes especializados (Architect, Code, Debug).
+- **Independiente:** El agente principal gestiona la tarea directamente con los workflows globales (`/deep-plan`, `/audit`), sin el pipeline stepwise.
+
+La carpeta `01-brief/` actúa como un **backlog de ideas**, permitiendo acumular múltiples briefs en paralelo. La consolidación en memoria episódica (via `end.md`) es **decisión del usuario**, no automática, para poder agrupar varios PRs en una sola sesión.
 
 Para todos los detalles, lee la [Documentación de AI Helpers](file:///home/alfonsom0/repos/cortex-md/ai-helpers/README.es.md).
 

@@ -1,5 +1,5 @@
 ---
-description: Deep planning with Proof of Work. Forces the LLM to map the repo, contrast with architecture rules, and partition work into atomic tasks. Supports three execution modes (strict, standard, autonomous) to adapt to different model capabilities.
+description: Deep planning with Proof of Work. Forces the LLM to map the repo, contrast with architecture rules, and partition work into atomic tasks. Supports three execution modes (strict, standard, autonomous) to adapt to different model capabilities. Note: autonomous mode can be removed in projects that do not use high-capacity models.
 ---
 
 # Workflow: Deep Planning with Proof of Work
@@ -27,6 +27,8 @@ Determine the execution mode based on the user's request.
 > Which mode should I use? (Next time, you can specify it directly, e.g., "Create a strict plan" or "Plan this autonomously".)
 
 **Wait for the user's response before proceeding.**
+
+> **Customization:** If your team does not use high-capacity reasoning models (Opus, o1, Deep Research), you can remove the `autonomous` mode from this workflow to reduce selection friction. Fewer options = less cognitive overhead for the user.
 
 ---
 

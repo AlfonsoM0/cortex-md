@@ -1,5 +1,5 @@
 ---
-description: Planificación profunda con Prueba de Trabajo. Fuerza al LLM a mapear el repo, contrastar con reglas de arquitectura y particionar el trabajo en tareas atómicas. Soporta tres modos de ejecución (strict, standard, autonomous) para adaptarse a distintas capacidades de modelo.
+description: Planificación profunda con Prueba de Trabajo. Fuerza al LLM a mapear el repo, contrastar con reglas de arquitectura y particionar el trabajo en tareas atómicas. Soporta tres modos de ejecución (strict, standard, autonomous) para adaptarse a distintas capacidades de modelo. Nota: el modo autonomous puede eliminarse en proyectos que no usen modelos de alta capacidad.
 ---
 
 # Workflow: Planificación Profunda con Prueba de Trabajo
@@ -27,6 +27,8 @@ Determiná el modo de ejecución basándote en la solicitud del usuario.
 > ¿Qué modo debo usar? (La próxima vez, podés especificarlo directamente, ej. "Creá un plan estricto" o "Planificá esto autónomamente".)
 
 **Esperá la respuesta del usuario antes de continuar.**
+
+> **Personalización:** Si tu equipo no utiliza modelos de razonamiento de alta capacidad (Opus, o1, Deep Research), podés eliminar el modo `autonomous` de este workflow para reducir la fricción en la selección. Menos opciones = menos overhead cognitivo para el usuario.
 
 ---
 

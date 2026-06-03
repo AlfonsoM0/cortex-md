@@ -102,6 +102,9 @@ Cortex-MD integrates within the standard `.agents/` convention (based on [Anthro
 │               └── DD.md              #     Detailed session record (files, commits, decisions)
 ├── .mcp.json                          # (Convention) Local MCP server configuration
 ├── ai-helpers/                        # ★ Cortex-MD: Stepwise Execution Pipeline module
+│   ├── generators/                    #     Active prompts (Stepwise engines)
+│   ├── idea-development/              #     Static templates and workbench files
+│   └── prompts/                       #     Master orchestration prompts
 └── docs/                              # ★ Cortex-MD: Guides and documentation
 ```
 
@@ -200,13 +203,19 @@ An evidence-based validation workflow with six phases (Inventory → Modularity 
 
 While Cortex-MD excels at managing global memory and episodic context, it doesn't prescribe how to do the actual coding *during* the session. The **AI Helpers** module (`ai-helpers/`) fills this operational gap.
 
-It provides a stepwise execution pipeline (`Brief → Breakdown → Spec → Prompt → Audit → end.md`) that allows developers and AI orchestrators to take a high-level idea and transform it into audited code through an iterative, repeatable process. 
+The module supports **three work modes**:
+
+- **Manual Flow:** The user controls each step of the pipeline (`Brief → Breakdown → Spec → Prompt → Audit`).
+- **Orchestrated Flow:** An Orchestrator agent executes the complete cycle, delegating to specialized sub-agents (Architect, Code, Debug).
+- **Independent:** The main agent manages the task directly using global workflows (`/deep-plan`, `/audit`), without the stepwise pipeline.
+
+The `01-brief/` folder acts as an **idea backlog**, allowing multiple briefs to accumulate in parallel. Consolidation into episodic memory (via `end.md`) is **the user's explicit decision**, rather than automatic, enabling the grouping of multiple PRs under a single session.
 
 For full details, read the [AI Helpers Documentation](file:///home/alfonsom0/repos/cortex-md/ai-helpers/README.md).
 
 ## Multi-Developer Scalability
 
-When working in teams with more than one developer, using Cortex-MD out-of-the-box can lead to Git merge conflicts in the episodic memory files (`timeline.md` and `YYYY/MM/DD.md`). 
+When working in teams with more than one developer, using Cortex-MD out-of-the-box can lead to Git merge conflicts in the episodic memory files (`timeline.md` and `YYYY/MM/DD.md`).
 
 To solve this, the architecture can be divided into two layers:
 1. **Centralized Neocortex (Project Repo):** Semantic memory shared by the team.

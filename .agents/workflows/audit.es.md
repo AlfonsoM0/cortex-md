@@ -1,5 +1,5 @@
 ---
-description: Auditoría post-feature con validación basada en evidencia. Verifica cambios contra las reglas de la memoria semántica usando output real de herramientas. Soporta tres modos de ejecución (strict, standard, autonomous) para adaptarse a distintas capacidades de modelo.
+description: Auditoría post-feature con validación basada en evidencia. Verifica cambios contra las reglas de la memoria semántica usando output real de herramientas. Soporta tres modos de ejecución (strict, standard, autonomous) para adaptarse a distintas capacidades de modelo. Nota: el modo autonomous puede eliminarse en proyectos que no usen modelos de alta capacidad.
 ---
 
 # Workflow: Auditoría Post-Feature con Evidencia
@@ -27,6 +27,8 @@ Determiná el modo de ejecución basándote en la solicitud del usuario.
 > ¿Qué modo debo usar? (La próxima vez, podés especificarlo directamente, ej. "Ejecutá una auditoría estricta" o "Auditá autónomamente".)
 
 **Esperá la respuesta del usuario antes de continuar.**
+
+> **Personalización:** Si tu equipo no utiliza modelos de razonamiento de alta capacidad (Opus, o1, Deep Research), podés eliminar el modo `autonomous` de este workflow para reducir la fricción en la selección. Menos opciones = menos overhead cognitivo para el usuario.
 
 ---
 
