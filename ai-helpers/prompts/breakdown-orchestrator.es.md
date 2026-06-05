@@ -1,52 +1,86 @@
-Como agente orquestador, ejecutá tus tareas siguiendo rigurosamente los pasos a continuación.
+Como agente Orquestador, coordinás la implementación del plan sin editar archivos directamente. Tu rol es invocar sub-agentes, relayar información entre ellos y mantener el flujo coherente.
 
-## 0. Preparación y Verificación
+---
 
-Confirmá que el plan de desarrollo refinado (`ai-helpers/idea-development/02-breakdown.es.md`) está completo y aprobado por el usuario. Revisá el archivo para asegurar que todas las correcciones pendientes fueron incorporadas. Si el plan no está listo, notificalo antes de proceder.
+## Paso 0 — Inicialización del Estado de Sesión
 
-## 1. Iteración por cada PR
+1. Invocá al agente **Context Provider**: pedile que escanee los paquetes y módulos compartidos del proyecto para identificar componentes, hooks, utilidades y schemas existentes relevantes al plan completo descripto en `ai-helpers/idea-development/02-breakdown.md`. Recibís el resultado como texto.
 
-Para el PR actual (iniciando con PR 1):
+2. Invocá al agente **Architect** con el siguiente mandato:
+   > "Sobrescribí completamente `ai-helpers/idea-development/orchestator-memory.md` con la siguiente información:
+   >
+   > - Sección **PRs del Plan**: todos los PRs de `02-breakdown.md` marcados como `[ ]`.
+   > - Sección **Inventario Anti-Redundancia**: volcá el siguiente inventario global obtenido del Context Provider: [insertar texto del Context Provider].
+   > - Sección **Convenciones Críticas**: copiá las convenciones vigentes desde `.agents/memory/semantic/conventions.md`.
+   > - Sección **Notas de Alerta**: vacía."
 
-**a. Fase de Arquitectura (agente Architect):**
-- Indicale al agente Architect que ejecute, en secuencia, los generadores:
-  - `ai-helpers/generators/02-generate-spec.es.md`
-  - `ai-helpers/generators/03-generate-prompt.es.md`
-- Esperá a que el proceso del agente Architect concluya completamente antes de avanzar.
+---
 
-**b. Fase de Implementación (agente Code):**
-- Indicale al agente Code que ejecute las indicaciones contenidas en `ai-helpers/idea-development/04-prompt.es.md` para el PR actual.
-- Esperá a que el agente Code confirme la finalización antes de avanzar.
+## Paso 1 — Por cada PR (repetir hasta completar todos)
 
-## 2. Ciclo de PRs
+### 1a. Escaneo Focalizado (Context Provider)
 
-Al completar el paso 1, avanzá al siguiente PR del plan. Repetí esta iteración hasta que se hayan completado todos los PRs del breakdown.
+Invocá al agente **Context Provider**: pedile que escanee específicamente el área del PR actual (archivos, componentes y hooks directamente involucrados). Recibís el resultado como texto.
 
-## 3. PR Final: Validación con agente Debug
+### 1b. Generación de Spec y Prompt (Architect)
 
-Cuando se haya completado el último PR del plan, invocá al agente Debug para realizar una revisión exhaustiva. Su objetivo es confirmar que no existen problemas, fallos ni regresiones.
+Invocá al agente **Architect** con el siguiente mandato:
 
-- Si Debug detecta problemas: generá un resumen detallado de hallazgos a solucionar. Pasá esos hallazgos al agente Code para que implemente las soluciones. Una vez que Code termine, volvé a invocar a Debug. Repetí este ciclo hasta que Debug confirme que todo está correcto.
+> "Leé `ai-helpers/idea-development/orchestator-memory.md`. Actualizá la sección **Inventario Anti-Redundancia** sobrescribiendo el bloque con: [insertar texto del Context Provider de 1a]. Luego ejecutá en secuencia:
+>
+> - `ai-helpers/generators/02-generate-spec.md` para el PR actual.
+> - `ai-helpers/generators/03-generate-prompt.md`."
 
-## 4. Manejo de Errores durante el Proceso
+### 1c. Sanity-Check del Orquestador
 
-Durante cualquier etapa, si recibís feedback de errores:
+Antes de invocar a Code, revisá la spec generada (`03-spec.md`). Si la spec propone crear algo que el inventario indica que ya existe en los paquetes del proyecto, devolvé la observación a Architect para que la corrija antes de continuar.
 
-1. Pedile al agente Debug que genere un resumen con los hallazgos a solucionar.
-2. Pasá esos hallazgos al agente Code para que repare el código.
-3. Una vez resuelta la incidencia, reanudá el flujo normal desde donde se detuvo, **sin saltar pasos**. Si en el PR X se detecta un error, corregí ese PR antes de avanzar al PR X+1.
+### 1d. Implementación (Code)
 
-## 5. Quality Assurance Final
+Invocá al agente **Code** con el siguiente mandato:
 
-Invocá al agente Architect para que escriba en el archivo `ai-helpers/QA-notes.es.md` una lista de acciones de QA manual para validar el correcto funcionamiento de la implementación. Las acciones deben ser:
+> "Leé `ai-helpers/idea-development/orchestator-memory.md` para conocer las convenciones, el inventario anti-redundancia y el historial de PRs completados. Luego ejecutá las indicaciones de `ai-helpers/idea-development/04-prompt.md`.
+>
+> Antes de reportar la finalización, corré los comandos de validación del proyecto. Si algún comando falla, corregilo antes de continuar.
+>
+> Como paso final, sobrescribí la línea de tu PR en la sección **PRs del Plan** de `ai-helpers/idea-development/orchestator-memory.md` cambiando `[ ]` por `[x]` y anotando los archivos que creaste o modificaste."
 
-- Claras y detalladas.
-- Ordenadas lógicamente para facilitar su ejecución por un tester humano.
-- Citando para cada acción el PR específico al que corresponde.
-- Incluyendo un espacio para que el tester pueda añadir comentarios o resultados.
+### 1e. Manejo de Errores de Edición
 
-## Reglas Críticas
+Si Code falla al editar el mismo archivo 3 o más veces, en la próxima invocación a Code agregá la siguiente instrucción al inicio:
 
-- **Nutrición de contexto:** Tus agentes invocados nacen sin memoria del proyecto. Debés nutrirlos con el contexto relevante obtenido de la memoria semántica, skills y workflows del proyecto, para asegurar una correcta implementación.
-- **Comunicación estructurada:** Informá el avance después de cada PR completado y confirmá la finalización exitosa del proceso.
-- **Desacople de contexto:** Los prompts pasados a sub-agentes NO deben contener referencias a `AGENTS.md` ni a ningún archivo dentro de `.agents/`. El contexto global ya está cargado por el sistema.
+> "Aplicá el procedimiento de recuperación de `ai-helpers/prompts/fix-edit-error.md` para el archivo que está fallando. Además, anotá en la sección **Notas de Alerta** de `orchestator-memory.md` cuál fue el archivo problemático."
+
+---
+
+## Paso 2 — Ciclo de PRs
+
+Repetí el Paso 1 para cada PR del plan en orden, hasta completar todos los `[ ]` en `02-breakdown.md`.
+
+---
+
+## Paso 3 — Auditoría Final del Plan
+
+Invocá al agente **Debug** con el siguiente mandato:
+
+> "Ejecutá el workflow `.agents/workflows/audit.md`. Como fuente de verdad del plan usá `ai-helpers/idea-development/02-breakdown.md` y como registro de completitud `ai-helpers/idea-development/orchestator-memory.md`. Escribí los hallazgos en `ai-helpers/idea-development/05-audit.md`."
+
+Si Debug reporta hallazgos que requieren corrección:
+
+1. Relayá los hallazgos al agente **Code** para que los corrija.
+2. Una vez que Code termine, invocá nuevamente a **Debug**.
+3. Repetí hasta que Debug confirme que no hay problemas.
+
+---
+
+## Cierre
+
+Una vez que la auditoría esté limpia, informá al usuario:
+
+> "El plan está implementado y auditado. Para consolidar los aprendizajes en la memoria a largo plazo, ejecutá `.agents/workflows/end.md` cuando lo consideres oportuno."
+
+No limpies ni eliminés ningún archivo. El próximo plan sobrescribirá todo desde cero al ejecutar el Paso 0.
+
+---
+
+**Nota sobre el agente Ask:** si durante la planificación (antes del Paso 1b) encontrás ambigüedad arquitectónica con alto costo de reversión, podés invocar a **Ask** con el contexto puntual antes de proceder con Architect. Usalo de forma quirúrgica, no sistemática.

@@ -34,12 +34,18 @@ El usuario interactúa paso a paso con cada generador. Ideal para tener visibili
 
 ### Opción 2: Flujo Orquestado (Máxima Automatización)
 
-Diseñado para delegar el ciclo completo a un Orquestador.
+Diseñado para delegar el ciclo completo a un Orquestador utilizando la extensión de IDE **[Zoo Code](https://zed.dev/extensions/zoo-code)**, que provee coordinación multi-agente nativa (Context Provider, Architect, Code, Debug). Los sub-agentes no retienen memoria entre invocaciones; `orchestator-memory.md` actúa como memoria de trabajo compartida durante el plan.
 
 1.  Usás `01-generate-breakdown.md` para convertir el brief en el plan (`02-breakdown.md`).
 2.  Invocás a tu agente Orquestador y le pasás el prompt maestro `prompts/breakdown-orchestrator.md`.
-3.  El Orquestador se encarga de invocar a los distintos **sub-agentes** (Architect, Code, Debug) en un bucle automatizado para cada PR del breakdown.
-4.  El usuario solo supervisa y recibe el resultado final una vez que el Orquestador ha resuelto todos los PRs y superado la auditoría del agente Debug.
+3.  El Orquestador ejecuta el ciclo completo:
+    - **Paso 0:** Inicializa `orchestator-memory.md` (Context Provider + Architect).
+    - **Por cada PR:** Context Provider escanea el área → Architect genera spec/prompt → Code implementa, valida y se auto-registra en `orchestator-memory.md`.
+    - **Auditoría final:** Debug audita el plan completo contra `02-breakdown.md`.
+4.  El usuario supervisa y recibe el resultado final auditado.
+5.  Cuando lo considerés oportuno, ejecutás `.agents/workflows/end.md` para consolidar en Cortex-MD.
+
+**QA bajo demanda:** una vez completado el plan, podés invocar `prompts/QA.md` para que Architect genere `QA-notes.md` con acciones de testing agrupadas por área.
 
 ### Opción 3: Independiente (Sin Pipeline Stepwise)
 
@@ -47,34 +53,69 @@ El agente principal del proyecto (con contexto global completo de la memoria sem
 
 > **¿Cuándo usarlo?** Cuando la tarea es suficientemente pequeña o el agente principal es lo suficientemente capaz como para no necesitar el scaffolding del pipeline.
 
-## 4. Reglas de Diseño
+## 4. Archivos del Pipeline
 
-Este módulo depende de varias reglas arquitectónicas estrictas para funcionar correctamente sin colisionar con el resto de Cortex-MD:
+### `/idea-development/`
+
+| Archivo | Descripción |
+| --- | --- |
+| `01-brief/` | Carpeta con el requerimiento inicial del usuario. |
+| `02-breakdown.md` | Plan de PRs generado por `01-generate-breakdown.md`. Fuente de verdad del plan. |
+| `03-spec.md` | Especificación técnica del PR actual (sobrescrita por PR). |
+| `04-prompt.md` | Prompt de implementación del PR actual (sobrescrito por PR). |
+| `05-audit.md` | Hallazgos de la auditoría del plan. |
+| `orchestator-memory.md` | **[Flujo Orquestado]** Memoria de trabajo: estado de PRs, inventario anti-redundancia, convenciones críticas y notas de alerta. Efímero por plan. |
+| `QA-notes.md` | **[Bajo demanda]** Acciones de QA manual generadas por `prompts/QA.md`. |
+
+### `/generators/`
+
+| Archivo | Descripción |
+| --- | --- |
+| `01-generate-breakdown.md` | Convierte el brief en el plan de PRs. |
+| `02-generate-spec.md` | Genera la especificación técnica del PR actual. Produce dos secciones obligatorias: **Inventario Anti-Redundancia** y **Comandos de Validación**. |
+| `03-generate-prompt.md` | Genera el prompt de implementación para el agente Code. |
+| `04-generate-audit.md` | Audita un PR individual contra su spec (Flujo Manual). |
+
+### `/prompts/`
+
+| Archivo | Descripción |
+| --- | --- |
+| `breakdown-orchestrator.md` | Prompt maestro del Flujo Orquestado. Coordina Context Provider, Architect, Code y Debug en ciclos de PRs. |
+| `QA.md` | Prompt bajo demanda. Instruye a Architect para generar `QA-notes.md` agrupado por área de UI, minimizando navegación y acciones repetidas. |
+| `fix-edit-error.md` | Corrección de emergencia cuando Code falla editando el mismo archivo 3+ veces. El Orquestador lo inyecta automáticamente en el paso 1e. |
+
+## 5. Reglas de Diseño
 
 ### A. Barrera de Contexto (`AGENTS.md` local)
 
 Para proteger radicalmente la memoria de trabajo del agente principal, esta carpeta contiene su propio `AGENTS.md`. Actúa como una barrera, indicando a los agentes que **ignoren** todo el contenido de esta carpeta para la indexación global automática. Los archivos aquí se leen y sobrescriben estrictamente bajo demanda, evitando que borradores a medio terminar contaminen la memoria a largo plazo.
 
-### B. Identidad y Desacople de Contexto
+### B. Barrera Unidireccional
 
-- El **agente principal** es la IA con el contexto global completo (memoria semántica cargada).
-- Cuando actúa como Orquestador e invoca a **sub-agentes** (Architect, Code, Debug), esos sub-agentes nacen como "tablas rasas" (sin memoria del proyecto).
-- Por esta razón, los prompts generados como `04-prompt.md` **no incluyen reglas globales**. Es responsabilidad del Orquestador "nutrir" a esos sub-agentes pasándoles solo el contexto estrictamente necesario para su tarea, protegiéndolos del _context bloat_.
+`ai-helpers` consume archivos de `.agents/workflows/` y `.agents/memory/`, pero **`.agents/` no conoce ni referencia a `ai-helpers/`**. Nunca modificar archivos de `.agents/` desde este módulo.
 
-### C. Commits Enriquecidos
+### C. Identidad y Desacople de Contexto
 
-En lugar de crear múltiples carpetas para cada feature (lo cual infla el repo), los archivos del pipeline se mantienen como un único "espacio de trabajo estático" que se sobrescribe en cada iteración. Al enviar los cambios, toda la cadena de razonamiento autónomo generada en estos archivos debe inyectarse directamente en el cuerpo del commit o en la descripción del PR. El historial de Git se convierte en la máxima Memoria Episódica inmutable.
+Los sub-agentes invocados por el Orquestador nacen como "tablas rasas" sin memoria del proyecto. El Orquestador los nutre con el contexto estrictamente necesario para su tarea. En el Flujo Orquestado, ese contexto vive en `orchestator-memory.md`; en el Flujo Manual, el usuario lo gestiona directamente.
 
-### D. Kanbanización
+### D. Escrituras Completas — Sin Costo de Limpieza
 
-El archivo `02-breakdown.md` se estructura usando checkboxes de Markdown (`- [ ]`, `- [x]`). Esto actúa como el Neocortex de corto plazo, permitiendo mantener sincronizado el estado de la tarea sin colisionar.
+Todos los archivos del pipeline se sobrescriben completamente (no se parchean). Esto elimina el costo de tokens por contenido obsoleto y hace innecesarios los pasos de limpieza entre PRs. El próximo plan sobrescribe `orchestator-memory.md` desde cero en el Paso 0.
 
-### E. Consolidación Manual
+### E. Kanbanización
 
-A diferencia del proceso automático, al finalizar con éxito una característica mediante este módulo, **es responsabilidad del usuario** decidir cuándo ejecutar `.agents/workflows/end.md` para consolidar lo aprendido en la memoria semántica. Esto permite agrupar múltiples PRs lógicos en una sola sesión de memoria episódica, en lugar de crear una entrada por cada PR.
+El archivo `02-breakdown.md` usa checkboxes de Markdown (`- [ ]`, `- [x]`). En el Flujo Orquestado, Code auto-registra su finalización en `orchestator-memory.md` de la misma forma.
 
-## 5. Personalización
+### F. Inventario Anti-Redundancia
 
-Los prompts en la carpeta `generators/` y `prompts/` pueden y deben ser personalizados para adaptarse a las herramientas y convenciones específicas de tu equipo. Son simples archivos Markdown diseñados para ser modificados.
+El output de `02-generate-spec.md` siempre incluye una sección de **Inventario Anti-Redundancia** antes de proponer nuevas abstracciones. Esto fuerza una verificación explícita de los paquetes existentes del proyecto y previene recrear componentes, hooks o utilidades que ya existen.
 
-> **Nota sobre los modos de workflow:** Los workflows de extensión (`deep-plan.md`, `audit.md`) soportan tres modos (`strict`, `standard`, `autonomous`). Si tu equipo no utiliza modelos de razonamiento de alta capacidad (Opus, o1, Deep Research), considera **eliminar el modo `autonomous`** de tus workflows para reducir la fricción cognitiva en la selección de modo. Menos opciones = menos overhead.
+### G. Consolidación Manual
+
+Al finalizar una característica, **es responsabilidad del usuario** ejecutar `.agents/workflows/end.md` para consolidar lo aprendido en la memoria semántica de Cortex-MD. Esto permite agrupar múltiples PRs en una sola sesión de memoria episódica, en lugar de consolidar después de cada PR individual.
+
+## 6. Personalización
+
+Los prompts en `generators/` y `prompts/` pueden y deben ser personalizados para adaptarse a las herramientas y convenciones específicas de tu equipo. Son simples archivos Markdown diseñados para ser modificados.
+
+> **Nota sobre los modos de workflow:** Los workflows de extensión (`deep-plan.md`, `audit.md`) soportan tres modos (`strict`, `standard`, `autonomous`). Si tu equipo no utiliza modelos de razonamiento de alta capacidad (Opus, o1, Deep Research), considerá **eliminar el modo `autonomous`** de tus workflows para reducir la fricción cognitiva en la selección de modo. Menos opciones = menos overhead.
