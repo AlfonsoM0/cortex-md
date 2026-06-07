@@ -1,0 +1,10 @@
+{
+  "example-local": {
+    "type": "stdio",
+    "alwaysAllow": ["list_tools"]
+  },
+  "example-remote": {
+    "disabled": true,
+    "alwaysAllow": []
+  }
+}

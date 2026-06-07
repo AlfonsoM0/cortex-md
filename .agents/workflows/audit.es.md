@@ -126,7 +126,18 @@ Ejecutá las herramientas de validación automatizada del proyecto.
 
 ---
 
-## Fase 6: Reporte de Auditoría
+## Fase 6: Sincronización de Roadmap y Feature-Docs (Opcional)
+
+Una vez que los cambios pasan la validación, mantené la documentación del proyecto alineada con la realidad as-built.
+
+1. **Roadmap:** Si el proyecto mantiene un roadmap maestro (ej. `docs/00-MASTER-ROADMAP.md`), marcá los hitos completados, registrá pivotes arquitectónicos o agregá nuevos pasos.
+2. **Feature docs:** Si los archivos modificados pertenecen a un dominio/feature documentado (ej. `docs/features/*`), actualizá esos documentos para reflejar la implementación final.
+
+> **Composabilidad:** Este workflow puede referenciar checklists de dominio específicas del proyecto. Si tu proyecto define workflows de checklist especializados (ej. una checklist de UI/UX, una de seguridad, una de migración de datos) para los dominios tocados en esta sesión, consultalos/ejecutalos acá. Mantené esas checklists en el proyecto — el framework permanece agnóstico al dominio.
+
+---
+
+## Fase 7: Reporte de Auditoría
 
 Presentá un resumen estructurado al usuario.
 

@@ -86,7 +86,8 @@ Cortex-MD se integra dentro de la convención estándar `.agents/` (basada en co
 │   ├── end.md                         # ★ Core: Fin de sesión ("Dormir")
 │   ├── defrag.md                      # ★ Core: Optimización de memoria ("Defrag")
 │   ├── deep-plan.md                   # ★ Extensión: Planificación profunda con Prueba de Trabajo
-│   └── audit.md                       # ★ Extensión: Auditoría post-feature con evidencia
+│   ├── audit.md                       # ★ Extensión: Auditoría post-feature con evidencia
+│   └── commit.md                      # ★ Opcional: revisión de staged + commit con intención
 ├── memory/                            # ★ Cortex-MD: Sistema de memoria persistente
 │   ├── semantic/                      #   Neocorteza: Estado global del proyecto
 │   │   ├── taxonomy.md                #     Taxonomía estricta de etiquetas para el índice
@@ -101,11 +102,14 @@ Cortex-MD se integra dentro de la convención estándar `.agents/` (basada en co
 │           └── MM/
 │               └── DD.md              #     Registro detallado de la sesión (archivos, commits, decisiones)
 ├── .mcp.json                          # (Convención) Configuración de servidores MCP local
+├── sync-mcp.js                        # ★ Opcional (módulo MCP): genera configs por IDE desde una sola fuente
+├── mcp_config.json                    # ★ Opcional (módulo MCP): lista canónica de servidores (placeholders, sin secretos)
+├── mcp_config.zoo-overrides.json      # ★ Opcional (módulo MCP): ejemplo de overrides por IDE
 ├── ai-helpers/                        # ★ Cortex-MD: Módulo Pipeline de Ejecución Stepwise
-└── docs/                              # ★ Cortex-MD: Guías y documentación
+└── docs/                              # ★ Cortex-MD: Guías y documentación (incl. mcp-sync.es.md)
 ```
 
-Adicionalmente, `AGENTS.md` se ubica en la **raíz del repositorio**. Actúa como el punto de entrada (_system prompt_) que el IDE inyecta automáticamente al agente, y es responsable de dirigir al LLM hacia los workflows de Cortex-MD. Esto sigue el [estándar AGENTS.md](https://agents.md) adoptado por más de 60k proyectos open source y soportado por herramientas como Codex, Jules, Cursor, VS Code Copilot, y muchas más.
+Adicionalmente, `AGENTS.md` se ubica en la **raíz del repositorio**. Actúa como el punto de entrada (_system prompt_) que el IDE inyecta automáticamente al agente, y es responsable de dirigir al LLM hacia los workflows de Cortex-MD. También aloja el **Skill Router** (un índice categorizado y bajo-demanda de las skills del proyecto) y las **reglas inviolables** (modularidad estricta y anti-redundancia) — guardas que deben permanecer en el contexto siempre-cargado, ya que `conventions.md` y las skills se cargan solo selectivamente. Esto sigue el [estándar AGENTS.md](https://agents.md) adoptado por más de 60k proyectos open source y soportado por herramientas como Codex, Jules, Cursor, VS Code Copilot, y muchas más.
 
 ## Flujos de Trabajo (Workflows)
 
@@ -130,9 +134,9 @@ Al finalizar tu sesión de código, el LLM consolida la memoria a largo plazo:
 - **Generación Episódica:** Crea el archivo del día (`DD.md`) con un template estructurado documentando archivos modificados, hashes de commits, decisiones técnicas y resolución de errores.
 - **Actualización del Índice:** Añade una entrada etiquetada a `timeline.md` (máx. 50 sesiones). Las etiquetas provienen estrictamente de `taxonomy.md`.
 - **Consolidación Semántica (Crítico):** Evalúa si las acciones de hoy alteraron la arquitectura, reglas o convenciones globales. De ser así, sobrescribe el archivo semántico correspondiente.
-- **Vaciado de Memoria de Trabajo:** Actualiza `active-tasks.md` para la próxima sesión.
-- **Enrutamiento de Conocimiento:** Si se descubrió un nuevo patrón o solución a un bug, lo enruta al archivo correcto (memoria semántica, skill o docs) en vez de inflar `AGENTS.md`.
-- **Sincronización de Planificación (Opcional):** Si el proyecto tiene un roadmap o documento de planificación maestro, lo actualiza para reflejar hitos completados o nuevos pasos.
+- **Vaciado de Memoria de Trabajo:** Actualiza `active-tasks.md` para la próxima sesión, clasificando el backlog por **prioridad Eisenhower (P1–P4)** + **sizing de esfuerzo (T-shirt)** — la fuente única de deuda técnica.
+- **Enrutamiento de Conocimiento:** Si se descubrió un nuevo patrón o solución a un bug, lo enruta al archivo correcto (memoria semántica, skill o docs) en vez de inflar `AGENTS.md`. Una **Guarda de Skills Externas** protege las carpetas gestionadas por un CLI de skills externo (`skills-lock.json`).
+- **Sincronización de Planificación y Feature-Docs (Opcional):** Si el proyecto tiene un roadmap maestro o docs de features (`docs/features/*`), los actualiza para reflejar hitos completados y la implementación as-built.
 
 ### 3. Desfragmentación de Memoria: `defrag.md`
 
@@ -143,6 +147,8 @@ Se ejecuta bajo demanda cuando el usuario detecta que los archivos de memoria ha
 - **Compresión Semántica:** Reescribe cada archivo semántico para un consumo óptimo de tokens — listas densas sobre prosa, voz imperativa, cero palabras de relleno.
 - **Optimización Episódica:** Audita el timeline por inflación de etiquetas y aplica el límite de 50 sesiones.
 - **Validación Cruzada:** Detecta contradicciones y desalineaciones entre `architecture.md`, `stack.md`, `conventions.md` y `business-rules.md`.
+- **Optimización de Feature-Docs (Opcional):** Aplica la misma compresión a la documentación detallada de features (`docs/features/*`).
+- **Limpieza de Entorno (Opcional):** Purga cachés pesadas de build/tooling como parte del mantenimiento periódico.
 - **Reporte de Defrag:** Presenta un resumen de todos los cambios para revisión del usuario.
 
 > **Cuándo ejecutarlo:** Cada 15-20 sesiones, o cuando los archivos de memoria semántica crezcan más allá de lo razonable para la complejidad del proyecto. El workflow es idempotente — ejecutarlo sobre memoria ya optimizada no produce cambios.
@@ -188,7 +194,7 @@ Un workflow de planificación estructurada con tres fases (Descubrimiento → Re
 
 ### 5. Auditoría Post-Feature: `audit.md`
 
-Un workflow de validación basado en evidencia con seis fases (Inventario → Modularidad → Redundancia → Convenciones → Validación Técnica → Reporte):
+Un workflow de validación basado en evidencia con siete fases (Inventario → Modularidad → Redundancia → Convenciones → Validación Técnica → Sincronización de Roadmap y Feature-Docs → Reporte):
 
 - **`strict`:** Output de grep para cada check, conteo de líneas para cada archivo, evidencia impresa en cada fase.
 - **`standard`:** Evidencia impresa solo para hallazgos y violaciones de umbrales. Formato resumen.
@@ -225,7 +231,7 @@ Para instrucciones de configuración, lee la [Guía Multi-Desarrollador](file://
 Cortex-MD es una arquitectura abierta licenciada bajo [MIT](LICENSE). Las áreas de investigación actual incluyen:
 
 - Optimización de la taxonomía de etiquetas en `taxonomy.md`.
-- Creación de scripts de automatización (Bash/Node.js) para inicializar la estructura de carpetas.
+- Creación de scripts de automatización (Bash/Node.js) para inicializar la estructura de carpetas. _(Ya se incluye un helper opcional en Node, `sync-mcp.js`, para generar configs de MCP por IDE desde una única fuente canónica — ver [docs/mcp-sync.es.md](docs/mcp-sync.es.md).)_
 - Evaluación de impacto en la retención de contexto en proyectos de más de 100k líneas de código.
 - **Métricas de tokens para defrag:** Agregar un conteo estimado de tokens (antes vs. después) al reporte de desfragmentación ayudaría a los usuarios a cuantificar el impacto de la optimización. Esto podría implementarse como una fase opcional en `defrag.md`.
 - **Investigación de workflows de extensión:** Testear y refinar la metodología de Prueba de Trabajo en distintas familias de modelos (Claude, GPT, Gemini, open-source) y distintos tamaños de proyecto.

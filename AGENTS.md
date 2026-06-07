@@ -58,10 +58,51 @@ These workflows are **not part of the core memory lifecycle** but provide develo
 - **File to invoke:** `.agents/workflows/audit.md`
 - **Instruction:** Validates all changes against project standards. The depth of evidence required adapts to the selected mode, but the Technical Validation gateway (lint/build/typecheck) is always mandatory regardless of mode.
 
-## 4. Strict File Modification Rules
+## 4. Knowledge Base (Skill Router)
+
+> **Dynamic Loading Rule:** Do not attempt to memorize the entire ecosystem. When you are about to execute a task, **first** consult the relevant domain Skill or documentation. Skills live in `.agents/skills/<name>/SKILL.md` and are loaded on demand — never all at once.
+
+Organize your skills into domains so the right instructions are easy to locate. Replace the placeholders below with your project's actual skills (delete this section if the project has no skills yet):
+
+### Process & Quality
+
+- **`[planning]`**: Atomic, actionable plans. 📖 `.agents/skills/<planning>/SKILL.md`
+- **`[lint-and-validate]`**: Canonical quality/validation loop. 📖 `.agents/skills/<lint-and-validate>/SKILL.md`
+
+### Frontend & UI
+
+- **`[ui-patterns]`**: Component library, state, forms, i18n. 📖 `.agents/skills/<ui-patterns>/SKILL.md`
+
+### Backend & Data
+
+- **`[architecture]`**: Module/package boundaries. 📖 `.agents/skills/<architecture>/SKILL.md`
+- **`[database]`**: Schemas, indexing, migrations, access rules. 📖 `.agents/skills/<database>/SKILL.md`
+
+### Business Domain
+
+- **`[<domain-skill>]`**: Project-specific domain flows (auth, payments, AI, etc.). 📖 `.agents/skills/<domain-skill>/SKILL.md`
+
+*If a skill is managed by an external CLI (registered in `skills-lock.json`), treat its folder as read-only — see the Knowledge Routing phase in `end.md`.*
+
+## 5. Strict File Modification Rules
 
 - When modifying code, ensure you maintain the style and conventions established in your semantic memory.
 - When modifying files in the `.agents/memory/` folder, ensure you use the required Markdown format without altering the pre-existing tag or directory structure.
 - **Strict Taxonomy:** Whenever you add entries to the historical index, you must consult and mandatorily use the tags defined in `.agents/memory/semantic/taxonomy.md`. If you consider a new tag is necessary, **recommend it to the user and wait for their approval** before adding it.
 - **`[CortexMD]` Skip Rule:** During hippocampal routing (context search at session start), **skip** timeline entries tagged exclusively with `[CortexMD]`. These are memory maintenance sessions and do not contain project-relevant context.
+
+### Strict Modularity (Inviolable)
+
+- **Cohesive files:** The ideal file size groups tightly-related logic without losing context (LLM sweet spot: 200-500 lines). Avoid "micro-modularity" (splitting every small function into its own file) — it fragments context and forces too many jumps.
+- **200-line indicator:** 200 lines (excluding comments and type/interface declarations) is an **alert indicator, not a hard limit**. If a file exceeds it, evaluate whether it is due to comments/types or whether it genuinely mixes too many responsibilities that could be split cleanly.
+- **Atomic components:** Each component/unit must have a single responsibility. If it handles multiple concerns (fetch + form + layout + validation), extract subcomponents. Keep them in the same file if they change together; split them if reused globally.
+- **Composition over monolith:** Prefer composing N small focused pieces into 1 large piece. A file beyond ~500 lines of pure code loses focus and must be refactored.
+
+### Anti-Redundancy (Inviolable)
+
+- **Search before creating:** BEFORE creating any component, hook, utility, or validator, **search the existing codebase** for something similar — by name and by functionality.
+- **Shared packages first:** Check the project's shared packages/utilities before writing new code. If an equivalent exists, **use it**.
+- **Zero duplication:** If you find yourself writing logic that already exists elsewhere, import it. If it needs adaptation, extend it — do not copy it.
+
+> **Why these rules live here (and not in `conventions.md` or a skill):** `AGENTS.md` is the always-loaded system prompt. `conventions.md` and skills are loaded *selectively*, so guardrails placed there drift out of context — agents then create duplicate components and oversized files. Universal, inviolable rules belong in this file so they are always present.
 

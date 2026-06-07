@@ -15,6 +15,7 @@ Your first task is to understand "where you are" and "what the rules are".
    - `.agents/memory/semantic/taxonomy.md` — If you will need to search or update the episodic timeline.
 3. **Read the file:** `.agents/memory/semantic/active-tasks.md`
    - **Objective:** Load into your working memory the tasks left pending from the previous session and the immediate objective.
+4. **Optional — project compass:** If the project maintains a master roadmap (e.g., `docs/00-MASTER-ROADMAP.md`), read it to understand the current development phase.
 
 ## Phase 2: Hippocampal Routing (Context Search)
 

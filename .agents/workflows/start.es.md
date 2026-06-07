@@ -15,6 +15,7 @@ Tu primera tarea es entender "dónde estás" y "cuáles son las reglas".
    - `.agents/memory/semantic/taxonomy.md` — Si necesitarás buscar o actualizar el timeline episódico.
 3. **Lee el archivo:** `.agents/memory/semantic/active-tasks.md`
    - **Objetivo:** Cargar en tu memoria de trabajo las tareas que quedaron pendientes de la sesión anterior y el objetivo inmediato.
+4. **Opcional — brújula del proyecto:** Si el proyecto mantiene un roadmap maestro (ej. `docs/00-MASTER-ROADMAP.md`), leelo para entender la fase de desarrollo actual.
 
 ## Fase 2: Enrutamiento Hipocampal (Búsqueda de Contexto)
 

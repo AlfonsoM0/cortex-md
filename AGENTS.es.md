@@ -58,10 +58,51 @@ Estos workflows **no forman parte del ciclo de vida core de la memoria** pero pr
 - **Archivo a invocar:** `.agents/workflows/audit.md`
 - **Instrucción:** Valida todos los cambios contra los estándares del proyecto. La profundidad de evidencia requerida se adapta al modo seleccionado, pero el gateway de Validación Técnica (lint/build/typecheck) es siempre obligatorio sin importar el modo.
 
-## 4. Reglas Estrictas de Modificación de Archivos
+## 4. Base de Conocimiento (Skill Router)
+
+> **Regla de Carga Dinámica:** No intentes memorizar todo el ecosistema. Cuando vayas a ejecutar una tarea, consultá **primero** la Skill o documentación de dominio correspondiente. Las skills viven en `.agents/skills/<nombre>/SKILL.md` y se cargan bajo demanda — nunca todas a la vez.
+
+Organizá tus skills por dominio para que las instrucciones correctas sean fáciles de localizar. Reemplazá los placeholders de abajo por las skills reales de tu proyecto (eliminá esta sección si el proyecto aún no tiene skills):
+
+### Proceso & Calidad
+
+- **`[planning]`**: Planes atómicos y accionables. 📖 `.agents/skills/<planning>/SKILL.md`
+- **`[lint-and-validate]`**: Loop canónico de calidad/validación. 📖 `.agents/skills/<lint-and-validate>/SKILL.md`
+
+### Frontend & UI
+
+- **`[ui-patterns]`**: Librería de componentes, estado, forms, i18n. 📖 `.agents/skills/<ui-patterns>/SKILL.md`
+
+### Backend & Datos
+
+- **`[architecture]`**: Límites entre módulos/paquetes. 📖 `.agents/skills/<architecture>/SKILL.md`
+- **`[database]`**: Esquemas, indexing, migraciones, reglas de acceso. 📖 `.agents/skills/<database>/SKILL.md`
+
+### Dominio de Negocio
+
+- **`[<domain-skill>]`**: Flujos de dominio específicos del proyecto (auth, pagos, IA, etc.). 📖 `.agents/skills/<domain-skill>/SKILL.md`
+
+*Si una skill es gestionada por un CLI externo (registrada en `skills-lock.json`), tratá su carpeta como solo-lectura — ver la fase de Enrutamiento de Conocimiento en `end.md`.*
+
+## 5. Reglas Estrictas de Modificación de Archivos
 
 - Al modificar código, asegúrate de mantener el estilo y las convenciones establecidas en tu memoria semántica.
 - Al modificar los archivos de la carpeta `.agents/memory/`, asegúrate de utilizar el formato Markdown requerido sin alterar la estructura de etiquetas o directorios preexistentes.
 - **Taxonomía Estricta:** Siempre que añadas entradas al índice histórico, debes consultar y utilizar obligatoriamente las etiquetas definidas en `.agents/memory/semantic/taxonomy.md`. Si consideras que una etiqueta nueva es necesaria, **recomiéndala al usuario y espera su aprobación** antes de agregarla.
 - **Regla de Omisión `[CortexMD]`:** Durante el enrutamiento hipocampal (búsqueda de contexto al inicio de sesión), **omitir** las entradas del timeline etiquetadas exclusivamente con `[CortexMD]`. Son sesiones de mantenimiento de memoria y no contienen contexto relevante para el proyecto.
+
+### Modularidad Estricta (Inviolable)
+
+- **Archivos cohesionados:** El tamaño ideal de un archivo agrupa lógica fuertemente relacionada sin perder contexto (sweet spot para LLMs: 200-500 líneas). Evitá la "micro-modularidad" (separar cada función pequeña en su propio archivo) — fragmenta el contexto y obliga a demasiados saltos.
+- **Indicador de 200 líneas:** Las 200 líneas (excluyendo comentarios y declaraciones de tipos/interfaces) son un **indicador de alerta, no un límite duro**. Si un archivo lo supera, evaluá si se debe a comentarios/tipos o si realmente mezcla demasiadas responsabilidades que podrían separarse de forma limpia.
+- **Componentes atómicos:** Cada componente/unidad debe tener una sola responsabilidad. Si maneja múltiples concerns (fetch + form + layout + validación), extraé subcomponentes. Mantenelos en el mismo archivo si cambian juntos; separalos si se reutilizan globalmente.
+- **Composición sobre monolito:** Preferí componer N piezas pequeñas y enfocadas en 1 pieza grande. Un archivo de más de ~500 líneas de código puro pierde el foco y debe refactorizarse.
+
+### Anti-Redundancia (Inviolable)
+
+- **Buscar antes de crear:** ANTES de crear cualquier componente, hook, utilidad o validator, **buscá en el codebase existente** si ya hay algo similar — por nombre y por funcionalidad.
+- **Paquetes compartidos primero:** Verificá los paquetes/utilidades compartidas del proyecto antes de escribir código nuevo. Si existe un equivalente, **usalo**.
+- **Cero duplicación:** Si detectás que estás escribiendo lógica que ya existe en otro lugar, importala. Si necesita adaptación, extendela — no la copies.
+
+> **Por qué estas reglas viven acá (y no en `conventions.md` ni en una skill):** `AGENTS.md` es el system prompt siempre-cargado. `conventions.md` y las skills se cargan *selectivamente*, así que las guardas puestas ahí se salen de contexto — y entonces los agentes crean componentes duplicados y archivos sobredimensionados. Las reglas universales e inviolables van en este archivo para estar siempre presentes.
 

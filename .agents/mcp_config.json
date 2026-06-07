@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "example-local": {
+      "command": "npx",
+      "args": ["-y", "@scope/example-mcp@latest"]
+    },
+    "example-remote": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.example.com/mcp"],
+      "env": {
+        "AUTH_HEADER": "Bearer <YOUR_TOKEN_HERE>"
+      }
+    }
+  }
+}

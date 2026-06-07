@@ -40,6 +40,7 @@ Read every file in the memory system to build a complete picture before making a
    - `.agents/memory/semantic/taxonomy.md`
 2. **Read the episodic index:** `.agents/memory/episodic/timeline.md`
 3. **Read the 3 most recent episodic records** (daily files) referenced in the timeline.
+4. **Read the roadmap (if any):** e.g., `docs/00-MASTER-ROADMAP.md` — to validate alignment between active tasks and the real project state.
 
 _Objective: Load the entire memory state to detect patterns of degradation across all files simultaneously._
 
@@ -64,7 +65,15 @@ Rewrite each file applying these formatting rules for optimal LLM token consumpt
 - **Use imperative voice.** "Use X" instead of "You should consider using X when appropriate".
 - **Keep headers shallow.** Avoid nesting beyond H3 (`###`). Flatten deep hierarchies.
 
-### 2.3 Rewrite
+### 2.3 Knowledge Routing
+
+If during the audit you detect information that belongs in a skill:
+
+1. Identify which skill in `.agents/skills/` should contain it.
+2. **External Skills Guard:** check `skills-lock.json`. If the destination skill is registered there, **do not modify it** — redirect the knowledge to the closest local skill instead.
+3. Move it to the corresponding `SKILL.md` (only if local). In the semantic file, leave a compact reference if needed.
+
+### 2.4 Rewrite
 
 After analysis, **rewrite each semantic file** applying the above principles. The result must be:
 
@@ -90,17 +99,37 @@ Verify consistency across the semantic memory files:
 2. **`conventions.md` ↔ `architecture.md`:** Coding conventions should not contradict architectural decisions.
 3. **`business-rules.md` ↔ `architecture.md`:** Business domain entities should align with the module structure.
 4. **`taxonomy.md` ↔ `timeline.md`:** All tags in use in the timeline must exist in the taxonomy.
+5. **`active-tasks.md` ↔ roadmap (if any):** The current task should be coherent with the roadmap phase.
 
 If contradictions are found, resolve them by treating the **most recently consolidated semantic file** as the source of truth, then update the outdated file.
 
-## Phase 5: Defrag Report
+## Phase 5: Feature Documentation Optimization (Optional)
+
+If the project keeps detailed feature documentation (e.g., `docs/features/*`):
+
+1. **Inventory the feature docs.**
+2. **Audit and compress** them applying the same principles as Phase 2 (remove redundancy, optimize tokens).
+3. **Cross-consistency:** ensure the architecture, flows, and decisions described there do not contradict the "absolute truth" consolidated in semantic memory (`architecture.md`, `business-rules.md`).
+
+## Phase 6: Environment Cleanup (Optional)
+
+Since this workflow runs periodically, it is a good moment to purge heavy build/tooling caches that accumulate over time.
+
+1. **Purge build caches:** Run your toolchain's cache-clean command (e.g., the build tool's `clean` task) to free accumulated space. Adapt the command to your stack.
+2. **Storage reminder:** If you develop inside a virtualized filesystem (e.g., WSL2), add a reminder to the final report that reclaiming disk space may require compacting the virtual disk image at the OS level.
+
+> Skip this phase entirely if your project has no heavy build caches.
+
+## Phase 7: Defrag Report
 
 Present a summary to the user covering:
 
 1. **Files modified:** List each semantic file that was rewritten, with a one-line description of what changed.
 2. **Redundancies removed:** Concrete examples of duplicated or misplaced information that was cleaned up.
-3. **Cross-file issues found:** Any contradictions or drift that was corrected.
-4. **Episodic observations:** Timeline health, tag distribution issues.
-5. **Recommendation:** Suggest when the next defrag should be run (e.g., "after 15-20 more sessions" or "when semantic files exceed N lines").
+3. **Knowledge routed:** If information was moved to skills, indicate what was moved and where.
+4. **Cross-file issues found:** Any contradictions or drift that was corrected.
+5. **Episodic observations:** Timeline health, tag distribution issues.
+6. **Environment & System:** Confirm any cache cleanup performed and leave the storage-compaction reminder if applicable.
+7. **Recommendation:** Suggest when the next defrag should be run (e.g., "after 15-20 more sessions" or "when semantic files exceed N lines").
 
 _Internal note for the LLM: This workflow is idempotent — running it twice in succession should produce no further changes. If the memory is already optimized, report that to the user and skip unnecessary rewrites._

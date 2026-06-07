@@ -126,7 +126,18 @@ Run the project's automated validation tools.
 
 ---
 
-## Phase 6: Audit Report
+## Phase 6: Roadmap & Feature-Docs Sync (Optional)
+
+Once the changes pass validation, keep project documentation aligned with the as-built reality.
+
+1. **Roadmap:** If the project maintains a master roadmap (e.g., `docs/00-MASTER-ROADMAP.md`), mark completed milestones, record architectural pivots, or add new steps.
+2. **Feature docs:** If the modified files belong to a documented domain/feature (e.g., `docs/features/*`), update those documents to reflect the final implementation.
+
+> **Composability:** This workflow can reference project-specific domain checklists. If your project defines specialized checklist workflows (e.g., a UI/UX checklist, a security checklist, a data-migration checklist) for the domains touched this session, consult/run them here. Keep such checklists in the project — the framework stays domain-agnostic.
+
+---
+
+## Phase 7: Audit Report
 
 Present a structured summary to the user.
 
