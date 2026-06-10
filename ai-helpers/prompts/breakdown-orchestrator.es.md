@@ -2,6 +2,18 @@ Como agente Orquestador, coordinás la implementación del plan sin editar archi
 
 ---
 
+## Nota de Contexto
+
+Si tu herramienta de orquestación inyecta el contexto base del proyecto en cada sub-agente automáticamente (vía archivos de reglas, instrucciones de sistema o configuración de modos), no es necesario repetirlo en los mandatos.
+
+En ese caso, **antepone la siguiente cláusula al inicio de cada mandato** para enfocar al sub-agente en el flujo orquestado y evitar que ejecute fases de `start.md` irrelevantes para su tarea:
+
+> "Para este mandato: tratalo como la solicitud del usuario en la Fase 2, omití `active-tasks.md` y suprimí la confirmación de la Fase 4. El estado del plan vive en `ai-helpers/idea-development/orchestator-memory.md`."
+
+Si los sub-agentes **no** tienen contexto pre-inyectado, esta cláusula no aplica — el contenido de `orchestator-memory.md` (incluyendo Convenciones Críticas) cumple esa función.
+
+---
+
 ## Paso 0 — Inicialización del Estado de Sesión
 
 1. Invocá al agente **Context Provider**: pedile que escanee los paquetes y módulos compartidos del proyecto para identificar componentes, hooks, utilidades y schemas existentes relevantes al plan completo descripto en `ai-helpers/idea-development/02-breakdown.md`. Recibís el resultado como texto.
@@ -11,7 +23,7 @@ Como agente Orquestador, coordinás la implementación del plan sin editar archi
    >
    > - Sección **PRs del Plan**: todos los PRs de `02-breakdown.md` marcados como `[ ]`.
    > - Sección **Inventario Anti-Redundancia**: volcá el siguiente inventario global obtenido del Context Provider: [insertar texto del Context Provider].
-   > - Sección **Convenciones Críticas**: copiá las convenciones vigentes desde `.agents/memory/semantic/conventions.md`.
+   > - Sección **Convenciones Críticas**: copiá las convenciones vigentes desde `.agents/memory/semantic/conventions.md`. _(Podés omitir esta sección si tu herramienta inyecta contexto automáticamente en los sub-agentes.)_
    > - Sección **Notas de Alerta**: vacía."
 
 ---
@@ -39,7 +51,7 @@ Antes de invocar a Code, revisá la spec generada (`03-spec.md`). Si la spec pro
 
 Invocá al agente **Code** con el siguiente mandato:
 
-> "Leé `ai-helpers/idea-development/orchestator-memory.md` para conocer las convenciones, el inventario anti-redundancia y el historial de PRs completados. Luego ejecutá las indicaciones de `ai-helpers/idea-development/04-prompt.md`.
+> "Leé `ai-helpers/idea-development/orchestator-memory.md` para conocer las convenciones _(si aplica)_, el inventario anti-redundancia y el historial de PRs completados. Luego ejecutá las indicaciones de `ai-helpers/idea-development/04-prompt.md`.
 >
 > Antes de reportar la finalización, corré los comandos de validación del proyecto. Si algún comando falla, corregilo antes de continuar.
 >

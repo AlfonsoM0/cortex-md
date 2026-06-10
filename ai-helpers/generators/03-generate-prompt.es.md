@@ -13,10 +13,8 @@ Genera un prompt de delegación para el agente orquestador. El prompt debe conte
    para la tarea (ej., guías UX/UI si el PR involucra frontend).
 
 ## Regla Crítica: Desacople de Contexto
-El prompt NO DEBE contener referencias a `AGENTS.md` ni a ningún archivo dentro de `.agents/`. 
-El agente orquestador ya tiene su "Corteza Prefrontal" cargada mediante el prompt del 
-sistema de su IDE. Duplicar estas reglas genera sobrecarga de contexto y distrae al 
-modelo de la ejecución pura de código.
+El prompt NO DEBE contener referencias a `AGENTS.md` ni a ningún archivo dentro de `.agents/`.
+El contexto global ya está disponible para el sub-agente: ya sea vía el prompt del sistema de su IDE, vía archivos de reglas inyectados por la herramienta de orquestación, o vía `orchestator-memory.md`. Duplicarlo en el prompt genera sobrecarga de contexto y distrae al modelo de la ejecución pura de código.
 
 ## Salida
 Escribe el prompt de delegación en `ai-helpers/idea-development/04-prompt.es.md`.

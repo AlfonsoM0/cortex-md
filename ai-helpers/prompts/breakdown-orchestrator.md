@@ -2,6 +2,18 @@ As an Orchestrator agent, coordinate the plan's implementation without directly 
 
 ---
 
+## Context Note
+
+If your orchestration tool auto-injects the project's base context into each sub-agent (via rule files, system instructions, or mode configuration), there is no need to repeat it in the mandates.
+
+In that case, **prepend the following clause to the start of each mandate** to focus the sub-agent on the orchestrated flow and prevent it from executing irrelevant phases of `start.md`:
+
+> "For this mandate: treat it as the user's request in Phase 2, skip `active-tasks.md`, and suppress the confirmation from Phase 4. The plan's state lives in `ai-helpers/idea-development/orchestator-memory.md`."
+
+If sub-agents **do not** have pre-injected context, this clause does not apply — the contents of `orchestator-memory.md` (including Critical Conventions) serve that purpose.
+
+---
+
 ## Step 0 — Session State Initialization
 
 1. Invoke the **Context Provider** agent: ask it to scan the project's shared packages and modules to identify existing components, hooks, utilities, and schemas relevant to the complete plan described in `ai-helpers/idea-development/02-breakdown.md`. Receive the result as text.
@@ -11,7 +23,7 @@ As an Orchestrator agent, coordinate the plan's implementation without directly 
    >
    > - Section **Plan PRs**: all PRs from `02-breakdown.md` marked as `[ ]`.
    > - Section **Anti-Redundancy Inventory**: paste the following global inventory obtained from the Context Provider: [insert Context Provider output].
-   > - Section **Critical Conventions**: copy the active conventions from `.agents/memory/semantic/conventions.md`.
+   > - Section **Critical Conventions**: copy the active conventions from `.agents/memory/semantic/conventions.md`. _(You may skip this section if your tool auto-injects context into sub-agents.)_
    > - Section **Alert Notes**: empty."
 
 ---
@@ -39,7 +51,7 @@ Before invoking Code, review the generated spec (`03-spec.md`). If the spec prop
 
 Invoke the **Code** agent with the following mandate:
 
-> "Read `ai-helpers/idea-development/orchestator-memory.md` to learn the conventions, anti-redundancy inventory, and history of completed PRs. Then execute the instructions in `ai-helpers/idea-development/04-prompt.md`.
+> "Read `ai-helpers/idea-development/orchestator-memory.md` to learn the conventions _(if applicable)_, anti-redundancy inventory, and history of completed PRs. Then execute the instructions in `ai-helpers/idea-development/04-prompt.md`.
 >
 > Before reporting completion, run the project's validation commands. If any command fails, fix it before continuing.
 >

@@ -34,7 +34,9 @@ El usuario interactúa paso a paso con cada generador. Ideal para tener visibili
 
 ### Opción 2: Flujo Orquestado (Máxima Automatización)
 
-Diseñado para delegar el ciclo completo a un Orquestador utilizando la extensión de IDE **[Zoo Code](https://zed.dev/extensions/zoo-code)**, que provee coordinación multi-agente nativa (Context Provider, Architect, Code, Debug). Los sub-agentes no retienen memoria entre invocaciones; `orchestator-memory.md` actúa como memoria de trabajo compartida durante el plan.
+Diseñado para delegar el ciclo completo a un agente Orquestador con coordinación multi-agente (Context Provider, Architect, Code, Debug). `orchestator-memory.md` actúa como memoria de trabajo compartida durante el plan.
+
+**Configuración de contexto para sub-agentes:** si tu herramienta de orquestación soporta reglas de contexto por agente o por modo (ej. Zoo Code con archivos en `.zoo/rules/`), configurá que todos los agentes lean `AGENTS.md` y ejecuten `start.md` automáticamente. Esto elimina la necesidad de copiar `conventions.md` en cada plan y permite reducir `orchestator-memory.md` a solo estado operativo. Ver la Nota de Contexto en `prompts/breakdown-orchestrator.md` para la cláusula de enfoque complementaria.
 
 1.  Usás `01-generate-breakdown.md` para convertir el brief en el plan (`02-breakdown.md`).
 2.  Invocás a tu agente Orquestador y le pasás el prompt maestro `prompts/breakdown-orchestrator.md`.
@@ -64,7 +66,7 @@ El agente principal del proyecto (con contexto global completo de la memoria sem
 | `03-spec.md` | Especificación técnica del PR actual (sobrescrita por PR). |
 | `04-prompt.md` | Prompt de implementación del PR actual (sobrescrito por PR). |
 | `05-audit.md` | Hallazgos de la auditoría del plan. |
-| `orchestator-memory.md` | **[Flujo Orquestado]** Memoria de trabajo: estado de PRs, inventario anti-redundancia, convenciones críticas y notas de alerta. Efímero por plan. |
+| `orchestator-memory.md` | **[Flujo Orquestado]** Memoria de trabajo: estado de PRs, inventario anti-redundancia, convenciones críticas _(opcional si el orquestador inyecta contexto automáticamente)_ y notas de alerta. Efímero por plan. |
 | `QA-notes.md` | **[Bajo demanda]** Acciones de QA manual generadas por `prompts/QA.md`. |
 
 ### `/generators/`
@@ -96,7 +98,7 @@ Para proteger radicalmente la memoria de trabajo del agente principal, esta carp
 
 ### C. Identidad y Desacople de Contexto
 
-Los sub-agentes invocados por el Orquestador nacen como "tablas rasas" sin memoria del proyecto. El Orquestador los nutre con el contexto estrictamente necesario para su tarea. En el Flujo Orquestado, ese contexto vive en `orchestator-memory.md`; en el Flujo Manual, el usuario lo gestiona directamente.
+Por defecto, los sub-agentes invocados por el Orquestador arrancan sin memoria del proyecto: `orchestator-memory.md` (incluyendo Convenciones Críticas) es el vehículo de contexto. Si tu herramienta de orquestación inyecta el contexto base automáticamente en cada sub-agente, `orchestator-memory.md` se reduce a solo estado operativo del plan (PRs e inventario), y una cláusula de enfoque en cada mandato evita que los sub-agentes ejecuten fases irrelevantes de `start.md`. En el Flujo Manual, el usuario gestiona el contexto directamente.
 
 ### D. Escrituras Completas — Sin Costo de Limpieza
 

@@ -13,10 +13,8 @@ Generate a delegation prompt for the orchestrating agent. The prompt must contai
    (e.g., frontend UX/UI guidelines if the PR involves UI work).
 
 ## Critical Rule: Context Decoupling
-The prompt MUST NOT contain references to `AGENTS.md` or any file inside `.agents/`. 
-The orchestrating agent already has its "Prefrontal Cortex" loaded via its IDE's 
-system prompt. Duplicating these rules generates context bloat and distracts the 
-model from pure code execution.
+The prompt MUST NOT contain references to `AGENTS.md` or any file inside `.agents/`.
+The global context is already available to the sub-agent: either via the IDE's system prompt, via rule files injected by the orchestration tool, or via `orchestator-memory.md`. Duplicating it in the prompt generates context bloat and distracts the model from pure code execution.
 
 ## Output
 Write the delegation prompt to `ai-helpers/idea-development/04-prompt.md`.

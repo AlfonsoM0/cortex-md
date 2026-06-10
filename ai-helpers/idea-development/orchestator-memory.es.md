@@ -23,7 +23,8 @@
 
 ## Convenciones Críticas
 
-<!-- Copiar desde .agents/memory/semantic/conventions.md — conservar solo las reglas relevantes para este plan -->
+<!-- Copiar desde .agents/memory/semantic/conventions.md — conservar solo las reglas relevantes para este plan.
+     Puede omitirse si tu herramienta de orquestación inyecta el contexto base automáticamente en cada sub-agente. -->
 
 ## Notas de Alerta (transitorias)
 

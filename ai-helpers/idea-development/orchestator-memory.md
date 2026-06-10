@@ -23,7 +23,8 @@
 
 ## Critical Conventions
 
-<!-- Copy from .agents/memory/semantic/conventions.md — keep only rules relevant to this plan -->
+<!-- Copy from .agents/memory/semantic/conventions.md — keep only rules relevant to this plan.
+     Can be skipped if your orchestration tool auto-injects base context into each sub-agent. -->
 
 ## Alert Notes (transient)
 

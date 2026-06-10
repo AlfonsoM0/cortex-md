@@ -48,6 +48,8 @@ Ensure your IDE/agent reads `AGENTS.md` automatically at session start:
 | **VS Code Copilot** | Add reference in `.github/copilot-instructions.md`.                        |
 | **Other agents**    | Instruct the agent to read `AGENTS.md` as its first action.                |
 
+> **Multi-agent orchestrators:** if you use a tool that coordinates multiple sub-agents (e.g., Zoo Code, Roo Code agents, custom orchestrators), configure their global rule files so each agent mode reads `AGENTS.md` and executes `start.md` automatically. With the `rules-{mode}/` pattern, you can add mode-specific rules as well (e.g., Code following the frontend workflow). This eliminates the need to manually copy conventions in every orchestrated plan.
+
 ### 4. Use the daily workflows
 
 - **Session start:** The agent reads `AGENTS.md` → executes `start.md` → loads context.
