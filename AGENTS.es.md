@@ -14,11 +14,15 @@
 - **Descripción:** [Breve descripción de qué hace el proyecto. Ej: Plataforma de gestión financiera para PyMEs.]
 - **Stack Principal:** [Ej: Next.js, TypeScript, DrizzleORM, TailwindCSS]
 
-*Nota: Para ver las convenciones de código y arquitectura detallada, debes consultar tu memoria semántica (ver sección 3).*
+*Nota: Para ver las convenciones de código y arquitectura detallada, debes consultar tu memoria semántica (ver sección 3). El por qué del proyecto vive en `docs/00-PROJECT-BRIEF.md` y los criterios de decisión en `docs/01-GUIDELINES.md` (los crea `init.md`).*
 
 ## 3. Sistema de Memoria Continua (Cortex-MD)
 
 Este repositorio implementa el framework Cortex-MD para la persistencia de tu contexto. Tienes prohibido operar asumiendo que recuerdas toda la historia del proyecto desde tu entrenamiento base. Tu memoria reside físicamente en la carpeta `.agents/memory/`.
+
+- **Jerarquía de verdad:** fuente primaria (el código, o el sistema de registro que declara `stack.md`) > memoria semántica > memoria episódica. La memoria envejece declarando pendiente lo ya hecho: verificá contra la fuente antes de afirmar que algo falta.
+- **La memoria da la regla; el detalle vive en `docs/`**, que cada regla cita. El episódico es historia y nunca se cita como estado vigente.
+- **Una sola memoria:** si tu herramienta tiene memoria nativa, no la uses para este proyecto. Consolida solo el agente que conversa con el usuario.
 
 Para interactuar de forma segura y evitar alucinaciones, estás obligado a utilizar los siguientes Workflows en los momentos designados de tu ciclo de vida.
 
@@ -32,15 +36,25 @@ Para interactuar de forma segura y evitar alucinaciones, estás obligado a utili
 
 #### B. Workflow de Consolidación (Fin de Sesión)
 
-- **Cuándo usarlo:** Cuando el usuario indique que la tarea ha terminado, que la sesión se va a cerrar, o cuando te pida explícitamente "consolidar memoria" o "ejecutar cierre".
+- **Cuándo usarlo:** Cuando el usuario indique que la tarea ha terminado, que la sesión se va a cerrar, o cuando te pida explícitamente "consolidar memoria" o "ejecutar cierre". Si da señales de terminar sin pedirlo, **ofrecelo vos**.
 - **Archivo a invocar:** `.agents/workflows/end.md`
 - **Instrucción:** Lee el archivo `end.md` y ejecuta la síntesis de tus acciones de hoy. Escribe en el sistema de archivos tu razonamiento técnico, actualiza el índice y modifica el estado del proyecto. Es tu responsabilidad asegurarte de que tu instancia futura herede un conocimiento arquitectónico preciso.
 
 #### C. Workflow de Desfragmentación (Bajo Demanda)
 
-- **Cuándo usarlo:** Cuando el usuario solicite explícitamente optimización de memoria, desfragmentación, o pida "ejecutar defrag".
+- **Cuándo usarlo:** Cuando el usuario lo pida ("optimizar memoria", "ejecutar defrag") o cuando el chequeo semanal lo recomiende y el usuario acepte.
 - **Archivo a invocar:** `.agents/workflows/defrag.md`
 - **Instrucción:** Es una operación de mantenimiento profundo que audita y reestructura todo el sistema de memoria. Requiere un modelo de razonamiento de alta capacidad. Siempre esperá la confirmación del usuario antes de proceder.
+
+### Mantenimiento automático (lo propone el agente)
+
+El usuario no tiene que acordarse de mantener la memoria: el agente lo propone.
+
+- **Día de mantenimiento:** viernes — lo pregunta `init.md`; el usuario puede cambiarlo cuando quiera, o escribir "desactivado".
+- **Chequeo semanal:** en la primera sesión desde ese día sin chequeo registrado, ejecutá `.agents/workflows/maintenance.md` (liviano, no reescribe la memoria). Su estado vive en `.agents/memory/maintenance-log.md`.
+- **Proponer, no imponer:** la consolidación, la limpieza, el defrag y la re-alineación se proponen en una línea y se ejecutan solo con el sí del usuario. Si pospone, no insistas hasta el próximo día de mantenimiento.
+- **Cierre de sesión:** si el usuario da señales de terminar ("listo", "gracias, eso es todo") o se completó un trabajo importante, ofrecé consolidar con `end.md`.
+- **Responsable:** _(solo en equipos de varias personas)_ el agente de _[nombre]_ es el único que propone el mantenimiento.
 
 ### Workflows de Extensión Opcionales
 
@@ -82,7 +96,7 @@ Organizá tus skills por dominio para que las instrucciones correctas sean fáci
 
 - **`[<domain-skill>]`**: Flujos de dominio específicos del proyecto (auth, pagos, IA, etc.). 📖 `.agents/skills/<domain-skill>/SKILL.md`
 
-*Si una skill es gestionada por un CLI externo (registrada en `skills-lock.json`), tratá su carpeta como solo-lectura — ver la fase de Enrutamiento de Conocimiento en `end.md`.*
+*Si una skill es gestionada por un CLI externo (registrada en `skills-lock.json`), tratá su carpeta como solo-lectura — ver `end.md § Fase 5`.*
 
 ## 5. Reglas Estrictas de Modificación de Archivos
 
@@ -90,6 +104,8 @@ Organizá tus skills por dominio para que las instrucciones correctas sean fáci
 - Al modificar los archivos de la carpeta `.agents/memory/`, asegúrate de utilizar el formato Markdown requerido sin alterar la estructura de etiquetas o directorios preexistentes.
 - **Taxonomía Estricta:** Siempre que añadas entradas al índice histórico, debes consultar y utilizar obligatoriamente las etiquetas definidas en `.agents/memory/semantic/taxonomy.md`. Si consideras que una etiqueta nueva es necesaria, **recomiéndala al usuario y espera su aprobación** antes de agregarla.
 - **Regla de Omisión `[CortexMD]`:** Durante el enrutamiento hipocampal (búsqueda de contexto al inicio de sesión), **omitir** las entradas del timeline etiquetadas exclusivamente con `[CortexMD]`. Son sesiones de mantenimiento de memoria y no contienen contexto relevante para el proyecto.
+- **Contrato de la memoria:** al escribir en los archivos de reglas, seguí `end.md § Fase 3` (regla + cita a `docs/`, ≤ ~400 caracteres) y verificá con `node .agents/check-memory-contract.js`. Nunca guardes credenciales ni datos personales de terceros en la memoria.
+- **Barrera de `ai-helpers/`:** su contenido es efímero (planes, specs, briefs). Al terminar un trabajo se traslada a `docs/` y a la memoria, y se borra; por eso ni la memoria ni `docs/` referencian rutas dentro de `ai-helpers/`.
 
 ### Modularidad Estricta (Inviolable)
 

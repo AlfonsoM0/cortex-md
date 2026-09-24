@@ -130,8 +130,8 @@ Run the project's automated validation tools.
 
 Once the changes pass validation, keep project documentation aligned with the as-built reality.
 
-1. **Roadmap:** If the project maintains a master roadmap (e.g., `docs/00-MASTER-ROADMAP.md`), mark completed milestones, record architectural pivots, or add new steps.
-2. **Feature docs:** If the modified files belong to a documented domain/feature (e.g., `docs/features/*`), update those documents to reflect the final implementation.
+1. **Feature docs (default destination):** If the modified files belong to a documented domain/feature (e.g., `docs/features/*`), update those documents to reflect the final implementation.
+2. **Roadmap, only if the scope changed:** if the project maintains a master roadmap (e.g., `docs/00-MASTER-ROADMAP.md`), update it only when something enters, leaves or is reclassified, or on an architectural pivot. Execution progress does not go there: it is read in every session (`end.md § Phase 4`).
 
 > **Composability:** This workflow can reference project-specific domain checklists. If your project defines specialized checklist workflows (e.g., a UI/UX checklist, a security checklist, a data-migration checklist) for the domains touched this session, consult/run them here. Keep such checklists in the project — the framework stays domain-agnostic.
 

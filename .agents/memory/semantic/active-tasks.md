@@ -1,47 +1,37 @@
 # 🧠 Active Tasks (Working Memory)
 
-## 🎯 Focus
+> **This file answers "what is left to do?".** Only what is pending or in progress: completed items are **deleted** (their knowledge already lives in `docs/` and in rules). Current behavior lives in `docs/`; scope lives in the roadmap.
+>
+> 🔴 **The primary source takes precedence over this file.** A state document ages toward pessimism (declaring pending what is already done). Verify against the source before declaring something pending or blocked.
 
-*The single main task currently in progress.*
+## 📍 State
 
-- **Objective:**
-- **Status:** *E.g.: In progress / Blocked / Pending review*
-- **Key files:**
+_The verified state of the system, with date and how to verify it. External items (third-party configuration, deliveries, scheduled payments) include when and where they were verified._
 
-## 🚀 Next Steps (Next Session)
+- _E.g.: Production up to date with version `abc1234` (verified YYYY-MM-DD with `<command>`)._
 
-*The first logical action(s) for the next session, in order. Prefix each with priority + effort.*
+## 🚀 Next Steps
 
-1. **[🧭 P2: Strategic] [🟡 Session]** *Describe the next concrete step.*
+_The first logical action of the next session, prioritizing P1. Prefix: priority + effort._
 
----
+1. **[🧭 P2] [🟡 Session]** _Describe the next concrete step._
 
-## 📋 Backlog (Classified)
+## 👀 Watch
 
-> Classify every task by **Priority (Eisenhower)** and prefix it with **Effort (T-shirt sizing)**:
-> `[🟢 Snack]` (< 1h) · `[🟡 Session]` (2-4h) · `[🔴 Epic]` (> 1 day, must be split before starting).
-> This file is the **single source of technical debt** — never let debt scatter into loose notes.
+_Items not being worked on today but requiring monitoring. Each item includes its **trigger** (date, threshold, or event); without a trigger it is noise._
 
-### 🚨 P1: Critical (Important & Urgent)
+- **[🧯 P3] [Watch]** _E.g.: First recurring charge on YYYY-MM-DD: verify that it was recorded._
 
-*Blockers, vulnerabilities, billing failures. Do now.*
+## 📋 Backlog
 
-- *(none)*
+> **Priority (Eisenhower):** `🚨 P1` critical · `🧭 P2` strategic · `🧯 P3` noise · `🗄️ P4` archive.
+> **Effort (T-Shirt):** `[🟢 Snack]` < 1 h · `[🟡 Session]` 2-4 h · `[🔴 Epic]` > 1 day (split before starting) · `[Watch]` with trigger.
+> Each item in 1-2 sentences; if it requires more, cite the doc. **Single source of pending tasks and debt.**
 
-### 🧭 P2: Strategic (Important, NOT Urgent)
+_Group by domain as the backlog grows (e.g. Security, Data — or Stock, Suppliers). Within each group, from highest to lowest priority._
 
-*Roadmap core, preventive refactors. Plan and do methodically.*
+- _(none)_
 
-- *(none)*
+## 🗄️ Archive (Icebox)
 
-### 🧯 P3: Noise (Urgent, NOT Important)
-
-*Minor cosmetic changes or low-criticality reports. Do quickly or delegate.*
-
-- *(none)*
-
-### 🗄️ P4: Archive (Neither Important nor Urgent)
-
-*Idea icebox, minor tech debt, de-prioritized features.*
-
-- *(none)*
+- _(none)_

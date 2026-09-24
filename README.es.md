@@ -4,6 +4,8 @@ Cortex-MD es un framework de memoria persistente basado íntegramente en archivo
 
 El sistema emula las estructuras de memoria del cerebro humano, separando la información en **memoria semántica** (estado global del proyecto) y **memoria episódica** (registro cronológico indexado), optimizando drásticamente el uso de tokens y previniendo alucinaciones por pérdida de contexto.
 
+**Nació para el desarrollo de software, pero sirve para cualquier agente que trabaje de forma continua:** control de stock, evaluación de proveedores, secretaría, atención al cliente, investigación. Los workflows hablan de la **fuente primaria** —el código en un repositorio, el sistema de registro (planilla, ERP, CRM) en una operación administrativa— y de una **base de conocimiento canónica** en `docs/`. Ver el [ejemplo de un agente administrativo](#ejemplo-memoria-de-un-agente-administrativo).
+
 > 🌐 [Read in English (README.md)](README.md)
 
 ## ¿Por qué Cortex-MD?
@@ -16,44 +18,35 @@ El sistema emula las estructuras de memoria del cerebro humano, separando la inf
 
 ## Inicio Rápido
 
-### 1. Copia la estructura a tu proyecto
+### Opción A: instalación asistida (recomendada)
 
-Copia el directorio `.agents/` y `AGENTS.md` de este repositorio a la raíz de tu proyecto:
+No hace falta saber programar ni usar git: funciona en una **carpeta común** con archivos. Abrí tu agente de IA en la carpeta donde vas a trabajar y pegale este prompt:
 
-```bash
-# Clonar y copiar
-git clone https://github.com/YOUR_USER/cortex-md.git /tmp/cortex-md
-cp -r /tmp/cortex-md/.agents/ tu-proyecto/.agents/
-cp /tmp/cortex-md/AGENTS.md tu-proyecto/AGENTS.md
+```text
+Leé el framework Cortex-MD en https://github.com/AlfonsoM0/cortex-md (empezá por INSTALL.es.md) e instalá su sistema de memoria en este espacio de trabajo. Después ejecutá su workflow init.
 ```
 
-### 2. Ejecuta el bootstrap inicial
+El agente descarga el framework, copia solo lo necesario en tu idioma, conecta tu herramienta y empieza una **entrevista de alineación**: una charla para entender tu proyecto antes de escribir la memoria. Las instrucciones que sigue están en [`INSTALL.es.md`](INSTALL.es.md).
 
-Pide a tu agente de IA que ejecute el workflow de bootstrap para poblar la memoria semántica analizando tu codebase existente:
+### Opción B: instalación manual
 
-```
-Lee y ejecuta .agents/workflows/init.md
-```
+1. **Copiá la estructura** a tu proyecto — en tu idioma, renombrando `archivo.es.md` → `archivo.md` si usás las versiones en español ([`INSTALL.es.md`](INSTALL.es.md) detalla qué copiar):
 
-### 3. Configura tu IDE
+   ```bash
+   git clone --depth 1 https://github.com/AlfonsoM0/cortex-md.git /tmp/cortex-md
+   cp -r /tmp/cortex-md/.agents/ tu-proyecto/.agents/
+   cp /tmp/cortex-md/AGENTS.md tu-proyecto/AGENTS.md
+   ```
 
-Asegúrate de que tu IDE/agente lea `AGENTS.md` automáticamente al iniciar una sesión:
+2. **Conectá tus herramientas.** La memoria solo funciona si cada sesión la carga: cada herramienta tiene que **leer `AGENTS.md` al iniciar**, **ejecutar `start.md` antes de responder** y **no usar una memoria propia en paralelo**. Codex CLI lee `AGENTS.md` de forma nativa; **Claude Code** no (carga `CLAUDE.md`), así que necesita un archivo puente y admite un hook de inicio de sesión; Gemini CLI, Cursor, Aider y Copilot se configuran apuntando a `AGENTS.md`. Snippets listos para copiar: [`docs/agent-bridges.es.md`](docs/agent-bridges.es.md).
 
-| Herramienta         | Configuración                                                                          |
-| ------------------- | -------------------------------------------------------------------------------------- |
-| **Claude Code**     | Lee `AGENTS.md` automáticamente desde la raíz. Sin configuración necesaria.            |
-| **Cursor**          | Agrega `AGENTS.md` a las reglas del proyecto, o coloca el contenido en `.cursorrules`. |
-| **Gemini CLI**      | En `.gemini/settings.json`: `{ "context": { "fileName": "AGENTS.md" } }`               |
-| **Aider**           | En `.aider.conf.yml`: `read: AGENTS.md`                                                |
-| **VS Code Copilot** | Agrega referencia en `.github/copilot-instructions.md`.                                |
-| **Otros agentes**   | Instruye al agente a leer `AGENTS.md` como su primera acción.                          |
+3. **Ejecutá el bootstrap:** pedile a tu agente _"Leé y ejecutá `.agents/workflows/init.md`"_.
 
-> **Orquestadores multi-agente:** si usás una herramienta que coordina varios sub-agentes (ej. Zoo Code, agentes con Roo Code, orquestadores custom), configurá sus archivos de reglas globales para que cada modo lea `AGENTS.md` y ejecute `start.md` automáticamente. Con el patrón `rules-{modo}/` podés agregar además reglas específicas por agente (ej. que Code siga el workflow de frontend). Esto elimina la necesidad de copiar convenciones manualmente en cada plan orquestado.
+### Día a día: no tenés que acordarte de nada
 
-### 4. Usa los workflows diarios
-
-- **Inicio de sesión:** El agente lee `AGENTS.md` → ejecuta `start.md` → carga contexto.
-- **Fin de sesión:** Dile al agente: _"Consolida memoria"_ o _"Ejecuta `.agents/workflows/end.md`"_.
+- **Al empezar**, el agente carga la memoria solo (`start.md`) y, si la sesión anterior se cerró sin guardar, ofrece registrarla.
+- **Al terminar**, cuando le digas "listo" o "gracias", ofrece guardar lo aprendido (`end.md`).
+- **Una vez por semana** — el día que elegiste en la entrevista; por defecto, **viernes** —, hace un chequeo liviano de la memoria (`maintenance.md`) y te propone, solo si hace falta, una limpieza, una optimización profunda (`defrag.md`) o una nueva charla de alineación. Nada se modifica sin tu sí.
 
 ## Entorno Recomendado: API Directa + Extensiones Agentiles
 
@@ -84,9 +77,12 @@ Cortex-MD se integra dentro de la convención estándar `.agents/` (basada en co
 │   └── ...
 ├── workflows/                         # Flujos de orquestación del agente
 │   ├── init.md                        # ★ Core: Bootstrap inicial ("Onboarding")
+│   ├── references/
+│   │   └── alignment-interview.md     # ★ Core: Banco de preguntas de la entrevista de alineación
 │   ├── start.md                       # ★ Core: Inicio de sesión ("Despertar")
+│   ├── maintenance.md                 # ★ Core: Chequeo semanal automático (liviano)
 │   ├── end.md                         # ★ Core: Fin de sesión ("Dormir")
-│   ├── defrag.md                      # ★ Core: Optimización de memoria ("Defrag")
+│   ├── defrag.md                      # ★ Core: Optimización y verificación de memoria ("Defrag")
 │   ├── deep-plan.md                   # ★ Extensión: Planificación profunda con Prueba de Trabajo
 │   ├── audit.md                       # ★ Extensión: Auditoría post-feature con evidencia
 │   └── commit.md                      # ★ Opcional: revisión de staged + commit con intención
@@ -98,66 +94,179 @@ Cortex-MD se integra dentro de la convención estándar `.agents/` (basada en co
 │   │   ├── conventions.md             #     Convenciones de código y estilo
 │   │   ├── business-rules.md          #     Lógica de negocio y reglas del dominio
 │   │   └── active-tasks.md            #     Memoria de trabajo: tareas en curso
+│   ├── maintenance-log.md             #   Fechas del chequeo semanal, del último defrag y de la revisión del brief
 │   └── episodic/                      #   Hipocampo: Registro cronológico indexado
 │       ├── timeline.md                #     Índice de búsqueda rápida por [Tags] (máx. 50 sesiones)
 │       └── YYYY/
 │           └── MM/
-│               └── DD.md              #     Registro detallado de la sesión (archivos, commits, decisiones)
+│               ├── DD.md              #     Registro detallado de la sesión (cambios, decisiones, errores)
+│               └── DD-s2.md           #     Segunda sesión del mismo día
+├── check-memory-contract.js           # ★ Cortex-MD: verificador del contrato de la memoria (Node, sin dependencias)
 ├── .mcp.json                          # (Convención) Configuración de servidores MCP local
 ├── sync-mcp.js                        # ★ Opcional (módulo MCP): genera configs por IDE desde una sola fuente
 ├── mcp_config.json                    # ★ Opcional (módulo MCP): lista canónica de servidores (placeholders, sin secretos)
 ├── mcp_config.zoo-overrides.json      # ★ Opcional (módulo MCP): ejemplo de overrides por IDE
-├── ai-helpers/                        # ★ Cortex-MD: Módulo Pipeline de Ejecución Stepwise
-└── docs/                              # ★ Cortex-MD: Guías y documentación (incl. mcp-sync.es.md)
+└── backups/                           # Solo sin git: copias de la memoria antes de cada defrag (las 3 últimas)
+
+/AGENTS.md                             # Instrucciones base, cargadas en cada sesión
+/ai-helpers/                           # ★ Opcional: Módulo Pipeline de Ejecución Stepwise
+/docs/                                 # Base de conocimiento canónica de TU proyecto: el detalle que la memoria cita
+
+# Solo en el repositorio del framework (no se copian a tu proyecto):
+/INSTALL.md                            # Instrucciones de instalación para el agente
+/docs/                                 # Guías del framework (agent-bridges, mcp-sync, multi-dev)
 ```
 
 Adicionalmente, `AGENTS.md` se ubica en la **raíz del repositorio**. Actúa como el punto de entrada (_system prompt_) que el IDE inyecta automáticamente al agente, y es responsable de dirigir al LLM hacia los workflows de Cortex-MD. También aloja el **Skill Router** (un índice categorizado y bajo-demanda de las skills del proyecto) y las **reglas inviolables** (modularidad estricta y anti-redundancia) — guardas que deben permanecer en el contexto siempre-cargado, ya que `conventions.md` y las skills se cargan solo selectivamente. Esto sigue el [estándar AGENTS.md](https://agents.md) adoptado por más de 60k proyectos open source y soportado por herramientas como Codex, Jules, Cursor, VS Code Copilot, y muchas más.
 
+## Los Principios de la Memoria
+
+Lo que convierte una carpeta de Markdown en una memoria confiable no es la estructura de archivos: son cinco reglas que los workflows aplican en cada ciclo.
+
+1. **La fuente primaria le gana a la memoria.** Jerarquía de verdad: fuente primaria (código, sistema de registro) > memoria semántica > memoria episódica. La memoria envejece **hacia el pesimismo**: declara pendiente lo que ya se hizo y cita nombres que cambiaron. Antes de afirmar que algo falta, se verifica contra la fuente.
+2. **La memoria guarda la regla; el detalle vive en `docs/`.** Cada entrada de los archivos de reglas es: regla en imperativo + a lo sumo una frase de razón + cita al doc canónico, en ≤ ~400 caracteres. Mediciones, ejemplos y argumentación van al doc; la historia del descubrimiento, al episódico. Así la memoria que se lee en cada sesión se mantiene chica sin perder nada.
+3. **Tres tipos de archivo, tres contratos:**
+   - `architecture` · `stack` · `conventions` · `business-rules` responden **"¿cuál es la regla?"** → regla + cita.
+   - `active-tasks` responde **"¿qué falta hacer?"** → solo lo pendiente; **lo terminado se borra**, no se marca con ✅. Lo externo lleva fecha de verificación; lo que se vigila (`[Watch]`) lleva su disparador.
+   - `taxonomy` responde **"¿qué etiquetas valen?"** → lista cerrada.
+4. **El episódico es historia, nunca autoridad.** Explica por qué y qué se intentó (incluidos los **errores de razonamiento del agente**), pero no se cita desde la memoria ni desde `docs/`: envejece por diseño.
+5. **Lo que se lee siempre tiene presupuesto.** `start.md` carga un nivel fijo (`architecture`, `stack`, `active-tasks`, roadmap) que paga cada sesión; el resto se abre bajo demanda. El roadmap registra el **alcance**, no el avance.
+
+**Verificador:** `node .agents/check-memory-contract.js` controla la forma (entradas largas sin cita, citas a docs inexistentes, citas al episódico) y reporta el tamaño de la carga fija en tokens estimados. Mide la **forma**, no la verdad: eso lo hace el defrag contrastando la memoria con la fuente primaria.
+
 ## Flujos de Trabajo (Workflows)
 
-Cortex-MD provee **cuatro workflows core** (el ciclo de vida de la memoria) y **dos workflows de extensión** (metodología de desarrollo):
+Cortex-MD provee **cinco workflows core** (el ciclo de vida de la memoria) y **dos workflows de extensión** (metodología de desarrollo):
 
 ### 0. Bootstrap inicial: `init.md`
 
-Se ejecuta una sola vez al adoptar Cortex-MD en un proyecto existente. El LLM analiza el codebase y puebla todos los archivos de memoria semántica automáticamente.
+Se ejecuta una sola vez al adoptar Cortex-MD, y empieza por una **entrevista de alineación**: una conversación amigable en la que agente y usuario acuerdan qué problemas resuelve el proyecto, qué objetivos persigue y cómo se mide el éxito, cómo son los procedimientos actuales y cuáles automatizar, qué tareas no admiten error y cuáles apuran, cuánta autonomía tiene el agente, dónde está la información y cuál es su FODA. El banco de preguntas (`references/alignment-interview.md`) combina prácticas probadas —reunión inicial de proyecto, pre-mortem, criterios de automatización, niveles de autonomía según qué tan fácil es verificar y deshacer una tarea— y dice a qué documento o archivo de memoria va cada respuesta.
+
+Con la síntesis aprobada por el usuario, `init` crea la documentación canónica (`docs/00-PROJECT-BRIEF.md`, `docs/01-GUIDELINES.md`, procedimientos), puebla la memoria respetando el contrato, adapta `AGENTS.md` (contexto, autonomía, comunicación) y la taxonomía, y conecta las herramientas para que cada sesión cargue la memoria. La entrevista se repite en parte cuando el proyecto cambia de etapa (**re-alineación**).
 
 ### 1. El ciclo de "Despertar": `start.md`
 
-Cuando inicias una nueva sesión, el LLM lee `.agents/workflows/start.md` y realiza un RAG (Retrieval-Augmented Generation) manual y eficiente:
-
-- **Paso 1 (Lectura Semántica):** Siempre lee `architecture.md` y `stack.md` como baseline obligatorio. Carga selectivamente `conventions.md`, `business-rules.md` y `taxonomy.md` según la tarea.
-- **Paso 2 (Enrutamiento Hipocampal):** Escanea `episodic/timeline.md` buscando etiquetas (ej. `[Auth]`, `[UI]`, `[DB]`) relacionadas con el objetivo actual.
-- **Paso 3 (Recuperación Episódica):** Solo si encuentra coincidencias relevantes, abre los archivos diarios (`YYYY/MM/DD.md`) correspondientes para recuperar el razonamiento previo y hashes de commits.
+- **Jerarquía de verdad:** se lee antes de cargar nada.
+- **Fase 1 (Carga semántica):** siempre el nivel fijo (`architecture`, `stack`, `active-tasks` y el roadmap si existe); `conventions`, `business-rules` y `taxonomy` según la tarea. La memoria da la regla: los docs citados se abren cuando la tarea los pide.
+- **Fase 2 (Enrutamiento hipocampal):** busca en `timeline.md` las etiquetas de los dominios de la tarea.
+- **Fase 3 (Recuperación episódica):** solo si hubo coincidencias, lee esos días (incluidos `DD-sN.md`) como historia, no como estado.
 
 ### 2. El ciclo de "Sueño y Consolidación": `end.md`
 
-Al finalizar tu sesión de código, el LLM consolida la memoria a largo plazo:
-
-- **Generación Episódica:** Crea el archivo del día (`DD.md`) con un template estructurado documentando archivos modificados, hashes de commits, decisiones técnicas y resolución de errores.
-- **Actualización del Índice:** Añade una entrada etiquetada a `timeline.md` (máx. 50 sesiones). Las etiquetas provienen estrictamente de `taxonomy.md`.
-- **Consolidación Semántica (Crítico):** Evalúa si las acciones de hoy alteraron la arquitectura, reglas o convenciones globales. De ser así, sobrescribe el archivo semántico correspondiente.
-- **Vaciado de Memoria de Trabajo:** Actualiza `active-tasks.md` para la próxima sesión, clasificando el backlog por **prioridad Eisenhower (P1–P4)** + **sizing de esfuerzo (T-shirt)** — la fuente única de deuda técnica.
-- **Enrutamiento de Conocimiento:** Si se descubrió un nuevo patrón o solución a un bug, lo enruta al archivo correcto (memoria semántica, skill o docs) en vez de inflar `AGENTS.md`. Una **Guarda de Skills Externas** protege las carpetas gestionadas por un CLI de skills externo (`skills-lock.json`).
-- **Sincronización de Planificación y Feature-Docs (Opcional):** Si el proyecto tiene un roadmap maestro o docs de features (`docs/features/*`), los actualiza para reflejar hitos completados y la implementación as-built.
+- **Higiene previa** y, en equipos de agentes, **consolida solo el líder**.
+- **Episódico:** el día con cambios, decisiones y errores — incluidos los **errores de razonamiento propios**, los más caros de repetir.
+- **Timeline:** una línea de ~200 caracteres con etiquetas de la taxonomía (máx. 50 sesiones).
+- **Consolidación semántica** con el contrato de tres tipos de archivo; sin credenciales ni datos personales.
+- **Documentación y roadmap:** el comportamiento va a `docs/`; el roadmap cambia solo si cambió el alcance; **barrido de coherencia** cuando cambia un valor o un nombre.
+- **Skills** con la Guarda de Skills Externas.
+- **Flush de `active-tasks`:** borrar lo terminado (verificando antes que su detalle viva en `docs/`), estados externos fechados, `[Watch]` con disparador, backlog Eisenhower + T-Shirt.
+- **Cierre con el usuario:** lista los pendientes que solo una persona puede confirmar, para que marque los que ya no aplican.
 
 ### 3. Desfragmentación de Memoria: `defrag.md`
 
-Se ejecuta bajo demanda cuando el usuario detecta que los archivos de memoria han crecido con redundancias, ineficiencias de formato o inconsistencias entre archivos. Es análogo a la desfragmentación de disco — reorganizar datos para un rendimiento óptimo sin perder información.
+Bajo demanda, cada 15-20 sesiones. Además de comprimir y deduplicar:
 
-- **Puerta de Seguridad:** Advierte al usuario y requiere confirmación explícita de que un modelo de razonamiento de alta capacidad está activo.
-- **Inventario Completo:** Lee toda la memoria semántica y los registros episódicos recientes para construir una imagen completa.
-- **Compresión Semántica:** Reescribe cada archivo semántico para un consumo óptimo de tokens — listas densas sobre prosa, voz imperativa, cero palabras de relleno.
-- **Optimización Episódica:** Audita el timeline por inflación de etiquetas y aplica el límite de 50 sesiones.
-- **Validación Cruzada:** Detecta contradicciones y desalineaciones entre `architecture.md`, `stack.md`, `conventions.md` y `business-rules.md`.
-- **Optimización de Feature-Docs (Opcional):** Aplica la misma compresión a la documentación detallada de features (`docs/features/*`).
-- **Limpieza de Entorno (Opcional):** Purga cachés pesadas de build/tooling como parte del mantenimiento periódico.
-- **Reporte de Defrag:** Presenta un resumen de todos los cambios para revisión del usuario.
+- **Commit previo** para que sea reversible, e **inventario con la carga fija medida** (antes → después).
+- **Contrato bloqueante:** el verificador debe dar cero hallazgos.
+- **La memoria contra la fuente primaria (Fase 4.6):** contrasta nombres, límites y "únicos puntos de X" con el código o el sistema de registro. Es lo único que detecta una memoria que describe un sistema que ya no existe — y lo más valioso del reporte.
+- **Desvío de estado en `docs/`:** afirmaciones que el tiempo volvió falsas, priorizando las que **subestiman el riesgo**.
+- **Sistema de conocimiento:** router de skills, rutas muertas, actualización de skills externas sin perder archivos propios.
+- **Higiene:** datos sensibles fuera del control de versiones.
+- **Reporte que separa lo cosmético de lo sustantivo**, y **revisión independiente** del diff por otro agente o modelo antes de commitear.
 
-> **Cuándo ejecutarlo:** Cada 15-20 sesiones, o cuando los archivos de memoria semántica crezcan más allá de lo razonable para la complejidad del proyecto. El workflow es idempotente — ejecutarlo sobre memoria ya optimizada no produce cambios.
+> **Idempotente:** ejecutarlo sobre memoria ya optimizada no produce cambios.
+
+### 4. Chequeo Semanal: `maintenance.md`
+
+El usuario no tiene que saber cuándo optimizar la memoria o re-alinearse: lo decide este chequeo, que `start.md` dispara solo en la primera sesión desde el **día de mantenimiento** (lo elige el usuario en `init`; por defecto, viernes). Como el agente no tiene reloj entre sesiones, si ese día no se trabaja, corre en la sesión siguiente.
+
+- **Liviano y sin reescribir la memoria:** corre el verificador, busca sesiones sin consolidar (por commits o, sin git, por archivos modificados), pendientes vencidos o marcados como hechos, sesiones desde el último defrag, crecimiento de la carga fija y la antigüedad del brief.
+- **Una recomendación, no una lista:** consolidar, limpiar, **defrag solo cuando hace falta** (≥ 15 sesiones, carga fija +25 %, hallazgos del verificador, o > 60 días), revisión rápida del brief (> 90 días) o re-alineación ante señales de cambio.
+- **Proponer, nunca imponer:** tres líneas como máximo; si el usuario pospone, no insiste hasta la semana siguiente. Su estado vive en `.agents/memory/maintenance-log.md`.
+
+## Ejemplo: memoria de un agente administrativo
+
+Un agente que lleva el stock, evalúa proveedores, responde a clientes y hace de secretario de un comercio mayorista. No hay código: la **fuente primaria** es la planilla de stock y el sistema de facturación, y `docs/` guarda los procedimientos y las fichas de proveedores.
+
+```text
+.agents/memory/semantic/
+├── stack.md            # sistemas en uso y cuál es la fuente primaria
+├── architecture.md     # áreas y flujos de trabajo
+├── conventions.md      # el estilo de la casa
+├── business-rules.md   # reglas del negocio
+├── active-tasks.md     # pendientes, con estado fechado
+└── taxonomy.md         # [Stock] [Proveedores] [Clientes] [Pagos] [Agenda] [Docs] [CortexMD]
+docs/
+├── 00-PROJECT-BRIEF.md            # problemas, objetivos, FODA (de la entrevista de alineación)
+├── 01-GUIDELINES.md               # criterios de decisión y lo que no admite error
+├── procedimientos/reposicion.md
+├── procedimientos/pagos.md
+├── proveedores/evaluacion.md
+└── atencion/respuestas-tipo.md
+```
+
+**`stack.md`**
+
+```markdown
+- **Fuente primaria:** planilla `Stock` (existencias y mínimos) y el sistema de facturación (ventas y cobros). Ante una discrepancia, ganan ellos. → `docs/sistemas.md`
+- **Pedidos a proveedores:** por email desde la casilla de compras; WhatsApp solo para urgencias, con confirmación posterior por email. → `docs/procedimientos/reposicion.md`
+```
+
+**`architecture.md`**
+
+```markdown
+- **Reposición:** alerta de mínimo → pedido al proveedor preferido → recepción con remito → carga en la planilla → pago a 30 días. → `docs/procedimientos/reposicion.md`
+- **Reclamos de clientes:** se registran en la planilla `Reclamos` antes de responder. → `docs/atencion/reclamos.md`
+```
+
+**`business-rules.md`**
+
+```markdown
+- **Nunca aprobar un pago sin remito conformado:** el faltante se reclama antes de pagar. → `docs/procedimientos/pagos.md §2`
+- **Evaluar proveedores cada trimestre** por puntualidad, faltantes y precio; dos entregas tardías seguidas bajan su prioridad. → `docs/proveedores/evaluacion.md`
+- **El stock mínimo de cada producto lo define la planilla**, no la memoria: la memoria nombra la columna, nunca copia los valores.
+```
+
+**`conventions.md`**
+
+```markdown
+- **Responder a cada cliente en su idioma, en ≤ 5 líneas:** resultado, agradecimiento y cierre, sin jerga interna. → `docs/atencion/respuestas-tipo.md`
+- **Todo mensaje a un cliente o proveedor lo aprueba una persona antes de enviarse.**
+- **Nombrar archivos** `AAAA-MM-DD_proveedor_tipo.pdf`.
+```
+
+**`active-tasks.md`**
+
+```markdown
+## 📍 Estado
+- Stock conciliado con el recuento físico (verificado 2026-09-20 en la planilla).
+
+## 🚀 Próximos Pasos
+1. **[🚨 P1] [🟢 Snack]** Reclamar al Proveedor B las 12 unidades faltantes del remito 4521 antes del pago del viernes.
+
+## 👀 Watch
+- **[🧯 P3] [Watch]** El Proveedor A prometió entregar el 03/10: verificar la recepción ese día; si no llegó, pedir al Proveedor C.
+
+## 📋 Backlog
+- **[🧭 P2] [🟡 Sesión]** Evaluación trimestral de proveedores (Q3).
+```
+
+**Una entrada del timeline y un error de razonamiento en el episódico:**
+
+```markdown
+- 2026-09-24: [Proveedores] [Pagos] Faltante en el remito 4521 del Proveedor B: pago retenido hasta el reclamo; evaluación Q3 iniciada.
+```
+
+```markdown
+- **Error de razonamiento propio:** di por recibido el pedido 118 porque figuraba el email de despacho; la planilla no tenía la carga.
+  - **Prevención:** la recepción se confirma en la planilla (fuente primaria), nunca por el aviso del proveedor.
+```
+
+Lo mismo aplica a cualquier otro dominio: cambiá qué es la fuente primaria, qué guarda `docs/` y qué etiquetas usa la taxonomía. Los workflows no cambian.
 
 ## Workflows de Extensión: Modos de Ejecución Adaptativos
 
-Mientras los cuatro workflows core gestionan el ciclo de vida de la memoria, Cortex-MD también provee **workflows de extensión** que se adaptan a las capacidades del modelo que los ejecuta. Resuelven dos problemas simultáneamente:
+Mientras los cinco workflows core gestionan el ciclo de vida de la memoria, Cortex-MD también provee **workflows de extensión** que se adaptan a las capacidades del modelo que los ejecuta. Resuelven dos problemas simultáneamente:
 
 1. **Degradación de calidad** cuando modelos ligeros (Haiku, Flash, mini) procesan tareas de ingeniería complejas.
 2. **Overhead de latencia** cuando modelos pesados (Opus, o1) son forzados a través de pasos de micro-gestión innecesarios.
@@ -184,7 +293,7 @@ Cada workflow de extensión soporta **tres modos** que el usuario selecciona al 
 
 > **Innegociable en todos los modos:** El gateway de Validación Técnica (lint, typecheck, build) es siempre obligatorio y bloqueante. Ningún modelo — sin importar su capacidad — puede saltear la verificación objetiva del compilador.
 
-### 4. Planificación Profunda: `deep-plan.md`
+### 5. Planificación Profunda: `deep-plan.md`
 
 Un workflow de planificación estructurada con tres fases (Descubrimiento → Restricciones → Partición) que adapta su rigor:
 
@@ -194,7 +303,7 @@ Un workflow de planificación estructurada con tres fases (Descubrimiento → Re
 
 > **Cuándo usarlo:** Antes de implementar cualquier funcionalidad que abarque más de 3 archivos o cruce límites entre módulos.
 
-### 5. Auditoría Post-Feature: `audit.md`
+### 6. Auditoría Post-Feature: `audit.md`
 
 Un workflow de validación basado en evidencia con siete fases (Inventario → Modularidad → Redundancia → Convenciones → Validación Técnica → Sincronización de Roadmap y Feature-Docs → Reporte):
 
@@ -235,7 +344,8 @@ Cortex-MD es una arquitectura abierta licenciada bajo [MIT](LICENSE). Las áreas
 - Optimización de la taxonomía de etiquetas en `taxonomy.md`.
 - Creación de scripts de automatización (Bash/Node.js) para inicializar la estructura de carpetas. _(Ya se incluye un helper opcional en Node, `sync-mcp.js`, para generar configs de MCP por IDE desde una única fuente canónica — ver [docs/mcp-sync.es.md](docs/mcp-sync.es.md).)_
 - Evaluación de impacto en la retención de contexto en proyectos de más de 100k líneas de código.
-- **Métricas de tokens para defrag:** Agregar un conteo estimado de tokens (antes vs. después) al reporte de desfragmentación ayudaría a los usuarios a cuantificar el impacto de la optimización. Esto podría implementarse como una fase opcional en `defrag.md`.
+- **Métricas de tokens más precisas:** `check-memory-contract.js` estima la carga fija dividiendo bytes por 4; un tokenizador real por familia de modelos mejoraría la medición.
+- **Verificación de secciones citadas:** el verificador confirma que el archivo citado existe, no que la sección (`§2`) trate el tema.
 - **Investigación de workflows de extensión:** Testear y refinar la metodología de Prueba de Trabajo en distintas familias de modelos (Claude, GPT, Gemini, open-source) y distintos tamaños de proyecto.
 
 Si tienes mejoras en los prompts de los workflows, por favor abre un Pull Request o inicia una Issue para debatir el enfoque cognitivo.

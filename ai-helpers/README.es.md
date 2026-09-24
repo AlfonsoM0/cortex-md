@@ -96,6 +96,8 @@ Para proteger radicalmente la memoria de trabajo del agente principal, esta carp
 
 `ai-helpers` consume archivos de `.agents/workflows/` y `.agents/memory/`, pero **`.agents/` no conoce ni referencia a `ai-helpers/`**. Nunca modificar archivos de `.agents/` desde este módulo.
 
+**Contenido efímero:** todo lo que vive acá (breakdowns, specs, prompts, auditorías, planes de QA) es de trabajo. Al cerrar el trabajo, lo que sigue siendo verdad se traslada a `docs/` (comportamiento) y a la memoria (reglas), y el archivo se borra. Por eso **ni la memoria ni `docs/` citan rutas de `ai-helpers/`**: una cita hacia acá apuntaría a un archivo que va a desaparecer.
+
 ### C. Identidad y Desacople de Contexto
 
 Por defecto, los sub-agentes invocados por el Orquestador arrancan sin memoria del proyecto: `orchestator-memory.md` (incluyendo Convenciones Críticas) es el vehículo de contexto. Si tu herramienta de orquestación inyecta el contexto base automáticamente en cada sub-agente, `orchestator-memory.md` se reduce a solo estado operativo del plan (PRs e inventario), y una cláusula de enfoque en cada mandato evita que los sub-agentes ejecuten fases irrelevantes de `start.md`. En el Flujo Manual, el usuario gestiona el contexto directamente.
@@ -114,7 +116,7 @@ El output de `02-generate-spec.md` siempre incluye una sección de **Inventario 
 
 ### G. Consolidación Manual
 
-Al finalizar una característica, **es responsabilidad del usuario** ejecutar `.agents/workflows/end.md` para consolidar lo aprendido en la memoria semántica de Cortex-MD. Esto permite agrupar múltiples PRs en una sola sesión de memoria episódica, en lugar de consolidar después de cada PR individual.
+Al finalizar una característica, **es responsabilidad del usuario** ejecutar `.agents/workflows/end.md` para consolidar lo aprendido en la memoria semántica de Cortex-MD. `end.md` usa estos archivos como **insumo**, nunca como destino de sus citas (ver Barrera Unidireccional). Esto permite agrupar múltiples PRs en una sola sesión de memoria episódica, en lugar de consolidar después de cada PR individual.
 
 ## 6. Personalización
 

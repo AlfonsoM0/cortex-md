@@ -96,6 +96,8 @@ To radically protect the main agent's working memory, this folder contains its o
 
 `ai-helpers` consumes files from `.agents/workflows/` and `.agents/memory/`, but **`.agents/` does not know about or reference `ai-helpers/`**. Never modify `.agents/` files from within this module.
 
+**Ephemeral content:** everything that lives here (breakdowns, specs, prompts, audits, QA plans) is working material. When closing the work, whatever remains true is moved to `docs/` (behavior) and to memory (rules), and the file is deleted. That is why **neither memory nor `docs/` cite paths inside `ai-helpers/`**: a citation pointing here would point to a file that will disappear.
+
 ### C. Identity and Context Decoupling
 
 By default, sub-agents invoked by the Orchestrator start as "blank slates" with no project memory: `orchestator-memory.md` (including Critical Conventions) is the context vehicle. If your orchestration tool auto-injects base context into each sub-agent, `orchestator-memory.md` reduces to operational state only (PRs and inventory), and a focus clause in each mandate prevents sub-agents from executing irrelevant phases of `start.md`. In the Manual Flow, the user manages it directly.
@@ -114,7 +116,7 @@ The output of `02-generate-spec.md` always includes an **Anti-Redundancy Invento
 
 ### G. Manual Consolidation
 
-When a feature is completed, **it is the user's responsibility** to run `.agents/workflows/end.md` to consolidate learnings into Cortex-MD's semantic memory. This allows grouping multiple PRs into a single episodic session entry rather than consolidating after each individual PR.
+When a feature is completed, **it is the user's responsibility** to run `.agents/workflows/end.md` to consolidate learnings into Cortex-MD's semantic memory. `end.md` uses these files as **input**, never as a destination for its citations (see Unidirectional Barrier). This allows grouping multiple PRs into a single episodic session entry rather than consolidating after each individual PR.
 
 ## 6. Customization
 

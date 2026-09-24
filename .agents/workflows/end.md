@@ -1,128 +1,120 @@
+---
+description: Session end (Consolidation)
+---
+
 # Workflow: Session End (Cognitive Consolidation)
 
-**System Context:** You are an AI agent and the current work session has concluded. It is imperative to execute a memory consolidation process analogous to the human sleep cycle to prevent context degradation in future interventions. You must evaluate what information to retain, what to index, and how to modify the global project state.
+**System Context:** The session has ended — because the user requested it, or because you offered upon signals of closing and they accepted (`AGENTS.md § Automatic maintenance`). Consolidate memory so that your future instance inherits accurate knowledge: what to retain, what to index, and what changed in the global state. Execute the phases in order.
 
-Execute the following steps in strict sequential order.
+> **Who consolidates:** in a multi-agent team, **only the agent speaking with the user** (the leader) consolidates. Helpers report to them; if everyone writes to memory, they overwrite and contradict each other. Agent operational details (quotas, costs, dispatch preferences) are not project memory: they belong in the leader's own file.
 
-## Phase 1: Episodic Memory Creation
+## Phase 0: Prior Hygiene
 
-Generate the detailed record of this session's experiences and reasoning to preserve the "what" and the "why".
+- Review what changed (with git: `git status`; in a plain folder: files modified during the session) and run the validation corresponding to the scope. Do not repeat checks that already passed if nothing relevant changed.
+- If you are going to modify semantic memory, run `node .agents/check-memory-contract.js` at the end.
 
-1. Determine the current date in `YYYY`, `MM`, `DD` format.
-2. Create or update the file: `.agents/memory/episodic/YYYY/MM/DD.md`
-   - **Multiple sessions per day:** If more than one distinct session happens on the same day, append a descriptive slug to keep them separate and searchable: `.agents/memory/episodic/YYYY/MM/DD-<slug>.md` (e.g., `2026/06/04-inventory-redesign.md`). Use a plain `DD.md` for the routine single session.
-3. Use the following template as the mandatory structure:
+## Phase 1: Episodic Memory
+
+1. Create or update `.agents/memory/episodic/YYYY/MM/DD.md`. For another distinct session on the same day, use `DD-s2.md`, `DD-s3.md`… without overwriting the previous one (the numeric suffix sorts naturally and the timeline names it).
+2. Use this structure and omit sections that do not apply:
 
 ```markdown
 # Session: YYYY-MM-DD
 
 ## Summary
 
-Brief description (2-3 lines) of the session's objective and the outcome achieved.
+2-3 lines: objective and outcome.
 
-## Modified Files
+## Changes
 
-| File | Action | Change Description |
-|---|---|---|
-| `path/to/file.ts` | Created / Modified / Deleted | What was done and why |
+| File / record | Action | Description |
+| ------------------ | ------------------------------- | --------------------- |
+| `path/to/file` | Created / Modified / Deleted | What was done and why |
 
 ## Version Control
 
-- **Branch:** `branch-name`
-- **Commits:** `abc1234`, `def5678` (or indicate if no commits were made)
+- **Branch:** `branch` · **Commits:** `abc1234`, … (or "no commits")
 
-## Technical Decisions
+## Decisions
 
-- **Decision:** Description of the architectural or design decision made.
-  - **Context:** Why this decision was made (alternatives evaluated, constraints).
+- **Decision:** what was decided.
+  - **Context:** why (alternatives, constraints, who decided).
 
-## Errors Found and Resolutions
+## Errors and Resolutions
 
-- **Error:** Description of the bug or problem.
-  - **Root cause:** What was causing it.
-  - **Solution:** How it was resolved.
-  - **Prevention:** What to avoid in the future to prevent recurrence.
+- **Error:** description.
+  - **Root cause:** … · **Solution:** … · **Prevention:** …
 
-## Context for the Next Session
+## Context for Next Session
 
-Clear description of where the work left off and what should be done next to resume without friction.
+Where the work left off and what follows.
 ```
 
-4. Fill in all applicable sections. If a section does not apply (e.g., no errors were found), omit it from the generated file.
+> **Also record your own reasoning errors**, not just system errors: a hypothesis that the user corrected, data assumed to be true without verification, a "blocker" that did not exist. These are the most expensive to repeat and no test catches them. Note **what caused it** (outdated documentation, a record from another environment, assuming an error where there was a design decision) and **how to avoid it**.
 
-## Phase 2: Hippocampal Index Update
+In a project without version control, "Version Control" is replaced by a reference to the affected record (e.g. order number, spreadsheet row, ticket ID).
 
-Create the "synaptic tag" so your future instance can quickly find the episodic memory generated in Phase 1.
+## Phase 2: Hippocampal Index (timeline)
 
-1. **Read the file:** `.agents/memory/semantic/taxonomy.md`
-   - **Objective:** Obtain the strict list of allowed tags. If no tag covers the domain worked on, **recommend a new one to the user and wait for their approval** before using it.
-2. **Read the file:** `.agents/memory/episodic/timeline.md`
-3. Add a new entry at the top of the file under the corresponding month.
-   - **Strict format:** `- YYYY-MM-DD: [Tag1] [Tag2] One-line summary of what was accomplished.`
-   - **Make it self-contained:** the summary should be a dense executive line — enough scope (key files/concepts touched) that hippocampal routing can decide relevance without opening the daily file. Append an optional `Pending: ...` marker if work is unfinished.
-4. **Growth Limit (Purge):** Verify that the `timeline.md` file does not contain more than the **last 50 registered sessions**. If it exceeds this limit, silently remove the oldest sessions from the end of the file to maintain token economy.
+1. Read `.agents/memory/semantic/taxonomy.md`. If no tag covers the domain, **recommend one to the user and wait for their approval**.
+2. Add an entry to the **top** of `.agents/memory/episodic/timeline.md`:
+   - Format: `- YYYY-MM-DD: [Tag1] [Tag2] One-line summary.`
+   - **~200 characters in total**, dense and self-contained, to determine relevance without opening the daily file. Name the file (`DD-s2.md`) if there were multiple sessions.
+   - Details live in episodic memory; do not duplicate them in the index.
+3. Limit: **50 sessions**. If exceeded, remove the oldest ones from the bottom.
 
 ## Phase 3: Semantic Consolidation (Neuroplasticity)
 
-This is the critical phase of the process. You must evaluate whether today's work altered the "absolute truth" of the system (the global state).
+Did today's work change the current truth (new tool, structure, pattern, convention, domain rule)? **Yes →** overwrite obsolete information in the affected file. Semantic memory has no sense of time: it is a snapshot of the present, not a chronicle.
 
-1. Cognitively evaluate: Did today's actions implement a new technology, change a global design pattern, modify the structure, or alter conventions or business rules?
-2. If the answer is YES:
-   - Identify which semantic file was affected (`architecture.md`, `conventions.md`, `business-rules.md`, `stack.md`).
-   - Open the corresponding file and overwrite the obsolete information. Modify the document so it reflects the current architectural and logical state.
-   - **Strict warning:** Do not add text as if it were a chronological history. Semantic memory has no time — it must be an exact snapshot of the present.
+🔴 **Three file types, three contracts. Identify which one you are touching BEFORE writing:**
 
-## Phase 4: Prefrontal Cortex Flush (Working Memory)
+| File | Answers | Contract |
+| ----------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `architecture` · `stack` · `conventions` · `business-rules` | what is the rule? | **Rule + citation to `docs/`**, ≤ ~400 characters. Describes something that already exists, so there is always a doc to cite. |
+| `active-tasks` | what is left to do? | Task in 1-2 sentences, without mandatory citation. **Completed items are deleted** (Phase 6). |
+| `taxonomy` | which tags are valid? | Closed list; a new tag requires approval. |
 
-Prepare the environment so the next session starts without cognitive friction.
+**Anatomy of a rule entry:** rule in imperative mood + at most **one** sentence explaining rationale + citation to canonical doc. Example: _"Never approve a payment without a signed delivery note: shortages are claimed before paying. → `docs/procedimientos/pagos.md §2`"_.
 
-1. **Open the file:** `.agents/memory/semantic/active-tasks.md`
-2. Clear the tasks that were successfully completed during this session.
-3. **Classify the backlog:** Ensure every remaining task is organized under the following matrix (Priority + Effort):
-   - **Primary hierarchy (Priority — Eisenhower):**
-     - `🚨 P1: Critical (Important & Urgent)` — blockers, vulnerabilities, billing failures.
-     - `🧭 P2: Strategic (Important, NOT Urgent)` — preventive refactors, core/roadmap features.
-     - `🧯 P3: Noise (Urgent, NOT Important)` — minor cosmetic changes, low-criticality issues.
-     - `🗄️ P4: Archive (Neither Important nor Urgent)` — idea icebox, minor debt.
-   - **Secondary label (Effort — T-shirt sizing):** prefix each task with its effort:
-     - `[🟢 Snack]` — (< 1h) quick task.
-     - `[🟡 Session]` — (2-4h) a focused afternoon of deep work.
-     - `[🔴 Epic]` — (> 1 day) large task that MUST be split into sub-tasks before starting.
-4. **Define the next step:** Write clearly and concisely what the first logical action should be for the next iteration, always prioritizing **P1: Critical** tasks.
+- **What DOES NOT belong** (goes to the doc cited by the entry): metrics, examples and counterexamples; arguments longer than one sentence. The **discovery story** ("detected when…", "replaces previous rule") does not even go into the doc: it is session narrative and lives only in episodic memory.
+- **Quick test:** if leaving only the rule and citation keeps the entry actionable, the rest was superfluous.
+- **No doc to cite → create one or extend an existing one in `docs/`** and only then write the entry. Memory is never the only place where an important detail lives.
+- **Cite `docs/` (behavior, procedures) or a local skill (technical knowledge); never episodic memory.** Episodic memory ages by design: citing it injects stale data into the snapshot of the present.
+- **Never in memory:** credentials, tokens, or third-party personal data (customers, employees, suppliers). Memory is versioned and shared: name the system where they live, not the data itself.
+- **Verified by `node .agents/check-memory-contract.js`:** long entries without citations, citations to non-existent docs, and citations to episodic memory. It checks the **form**, not whether what is written is true.
 
-> **Single source of technical debt:** all technical debt detected during the session is recorded here, in the classified backlog of `active-tasks.md`. Never let debt scatter into unclassified issues or loose notes — this keeps clear visibility of what is urgent, important, and what can wait.
+## Phase 4: Documentation and Roadmap
 
-## Phase 5: Knowledge Routing (Continuous Learning)
+1. **`docs/` is the default destination for current behavior.** If what changed has its own doc (a feature, a procedure), update it to reflect what exists now.
+2. **The roadmap only changes if SCOPE changed** (something enters, leaves, or is reclassified). 🔴 **Execution progress does not belong in the roadmap:** it is read in every session (`start.md`), so anything added to it is paid for by all future sessions. Completing a task or closing a verification goes to `docs/` and `active-tasks.md`.
+3. **Consistency sweep** (mandatory if a value, limit, or name changed): search for the OLD value across `docs/` and semantic memory, and correct every occurrence. This also applies to what is **removed**: a deleted piece often survives in multiple documents that no one looked at again.
 
-If during the session you discovered a new pattern, a recurring bug solution, or an architectural improvement:
+## Phase 5: Continuous Learning (Skills)
 
-1. **Do NOT add it directly to `AGENTS.md`.** The root system prompt should remain lean and stable.
-2. **Identify the correct destination:** Determine whether the learning belongs to:
-   - A **semantic memory file** (`conventions.md`, `architecture.md`, `stack.md`, `business-rules.md`) — if it alters a global truth.
-   - A **skill file** (`.agents/skills/[name]/SKILL.md`) — if it is a reusable technique or domain-specific pattern.
-   - A **documentation file** (`docs/`) — if it is a product-level explanation or specification.
-3. **Route the knowledge** to the appropriate file. Only add to `AGENTS.md` if it constitutes a new universal rule or requires the creation of a new skill entry.
+A new pattern, a solution to a recurring problem, or a process improvement goes to the domain's `SKILL.md`, **not to `AGENTS.md`** (except for a new universal rule or registering a new skill). `AGENTS.md` is always loaded: everything added to it is paid for by every session.
 
-### External Skills Guard (Immutable)
+**External Skills Guard (immutable):** never modify skills registered in `skills-lock.json`; they are managed by an external CLI and any local edit will be lost.
 
-**NEVER modify** files inside skills registered in `skills-lock.json`. Those folders are managed by an external skill CLI (e.g., `npx skills update`) and any local edit will be lost on the next update.
+- Project-**specific knowledge** in an external skill's domain → write it in the closest **local** skill.
+- **Generic technology knowledge** → do not persist it: it will arrive with the official update.
 
-- **How to identify them:** read `skills-lock.json` at the project root. Each key under `"skills"` maps to a read-only folder in `.agents/skills/`.
-- **If the discovered knowledge belongs to an external skill's domain:**
-  1. **Project-specific** (e.g., "do not use provider X's auth because it collides with our setup"): write it into the closest **local** skill for that domain.
-  2. **Generic to the technology** (e.g., a well-known upstream bug): do not persist it — it will already be covered by the next official skill update.
+## Phase 6: Working Memory Flush (`active-tasks.md`)
 
-*Rationale: This prevents "system prompt bloat" — a gradual inflation of the root file that degrades token economy and dilutes the agent's core directives — while protecting externally-managed code from silent loss.*
+1. 🔴 **Delete what is COMPLETED; do not mark it as done.** This file answers "what is left?": a closed item has already migrated its knowledge to `docs/` and rules, and leaving it turns it into clutter that every session pays to read.
+   - **A ✅ in this file is a red flag**, unless it qualifies something still pending (e.g. "the form ✅ exists; publishing pending").
+   - **Before deleting, verify that its details live in `docs/`**; if not, move it first (Phase 4).
+2. **External states with date and verification environment.** Anything living outside the primary source (third-party configuration, a promised delivery, a scheduled payment) ages silently: record when and where it was verified. A scheduled date does not prove something occurred; upon expiring, mark it "verify" until evidence is obtained.
+3. **`[Watch]` items:** something not being worked on today but requiring monitoring, with its **trigger** to resume (a date, a threshold, an event). Without a trigger, it is noise.
+4. **Classify the backlog** by Priority (Eisenhower) + Effort (T-Shirt):
+   - `🚨 P1` Critical (important and urgent) · `🧭 P2` Strategic (important, not urgent) · `🧯 P3` Noise (urgent, not important) · `🗄️ P4` Archive (icebox).
+   - `[🟢 Snack]` < 1 h · `[🟡 Session]` 2-4 h · `[🔴 Epic]` > 1 day (split before starting) · `[Watch]` no intrinsic effort, requires trigger.
+5. Write the logical **next step**, prioritizing P1.
 
-## Phase 6: Planning & Feature-Docs Sync (Optional)
+**Style:** each item in 1-2 sentences; if it requires more, cite the doc. Exhaustive details live in the day's episodic record.
 
-If the project maintains a master roadmap, task board, or planning document (e.g., `docs/ROADMAP.md`, `docs/00-MASTER-ROADMAP.md`):
+> **Single source of pending tasks and debt:** everything pending is recorded here, classified — never scattered in loose notes.
 
-1. Review the planning document.
-2. If today's session completed a milestone, mark it as done.
-3. If the session revealed new steps, blockers, or architectural pivots, update the document accordingly.
-4. **The planning document, like semantic memory, must always reflect the current truth** — not a historical record.
+## Phase 7: Wrap-up with the user
 
-**Feature documentation (as-built):** If the files modified this session belong to a domain or feature that has dedicated documentation (e.g., `docs/features/*`), audit and update those documents so they reflect the final implementation. This prevents "as-built" documentation drift from accumulating across sessions.
-
-*Internal note for the LLM: Once these 6 phases have been executed and the corresponding files in the system have been modified, inform the user with a brief message that memory has been successfully consolidated and the session can be closed.*
+Report in a few lines that memory has been consolidated. If there are pending items whose completion **only a human can confirm** (a manual verification, a decision, something that happened outside the system), list them numbered and ask them to check off any that no longer apply: the primary source does not expose them, and without asking they survive indefinitely.

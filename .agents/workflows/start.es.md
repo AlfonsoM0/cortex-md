@@ -1,44 +1,53 @@
+---
+description: Inicio de sesión (Despertar)
+---
+
 # Workflow: Inicio de Sesión (Despertar Cognitivo)
 
-**Contexto del Sistema:** Eres un agente de IA operando en este repositorio. Acabas de iniciar una nueva sesión de trabajo y tu contexto actual está vacío. Para evitar alucinaciones, errores arquitectónicos y pérdida de continuidad, DEBES ejecutar los siguientes pasos de recuperación de memoria en el orden exacto antes de escribir código o responder al usuario.
+**Contexto del Sistema:** Iniciás una sesión nueva con el contexto vacío. Para no operar sobre suposiciones, ejecutá esta recuperación de memoria en orden **antes** de actuar o responder al usuario. Hacelo en silencio: respondé recién con el contexto restaurado.
 
-## Fase 1: Carga de Memoria Semántica (Estado Global)
+## Jerarquía de verdad (leela antes de cargar nada)
 
-Tu primera tarea es entender "dónde estás" y "cuáles son las reglas".
+1. **La fuente primaria** — lo que el sistema ES hoy: el código en un proyecto de software; el sistema de registro (planilla de stock, ERP, CRM, agenda, bandeja de entrada) en un proyecto administrativo. `stack.md` declara cuál es.
+2. **La memoria semántica** — la foto del presente que dejó la última consolidación.
+3. **La memoria episódica** — historia: explica **por qué** algo es como es y qué ya se intentó, nunca cómo está hoy.
 
-1. **Baseline obligatorio — LEE SIEMPRE estos dos archivos:**
-   - `.agents/memory/semantic/architecture.md` — Para entender la estructura del sistema.
-   - `.agents/memory/semantic/stack.md` — Para conocer las tecnologías en uso.
-2. **Carga selectiva — Lee estos si son relevantes para la tarea del usuario:**
-   - `.agents/memory/semantic/conventions.md` — Si vas a escribir o modificar código.
-   - `.agents/memory/semantic/business-rules.md` — Si la tarea involucra lógica de dominio o flujos de negocio.
-   - `.agents/memory/semantic/taxonomy.md` — Si necesitarás buscar o actualizar el timeline episódico.
-3. **Lee el archivo:** `.agents/memory/semantic/active-tasks.md`
-   - **Objetivo:** Cargar en tu memoria de trabajo las tareas que quedaron pendientes de la sesión anterior y el objetivo inmediato.
-4. **Opcional — brújula del proyecto:** Si el proyecto mantiene un roadmap maestro (ej. `docs/00-MASTER-ROADMAP.md`), leelo para entender la fase de desarrollo actual.
+Ante una discrepancia gana el nivel superior. 🔴 **La memoria envejece hacia el pesimismo:** declara pendiente lo que ya se hizo y cita nombres que cambiaron. Antes de declarar algo pendiente, bloqueado o inexistente, verificalo contra la fuente primaria.
 
-## Fase 2: Enrutamiento Hipocampal (Búsqueda de Contexto)
+## Fase 1: Memoria Semántica (nivel de carga fija)
 
-Analiza la solicitud inicial que te ha dado el usuario para esta sesión. Extrae mentalmente los dominios clave (ej. Autenticación, Base de Datos, Interfaz de Usuario, Pagos).
+**Leé SIEMPRE** — es lo que paga toda sesión, por eso tiene presupuesto de tamaño (`defrag.md § Fase 1`):
 
-1. **Lee el archivo:** `.agents/memory/episodic/timeline.md`
-   - **Objetivo:** Escanear el índice histórico buscando exclusivamente las etiquetas (`[Tags]`) que coincidan con los dominios de tu tarea actual.
-   - **Regla estricta:** No leas todo el historial, haz una búsqueda visual (*pattern matching*) de las etiquetas relevantes.
-   - **Regla de omisión:** Ignorá las entradas etiquetadas exclusivamente con `[CortexMD]` — son sesiones de mantenimiento de memoria y no contienen contexto relevante para el proyecto.
+1. `.agents/memory/semantic/architecture.md` — cómo está armado el sistema o la operación.
+2. `.agents/memory/semantic/stack.md` — herramientas, servicios y cuál es la fuente primaria.
+3. `.agents/memory/semantic/active-tasks.md` — qué está pendiente o en curso, y el próximo paso.
+4. El roadmap maestro, si existe (ej. `docs/00-MASTER-ROADMAP.md`) — alcance y fase actual.
 
-## Fase 3: Recuperación Episódica Selectiva (Deep Context)
+**Leé SOLO SI aplica a la tarea:**
 
-Si en la Fase 2 encontraste fechas en el `timeline.md` que contienen etiquetas relevantes para tu tarea actual:
+- `conventions.md` — vas a producir algo que respeta el estilo de la casa (código, documentos, mensajes).
+- `business-rules.md` — la tarea toca reglas del dominio.
+- `taxonomy.md` — vas a buscar en el timeline o agregarle una entrada.
 
-1. **Lee los registros diarios:** Abre los registros diarios específicos indicados por las fechas encontradas en `.agents/memory/episodic/YYYY/MM/DD.md`.
-   - **Objetivo:** Entender por qué se tomaron decisiones pasadas en ese módulo específico, qué errores se cometieron previamente, cómo se resolvieron y revisar los commits o código asociado.
-   - **Condición:** Si la tarea es completamente nueva y no hay etiquetas relevantes en el timeline, omite este paso para ahorrar tokens en tu ventana de contexto.
+🔴 **La memoria da la REGLA; el detalle vive en el doc que cada regla cita** (`→ docs/...`). Leela para saber **qué es cierto** y **dónde ampliar**, no esperando explicaciones completas. Los docs citados se abren **cuando la tarea los pide**, nunca en esta carga.
 
-## Fase 4: Confirmación y Ejecución
+## Fase 2: Enrutamiento Hipocampal
 
-Una vez completadas las fases anteriores, tu ventana de contexto está optimizada.
+Extraé los dominios de la solicitud (ej. Auth, DB, UI — o Stock, Proveedores, Clientes) y escaneá `.agents/memory/episodic/timeline.md` buscando `[Tags]` coincidentes.
 
-1. Responde al usuario con un mensaje breve confirmando que has cargado el contexto del proyecto y estás listo para comenzar con la tarea asignada.
-2. Inicia tu trabajo de análisis o codificación basado en la instrucción del usuario.
+- No leas todo el historial: buscá por patrón las etiquetas relevantes.
+- **Regla de omisión:** ignorá las entradas etiquetadas **solo** con `[CortexMD]` (mantenimiento de memoria, sin contexto del proyecto).
 
-*Nota interna para el LLM: Durante tu trabajo, mantén presente que al finalizar la sesión se te pedirá ejecutar `.agents/workflows/end.md` para consolidar lo que aprendas hoy.*
+## Fase 3: Recuperación Episódica Selectiva
+
+Si encontraste fechas con etiquetas relevantes, leé esos registros en `.agents/memory/episodic/YYYY/MM/`, incluidas las sesiones adicionales del día (`DD-s2.md`, `DD-s3.md`) cuando el índice las nombra. Tarea nueva sin etiquetas relevantes → saltá este paso.
+
+⚠️ **El episódico es historia:** sirve para entender decisiones y errores pasados, no para afirmar el estado actual. Si contradice a la semántica, gana la semántica; si contradice a la fuente primaria, gana la fuente primaria.
+
+## Fase 4: Mantenimiento y Confirmación
+
+1. **Sesiones sin consolidar:** si hubo trabajo después de la última entrada del timeline (con git: commits posteriores; sin git: archivos modificados después, fuera de `.agents/`), la sesión anterior se cerró sin `end.md`. Ofrecé registrarla con lo que muestran los cambios.
+2. **Chequeo semanal:** si corresponde según `AGENTS.md § Mantenimiento automático`, ejecutá `.agents/workflows/maintenance.md`. Si el usuario llegó con algo urgente, dejalo para el final de la sesión.
+3. Confirmale al usuario en una línea que cargaste el contexto — más, si hace falta, **una sola línea** de mantenimiento — y empezá la tarea.
+
+_Al terminar la sesión, sugerí ejecutar `.agents/workflows/end.md` para consolidar lo aprendido._

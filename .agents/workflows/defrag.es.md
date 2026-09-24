@@ -2,134 +2,136 @@
 description: Desfragmentación y Optimización de Memoria (Defrag)
 ---
 
-# Workflow: Desfragmentación y Optimización de Memoria (Defrag)
+# Workflow: Desfragmentación de Memoria (Defrag)
 
-**Contexto del Sistema:** Eres un agente de IA y el usuario ha solicitado una operación de mantenimiento profundo sobre el sistema de memoria Cortex-MD. A lo largo de múltiples sesiones, los archivos de memoria acumulan redundancias, ineficiencias de formato e inconsistencias entre archivos. Este workflow reestructura y comprime la memoria para un consumo óptimo por parte del LLM.
-
-**Crítico:** Esta es una operación avanzada que requiere capacidades de razonamiento fuertes. NO procedas sin confirmación explícita del usuario.
+**Contexto del Sistema:** Mantenimiento profundo de la memoria: eliminar redundancias, comprimir formato, corregir inconsistencias entre archivos y — lo más valioso — **comprobar que lo escrito siga siendo cierto**. Es una operación avanzada: requiere un modelo de razonamiento fuerte y la confirmación del usuario. Se ejecuta a pedido o cuando el chequeo semanal (`maintenance.md`) lo recomienda.
 
 ## Fase 0: Puerta de Seguridad
 
-Antes de comenzar, debés asegurarte de que las condiciones son correctas para esta operación.
+Revisá qué cambió desde la última consolidación (con git: `git status`) y mostrá esta advertencia; **esperá una confirmación explícita del usuario**:
 
-1. **Mostrá esta advertencia al usuario:**
+> ⚠️ **Optimización de la memoria** — voy a revisar a fondo y reordenar la memoria del proyecto (y los documentos relacionados), guardando antes una copia para poder deshacerlo. Conviene hacerlo con el modelo más capaz que tengas. ¿Procedo?
 
-> ⚠️ **Desfragmentación de Memoria**
->
-> Este workflow ejecuta una auditoría profunda y reestructuración de todos los archivos de memoria de Cortex-MD. Requiere un LLM con fuertes capacidades de razonamiento y análisis para ejecutarse correctamente.
->
-> **Antes de continuar, confirmá:**
->
-> - Estás usando tu modelo de razonamiento de mayor capacidad.
-> - No tenés trabajo sin guardar (esto modifica archivos en `.agents/memory/`).
->
-> Respondé **"Proceder"** para continuar.
+🔴 **El defrag tiene que poder deshacerse:**
 
-2. **Esperá la confirmación explícita del usuario.** No procedas hasta que confirme.
+- **Con git:** si hay cambios sin commitear, ofrecé commitearlos ANTES de proceder. Sin un commit previo, deshacer el defrag también se lleva el trabajo de la sesión.
+- **Sin git (una carpeta común):** copiá `.agents/memory/` y los documentos de `docs/` que vas a tocar a `.agents/backups/AAAA-MM-DD/` antes de reescribir. Conservá las 3 copias más recientes y decile al usuario dónde quedó la de hoy.
 
-## Fase 1: Inventario Completo de Memoria
+## Fase 1: Inventario
 
-Leé cada archivo del sistema de memoria para construir una imagen completa antes de hacer cualquier cambio.
+Leé TODO antes de cambiar nada, para detectar degradación entre archivos a la vez:
 
-1. **Leé TODOS los archivos de memoria semántica:**
-   - `.agents/memory/semantic/architecture.md`
-   - `.agents/memory/semantic/stack.md`
-   - `.agents/memory/semantic/conventions.md`
-   - `.agents/memory/semantic/business-rules.md`
-   - `.agents/memory/semantic/active-tasks.md`
-   - `.agents/memory/semantic/taxonomy.md`
-2. **Leé el índice episódico:** `.agents/memory/episodic/timeline.md`
-3. **Leé los 3 registros episódicos más recientes** (archivos diarios) referenciados en el timeline.
-4. **Leé el roadmap (si existe):** ej. `docs/00-MASTER-ROADMAP.md` — para validar la alineación entre las tareas activas y el estado real del proyecto.
+0. Registrá el tamaño de cada archivo y la **carga fija** (`node .agents/check-memory-contract.js` la reporta en bytes y tokens estimados). Leé en bloques que no trunquen la salida: una lectura truncada no completa el inventario.
+1. Los 6 archivos de `.agents/memory/semantic/`.
+2. `.agents/memory/episodic/timeline.md` y los **3 registros más recientes**, incluidos los `DD-sN.md` (ordená por fecha y número de sesión, no alfabéticamente).
+3. El roadmap maestro, si existe.
 
-_Objetivo: Cargar el estado completo de la memoria para detectar patrones de degradación a través de todos los archivos simultáneamente._
+**Presupuesto de la carga fija:** lo que `start.md` lee siempre lo paga cada sesión. Si crece más allá de lo razonable para el proyecto, el defrag propone qué pasa a lectura bajo demanda (a `docs/`, con la regla y la cita en la memoria).
 
 ## Fase 2: Auditoría Semántica y Compresión
 
-Para **cada** archivo de memoria semántica, evaluá y reescribí aplicando estos principios de optimización:
+### 2.1 Eliminar
 
-### 2.1 Detectar y Eliminar
+- **Redundancias** dentro de un archivo o entre archivos.
+- **Temporalidad disfrazada de estado** ("recientemente migramos a…") → presente absoluto.
+- **Implementación demasiado específica:** el paso a paso concreto va a una skill o al episódico. Una convención es una regla; una llamada a función o un clic en un menú es una implementación.
+- **Referencias muertas:** archivos, módulos, herramientas o proveedores que ya no existen.
+- **Argumentación y ejemplos duplicados de la doc.** Si el detalle existe en `docs/`, la entrada queda como **regla + cita**; si no existe, movelo al doc canónico (creándolo o extendiéndolo) y recién entonces comprimí. **Nunca borres un detalle que no viva en otro lado.** La historia del descubrimiento va al episódico del día, no a la doc.
+- **Citas al episódico desde la memoria semántica o desde `docs/`:** hallazgo a corregir siempre. Reemplazalas por el doc canónico.
+- **Datos sensibles** (credenciales, datos personales de terceros): se eliminan de la memoria y se nombra el sistema donde viven.
 
-- **Información redundante:** Reglas, hechos o patrones que aparecen en más de un archivo o más de una vez dentro del mismo archivo.
-- **Información temporal disfrazada de estado:** Frases como "Recientemente migramos a..." o "En la última sesión..." — la memoria semántica no tiene dimensión temporal. Reescribí en tiempo presente absoluto.
-- **Detalles de implementación demasiado específicos:** Patrones de código concretos que pertenecen a un archivo de skill o registro episódico, no al estado global. Una convención es una regla; una llamada a función específica es una implementación.
-- **Referencias muertas:** Menciones a archivos, módulos o tecnologías que ya no existen en el proyecto.
+### 2.2 Comprimir formato
 
-### 2.2 Comprimir Formato
+- Listas densas sobre prosa; tablas de 2 columnas → lista de definición.
+- Sin relleno ("es importante notar que…"); voz imperativa; encabezados hasta H3.
+- **Anatomía objetivo** (misma de `end.md § Fase 3`): regla en imperativo + a lo sumo una frase de razón + cita a `docs/`, ≤ ~400 caracteres.
 
-Reescribí cada archivo aplicando estas reglas de formato para un consumo óptimo de tokens por el LLM:
+### 2.3 Enrutar conocimiento a Skills
 
-- **Preferí listas densas sobre prosa.** Reemplazá párrafos narrativos con listas `clave: valor` estructuradas o viñetas compactas.
-- **Minimizá el padding de tablas.** Si una tabla tiene solo 2 columnas, considerá convertirla a lista de definición (`- **Término:** Definición`).
-- **Eliminá palabras de relleno.** Remové frases como "Es importante notar que", "Como se mencionó arriba", "Asegurate de que". Sé directo.
-- **Usá voz imperativa.** "Usar X" en vez de "Se debería considerar usar X cuando sea apropiado".
-- **Mantené headers poco profundos.** Evitá anidar más allá de H3 (`###`). Aplaná jerarquías profundas.
+Lo que pertenece a una skill se mueve a su `SKILL.md` local, dejando a lo sumo una referencia. **Guarda de Skills Externas:** si la skill figura en `skills-lock.json`, no la modifiques — usá la skill local más cercana.
 
-### 2.3 Enrutamiento de Conocimiento
+### 2.4 Reescribir
 
-Si durante la auditoría detectás información que pertenece a una skill:
+Cada archivo reescrito es completo y autocontenido (no un diff), de tamaño ≤ al original y semánticamente equivalente.
 
-1. Identificá qué skill de `.agents/skills/` debería contenerla.
-2. **Guarda de Skills Externas:** verificá `skills-lock.json`. Si la skill destino está registrada ahí, **no la modifiques** — redirigí el conocimiento a la skill local más cercana.
-3. Movéla al `SKILL.md` correspondiente (solo si es local). En el archivo semántico, dejá una referencia compacta si hace falta.
+### 2.5 Verificar el contrato (bloqueante)
 
-### 2.4 Reescritura
-
-Tras el análisis, **reescribí cada archivo semántico** aplicando los principios anteriores. El resultado debe ser:
-
-- Un documento completo y autocontenido (no un diff o parche).
-- Más corto o igual al original en conteo de caracteres.
-- Semánticamente equivalente — sin pérdida de información, solo optimización de formato y deduplicación.
+Corré `node .agents/check-memory-contract.js`. Objetivo: **cero hallazgos**. Cada hallazgo se corrige moviendo el detalle al doc y dejando regla + cita; no se silencia. ⚠️ Mide la **forma**, no la verdad: una entrada corta que miente pasa en verde. Eso lo cubre la Fase 4.6.
 
 ## Fase 3: Optimización Episódica
 
-1. **Auditoría del timeline:**
-   - Verificá el límite de 50 sesiones. Eliminá las entradas más antiguas si se excede.
-   - Señalá entradas con 5+ etiquetas — indican pobre granularidad de sesión. No las modifiques, pero anotálas en el reporte final.
-   - Asegurate de que las entradas usen exclusivamente etiquetas de `taxonomy.md`.
-2. **Verificación del límite episódico-semántico:**
-   - Si un registro episódico (archivo diario) contiene información que también fue promovida a memoria semántica, eso es correcto y esperado — los registros episódicos son logs inmutables.
-   - Si la memoria semántica contiene información que parece una entrada episódica (fechas específicas, referencias a sesiones, "hoy hicimos X"), extraéla de vuelta a su archivo episódico correspondiente o eliminála.
+1. **Timeline:** máximo 50 sesiones; cada entrada de **una línea (~200 caracteres)** — si creció a párrafo, verificá que el detalle esté en el día y comprimila; solo etiquetas de `taxonomy.md`; entradas con 5+ etiquetas se **señalan** en el reporte (sesiones poco granulares), sin modificarlas.
+2. **Límite episódico ↔ semántico:** lo episódico infiltrado en la semántica (fechas de sesión, "hoy hicimos X") vuelve a su día o se elimina. Que un día contenga algo ya promovido a la semántica es correcto: el episódico es un registro inmutable.
 
-## Fase 4: Validación Cruzada entre Archivos
+## Fase 4: Validación Cruzada
 
-Verificá la consistencia a través de los archivos de memoria semántica:
+- `architecture` ↔ `stack`: cada herramienta reflejada en la estructura y viceversa.
+- `conventions` ↔ `architecture`: sin contradicciones.
+- `business-rules` ↔ `architecture`: entidades del dominio alineadas a la estructura.
+- `taxonomy` ↔ `timeline`: toda etiqueta en uso existe en la taxonomía.
+- `active-tasks` ↔ roadmap: la tarea actual es coherente con la fase.
 
-1. **`architecture.md` ↔ `stack.md`:** Cada tecnología en `stack.md` debería estar reflejada arquitectónicamente. Cada módulo arquitectónico debería usar tecnologías listadas en `stack.md`.
-2. **`conventions.md` ↔ `architecture.md`:** Las convenciones de código no deberían contradecir decisiones arquitectónicas.
-3. **`business-rules.md` ↔ `architecture.md`:** Las entidades de dominio de negocio deberían alinearse con la estructura de módulos.
-4. **`taxonomy.md` ↔ `timeline.md`:** Todas las etiquetas en uso en el timeline deben existir en la taxonomía.
-5. **`active-tasks.md` ↔ roadmap (si existe):** La tarea actual debería ser coherente con la fase del roadmap.
+**Contradicción →** decidí con la jerarquía de verdad (`start.md`): primero la fuente primaria y las instrucciones vigentes del usuario; la fecha de consolidación solo desempata entre memorias con igual respaldo. No conviertas un comportamiento defectuoso en política ni una fecha programada en un hecho confirmado.
 
-Si se encuentran contradicciones, resolverlas tratando el **archivo semántico consolidado más recientemente** como fuente de verdad, y luego actualizar el archivo desactualizado.
+## Fase 4.5: Sistema de Conocimiento (Skills y Workflows)
 
-## Fase 5: Optimización de Documentación de Features (Opcional)
+1. **Router de skills:** cada skill listada en `AGENTS.md` existe como carpeta y viceversa, y su descripción refleja el `SKILL.md` real. Las descripciones viven **solo** en el router; la memoria no las repite.
+2. **Integridad de rutas:** las rutas a `.agents/` y `docs/` citadas desde workflows y `AGENTS.md` existen. Excluí los `SKILL.md` de este barrido: sus rutas son relativas a la carpeta de la skill.
+3. **Workflow ↔ skill:** un workflow instruye un proceso; una skill contiene conocimiento. Conocimiento denso acumulado en un workflow → a la skill, con un puntero.
+4. **Actualizar skills externas sin perder archivos propios** (si el proyecto usa un CLI de skills):
+   - Inspeccioná primero qué borra o sobrescribe el comando de actualización. Si toca carpetas con archivos propios (skills locales, notas locales dentro de skills externas), **ejecutalo en una copia aislada** y trasladá solo los cambios revisados de las skills externas y su lock.
+   - Revisá el diff real, no solo el hash del lock; separá lo sustantivo del formato. Si cambió la descripción de una skill, actualizá el router.
+   - Sin red o sin permisos: informá la actualización como pendiente y completá las fases locales.
+5. **Mejoras de proceso:** corregí contradicciones y rutas muertas en workflows y skills locales. No cambies permisos, decisiones del usuario ni dependencias por preferencia editorial.
 
-Si el proyecto mantiene documentación detallada de features (ej. `docs/features/*`):
+## Fase 4.6: La memoria contra la FUENTE PRIMARIA (lo que ningún script puede hacer)
 
-1. **Inventariá los docs de features.**
-2. **Auditá y comprimí** aplicando los mismos principios de la Fase 2 (eliminar redundancia, optimizar tokens).
-3. **Consistencia cruzada:** asegurate de que la arquitectura, flujos y decisiones descritas ahí no contradigan la "verdad absoluta" consolidada en la memoria semántica (`architecture.md`, `business-rules.md`).
+Los chequeos anteriores son internos (rutas que existen, etiquetas válidas, sin contradicciones): **pasan en verde mientras la memoria describe un sistema que ya no existe.**
 
-## Fase 6: Limpieza de Entorno (Opcional)
+Tomá las afirmaciones **verificables** de la memoria semántica — nombres, límites, valores, "único punto de X", proveedores, plazos — y contrastalas con la fuente primaria (buscar en el código; consultar el sistema de registro). Registrá afirmación, evidencia y corrección. Separá lo verificado en la fuente, lo que depende de un entorno o sistema externo, y lo que no pudiste verificar: esto último queda **fechado**, nunca declarado vigente por inferencia.
 
-Dado que este workflow se ejecuta periódicamente, es un buen momento para purgar cachés pesadas de build/tooling que se acumulan con el tiempo.
+- 🔴 **El desvío tiene dirección conocida: es PESIMISTA.** La memoria envejece declarando pendiente lo ya hecho, y eso hace rehacer trabajo que existe.
+- 🔴 **Exige criterio, no un script:** una memoria bien escrita nombra lo que NO existe (deudas, antipatrones), así que "ausente de la fuente" y "correctamente documentado como ausente" solo se distinguen leyendo la frase.
+- **Priorizá lo que costaría caro creer:** un "único punto de cálculo" que ya tiene dos, un límite que cambió de valor, un proveedor reemplazado. Un hallazgo acá vale más que diez de formato.
+- **`active-tasks.md` también se contrasta:** cada pendiente se busca en la fuente. Lo que la fuente no puede confirmar (una verificación manual, algo ocurrido fuera del sistema) se lista para que el usuario decida (Fase 7).
 
-1. **Purgar cachés de build:** Ejecutá el comando de limpieza de caché de tu toolchain (ej. la tarea `clean` de tu build tool) para liberar espacio acumulado. Adaptá el comando a tu stack.
-2. **Recordatorio de almacenamiento:** Si desarrollás dentro de un filesystem virtualizado (ej. WSL2), agregá al reporte final un recordatorio de que recuperar espacio en disco puede requerir compactar la imagen de disco virtual a nivel del SO.
+## Fase 5: Documentación
 
-> Omití esta fase por completo si tu proyecto no tiene cachés de build pesadas.
+1. Auditá `docs/` con los principios de la Fase 2.
+2. Nada contradice la verdad consolidada en la memoria.
+3. 🔴 **Cazá desvío de ESTADO, no solo de forma:** afirmaciones que el tiempo volvió falsas, sobre todo las que **prometen una acción futura** ("antes del lanzamiento", "cuando tengamos clientes", "todavía en modo prueba", "hay que hacerlo antes de…"). Armá un patrón de búsqueda con las frases de tu proyecto; los patrones amplios ("pendiente", "todavía no") solo devuelven ruido y se dejan de correr.
+   - **Priorizá la dirección CARA:** un doc que **subestima el riesgo** (dice "entorno de prueba" donde ya hay datos o dinero reales) daña mucho más que uno simplemente viejo.
+   - La búsqueda propone; **el veredicto lo das vos**, sabiendo el estado real.
+4. Un doc archivado que ya no representa nada vigente y cuyo valor histórico está cubierto → proponé su eliminación al usuario.
+5. **¿El brief sigue vigente?** Si `docs/00-PROJECT-BRIEF.md` tiene objetivos ya cumplidos o vencidos, o más de seis meses sin revisión, proponé una **re-alineación** (`references/alignment-interview.md`).
 
-## Fase 7: Reporte de Desfragmentación
+## Fase 6: Higiene y Entorno
 
-Presentá un resumen al usuario cubriendo:
+1. **Datos sensibles:** con git, cada carpeta con credenciales, sesiones o datos personales tiene que estar ignorada y sin archivos versionados — algo versionado es un hallazgo **crítico**. Sin git, igual: si la carpeta se sincroniza con la nube o se comparte, la memoria no contiene datos sensibles.
+2. **Cachés (opcional):** si el proyecto acumula cachés pesadas, purgalas con el comando de tu herramienta — verificando antes qué borra (algunas tareas `clean` también borran dependencias).
+3. Si trabajás en un disco virtual (ej. WSL2), recordá en el reporte que recuperar espacio puede requerir compactar la imagen desde el sistema anfitrión.
 
-1. **Archivos modificados:** Listá cada archivo semántico que fue reescrito, con una descripción de una línea de qué cambió.
-2. **Redundancias eliminadas:** Ejemplos concretos de información duplicada o mal ubicada que fue limpiada.
-3. **Conocimiento enrutado:** Si se movió información a skills, indicá qué se movió y a dónde.
-4. **Problemas entre archivos encontrados:** Contradicciones o desalineaciones que fueron corregidas.
-5. **Observaciones episódicas:** Salud del timeline, problemas de distribución de etiquetas.
-6. **Entorno y Sistema:** Confirmá cualquier limpieza de caché realizada y dejá el recordatorio de compactación de almacenamiento si aplica.
-7. **Recomendación:** Sugerí cuándo debería ejecutarse el próximo defrag (ej. "después de 15-20 sesiones más" o "cuando los archivos semánticos superen N líneas").
+## Fase 7: Reporte
 
-_Nota interna para el LLM: Este workflow es idempotente — ejecutarlo dos veces seguidas no debería producir más cambios. Si la memoria ya está optimizada, informálo al usuario y omití reescrituras innecesarias._
+Resumí al usuario:
+
+- Archivos reescritos (una línea cada uno) y **tamaño de la carga fija antes → después**.
+- Redundancias eliminadas y entradas comprimidas a regla + cita (con el doc de destino), y el resultado del verificador.
+- **Afirmaciones que la fuente primaria desmintió (Fase 4.6)** — lo más importante del reporte.
+- Desvío de estado corregido en `docs/`, marcando el que subestimaba riesgo.
+- Router, rutas muertas y skills actualizadas; salud del timeline y distribución de etiquetas; higiene.
+- **Pendientes que solo el usuario puede confirmar**, numerados, para que marque los que ya no aplican.
+- Próximo defrag sugerido (ej. tras 15-20 sesiones).
+
+🔴 **Separá lo COSMÉTICO de lo sustantivo.** Un recuento de archivos tocados no dice cuánto cambió el conocimiento, y un número inflado por reformateos hace desconfiar de todo el trabajo.
+
+## Fase 8: Revisión independiente
+
+Si hay otro agente o modelo disponible, pedile que revise los cambios del defrag antes de darlo por cerrado (con git, el diff antes de commitear): que verifique que cada cita apunte a la **sección** que trata el tema y que cada corrección tenga evidencia en la fuente. El verificador solo confirma que el archivo citado existe. Sin revisor, hacé vos una segunda pasada con ese foco.
+
+## Fase 9: Registro
+
+- Entrada en el timeline etiquetada **solo** `[CortexMD]` (así el enrutamiento la omite).
+- En `.agents/memory/maintenance-log.md`: fecha del último defrag, carga fija resultante en tokens, y posposiciones en cero.
+
+_Idempotente: ejecutarlo dos veces seguidas no debería producir más cambios. Si la memoria ya está óptima, informalo y omití reescrituras innecesarias._

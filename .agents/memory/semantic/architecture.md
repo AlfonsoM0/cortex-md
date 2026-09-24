@@ -1,8 +1,10 @@
 # System Architecture
 
+> **Contract:** each entry is a rule in imperative mood + at most one sentence of rationale + citation to canonical doc (`→ docs/...`), ≤ ~400 characters. Details live in `docs/`; history lives in episodic memory. Checker: `node .agents/check-memory-contract.js`.
+
 ## Overview
 
-*Describe in 2-3 lines what type of system this is (monolith, microservices, monorepo, etc.) and the main data flow.*
+*Describe in 2-3 lines what type of system this is (monolith, monorepo… or, in an administrative operation, what areas and systems comprise it) and the main flow (data, or workflow: order → receipt → payment).*
 
 ## Module Structure
 

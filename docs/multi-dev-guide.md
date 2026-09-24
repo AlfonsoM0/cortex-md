@@ -47,26 +47,13 @@ Clone both repositories in the same parent directory so they are siblings:
 
 Since Cortex-MD is powered by plain Markdown files, you can adapt it to this distributed setup by simply modifying the paths in your core workflows.
 
-In your main project repo, open `.agents/workflows/start.md` and `.agents/workflows/end.md`, and change the paths pointing to the episodic memory to use relative paths pointing to your sibling personal memory repo.
+In your main repository, open `.agents/workflows/start.md`, `end.md`, and `defrag.md` and replace **all** episodic memory paths with the relative path to your personal memory repository:
 
-### Example: Modifying `start.md`
+```text
+.agents/memory/episodic/   →   ../cortex-md-{project-name}/episodic/
+```
 
-Change this line:
-`1. **Read the file:** .agents/memory/episodic/timeline.md`
-To:
-`1. **Read the file:** ../cortex-md-{project-name}/episodic/timeline.md`
-
-### Example: Modifying `end.md`
-
-Change the file creation path:
-`2. Create or update the file: .agents/memory/episodic/YYYY/MM/DD.md`
-To:
-`2. Create or update the file: ../cortex-md-{project-name}/episodic/YYYY/MM/DD.md`
-
-Change the index update path:
-`2. **Read the file:** .agents/memory/episodic/timeline.md`
-To:
-`2. **Read the file:** ../cortex-md-{project-name}/episodic/timeline.md`
+This affects the index (`timeline.md`) and daily logs (`YYYY/MM/DD.md` and `DD-sN.md`). Search for them using `grep -n "memory/episodic" .agents/workflows/*.md` and verify that none remain: an overlooked path will cause the agent to write episodic logs into the shared repository.
 
 ---
 

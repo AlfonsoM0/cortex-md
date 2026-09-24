@@ -47,26 +47,13 @@ Clona ambos repositorios en el mismo directorio padre para que sean hermanos:
 
 Dado que Cortex-MD funciona con simples archivos Markdown, puedes adaptarlo a esta configuración distribuida simplemente modificando las rutas en tus workflows core.
 
-En tu repositorio principal del proyecto, abre `.agents/workflows/start.es.md` y `.agents/workflows/end.es.md`, y cambia las rutas que apuntan a la memoria episódica para usar rutas relativas que apunten a tu repositorio de memoria personal hermano.
+En tu repositorio principal, abrí `.agents/workflows/start.md`, `end.md` y `defrag.md` y reemplazá **todas** las rutas de la memoria episódica por la ruta relativa al repositorio de memoria personal:
 
-### Ejemplo: Modificando `start.es.md`
+```text
+.agents/memory/episodic/   →   ../cortex-md-{nombre-proyecto}/episodic/
+```
 
-Cambia esta línea:
-`1. **Lee el archivo:** .agents/memory/episodic/timeline.md`
-Por:
-`1. **Lee el archivo:** ../cortex-md-{nombre-proyecto}/episodic/timeline.md`
-
-### Ejemplo: Modificando `end.es.md`
-
-Cambia la ruta de creación de archivo:
-`2. Crea o actualiza el archivo: .agents/memory/episodic/YYYY/MM/DD.md`
-Por:
-`2. Crea o actualiza el archivo: ../cortex-md-{nombre-proyecto}/episodic/YYYY/MM/DD.md`
-
-Cambia la ruta de actualización del índice:
-`2. **Lee el archivo:** .agents/memory/episodic/timeline.md`
-Por:
-`2. **Lee el archivo:** ../cortex-md-{nombre-proyecto}/episodic/timeline.md`
+Afecta al índice (`timeline.md`) y a los registros diarios (`YYYY/MM/DD.md` y `DD-sN.md`). Buscalas con `grep -n "memory/episodic" .agents/workflows/*.md` y verificá que no quede ninguna: una ruta olvidada hace que el agente escriba el episódico en el repositorio compartido.
 
 ---
 

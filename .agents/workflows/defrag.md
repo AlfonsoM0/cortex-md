@@ -2,134 +2,136 @@
 description: Memory Defragmentation & Optimization (Defrag)
 ---
 
-# Workflow: Memory Defragmentation & Optimization (Defrag)
+# Workflow: Memory Defragmentation (Defrag)
 
-**System Context:** You are an AI agent and the user has requested a deep maintenance operation on the Cortex-MD memory system. Over multiple sessions, memory files accumulate redundancies, format inefficiencies, and cross-file inconsistencies. This workflow restructures and compresses the memory for optimal LLM consumption.
-
-**Critical:** This is an advanced operation that requires strong reasoning capabilities. Do NOT proceed without explicit user confirmation.
+**System Context:** Deep memory maintenance: eliminate redundancies, compress formatting, fix cross-file inconsistencies, and — most importantly — **verify that what is written remains true**. This is an advanced operation: it requires a high-reasoning model and explicit user confirmation. It is executed on demand or when the weekly check (`maintenance.md`) recommends it.
 
 ## Phase 0: Safety Gate
 
-Before starting, you must ensure conditions are right for this operation.
+Review what changed since the last consolidation (with git: `git status`) and display this warning; **wait for explicit user confirmation**:
 
-1. **Display this warning to the user:**
+> ⚠️ **Memory optimization** — I will thoroughly review and organize the project memory (and related documents), saving a backup beforehand so it can be undone. It is best done with the most capable model you have. Shall I proceed?
 
-> ⚠️ **Memory Defragmentation**
->
-> This workflow performs a deep audit and restructuring of all Cortex-MD memory files. It requires an LLM with strong reasoning and analytical capabilities to execute correctly.
->
-> **Before proceeding, confirm:**
->
-> - You are using your highest-capability reasoning model.
-> - You have no unsaved work (this modifies `.agents/memory/` files).
->
-> Reply **"Proceed"** to continue.
+🔴 **Defrag must be reversible:**
 
-2. **Wait for the user's explicit confirmation.** Do not proceed until they confirm.
+- **With git:** if there are uncommitted changes, offer to commit them BEFORE proceeding. Without a prior commit, undoing the defrag also wipes the session's work.
+- **Without git (a plain folder):** copy `.agents/memory/` and the documents in `docs/` you will touch to `.agents/backups/YYYY-MM-DD/` before rewriting. Keep the 3 most recent backups and tell the user where today's backup was saved.
 
-## Phase 1: Full Memory Inventory
+## Phase 1: Inventory
 
-Read every file in the memory system to build a complete picture before making any changes.
+Read EVERYTHING before modifying anything, to detect cross-file degradation all at once:
 
-1. **Read ALL semantic memory files:**
-   - `.agents/memory/semantic/architecture.md`
-   - `.agents/memory/semantic/stack.md`
-   - `.agents/memory/semantic/conventions.md`
-   - `.agents/memory/semantic/business-rules.md`
-   - `.agents/memory/semantic/active-tasks.md`
-   - `.agents/memory/semantic/taxonomy.md`
-2. **Read the episodic index:** `.agents/memory/episodic/timeline.md`
-3. **Read the 3 most recent episodic records** (daily files) referenced in the timeline.
-4. **Read the roadmap (if any):** e.g., `docs/00-MASTER-ROADMAP.md` — to validate alignment between active tasks and the real project state.
+0. Record the size of each file and the **always-loaded tier** (`node .agents/check-memory-contract.js` reports this in bytes and estimated tokens). Read in chunks that do not truncate output: truncated reading fails to complete the inventory.
+1. The 6 files in `.agents/memory/semantic/`.
+2. `.agents/memory/episodic/timeline.md` and the **3 most recent records**, including any `DD-sN.md` (sort by date and session number, not alphabetically).
+3. The master roadmap, if one exists.
 
-_Objective: Load the entire memory state to detect patterns of degradation across all files simultaneously._
+**Budget for the always-loaded tier:** whatever `start.md` reads is paid for by every session. If it grows beyond what is reasonable for the project, defrag proposes what to move to on-demand reading (to `docs/`, leaving only the rule and citation in memory).
 
-## Phase 2: Semantic Audit & Compression
+## Phase 2: Semantic Audit and Compression
 
-For **each** semantic memory file, evaluate and rewrite applying these optimization principles:
+### 2.1 Eliminate
 
-### 2.1 Detect and Remove
+- **Redundancies** within a file or across files.
+- **Temporality disguised as state** ("we recently migrated to…") → absolute present tense.
+- **Overly specific implementation details:** concrete step-by-step instructions belong in a skill or in episodic memory. A convention is a rule; a function call or a menu click is an implementation detail.
+- **Dead references:** files, modules, tools, or suppliers that no longer exist.
+- **Arguments and examples duplicated from docs.** If the detail exists in `docs/`, the entry becomes **rule + citation**; if it does not exist, move it to the canonical doc (creating or expanding it) and only then compress. **Never delete a detail that does not live elsewhere.** The discovery story belongs in that day's episodic record, not in docs.
+- **Citations to episodic memory from semantic memory or from `docs/`:** always a defect to fix. Replace them with citations to the canonical doc.
+- **Sensitive data** (credentials, third-party personal data): remove from memory and name the system where they live.
 
-- **Redundant information:** Rules, facts, or patterns that appear in more than one file or more than once within the same file.
-- **Temporal information disguised as state:** Sentences like "We recently migrated to..." or "As of the last session..." — semantic memory has no time dimension. Rewrite as absolute present tense.
-- **Over-specific implementation details:** Concrete code patterns that belong in a skill file or episodic record, not in global state. A convention is a rule; a specific function call is an implementation.
-- **Dead references:** Mentions of files, modules, or technologies that no longer exist in the project.
+### 2.2 Compress formatting
 
-### 2.2 Compress Format
+- Dense lists over prose; 2-column tables → definition lists.
+- No filler words ("it is important to note that…"); imperative voice; headings up to H3.
+- **Target anatomy** (same as `end.md § Phase 3`): rule in imperative mood + at most one sentence of rationale + citation to `docs/`, ≤ ~400 characters.
 
-Rewrite each file applying these formatting rules for optimal LLM token consumption:
+### 2.3 Route knowledge to Skills
 
-- **Prefer dense lists over prose.** Replace narrative paragraphs with structured `key: value` lists or compact bullet points.
-- **Minimize table padding.** If a table has only 2 columns, consider converting to a definition list (`- **Term:** Definition`).
-- **Eliminate filler words.** Remove phrases like "It is important to note that", "As mentioned above", "Please ensure that". Be direct.
-- **Use imperative voice.** "Use X" instead of "You should consider using X when appropriate".
-- **Keep headers shallow.** Avoid nesting beyond H3 (`###`). Flatten deep hierarchies.
-
-### 2.3 Knowledge Routing
-
-If during the audit you detect information that belongs in a skill:
-
-1. Identify which skill in `.agents/skills/` should contain it.
-2. **External Skills Guard:** check `skills-lock.json`. If the destination skill is registered there, **do not modify it** — redirect the knowledge to the closest local skill instead.
-3. Move it to the corresponding `SKILL.md` (only if local). In the semantic file, leave a compact reference if needed.
+Whatever belongs in a skill moves to its local `SKILL.md`, leaving at most a reference. **External Skills Guard:** if the skill appears in `skills-lock.json`, do not modify it — use the closest local skill.
 
 ### 2.4 Rewrite
 
-After analysis, **rewrite each semantic file** applying the above principles. The result must be:
+Each rewritten file is complete and self-contained (not a diff), with size ≤ original and semantically equivalent.
 
-- A complete, self-contained document (not a diff or patch).
-- Shorter than or equal to the original in raw character count.
-- Semantically equivalent — no information loss, only format optimization and deduplication.
+### 2.5 Verify contract (blocking)
+
+Run `node .agents/check-memory-contract.js`. Target: **zero findings**. Each finding is resolved by moving details to the doc and leaving rule + citation; do not suppress warnings. ⚠️ It checks **form**, not truth: a short entry containing false statements passes in green. That is covered in Phase 4.6.
 
 ## Phase 3: Episodic Optimization
 
-1. **Timeline audit:**
-   - Verify the 50-session limit. Remove oldest entries if exceeded.
-   - Flag entries with 5+ tags — these indicate poor session granularity. Do not modify them, but note them in the final report.
-   - Ensure entries use strict tags from `taxonomy.md` only.
-2. **Episodic-semantic boundary check:**
-   - If any episodic record (daily file) contains information that was also promoted to semantic memory, that is correct and expected — episodic records are immutable logs.
-   - If semantic memory contains information that reads like an episodic entry (specific dates, session references, "today we did X"), extract it back to its proper episodic file or remove it.
+1. **Timeline:** maximum 50 sessions; each entry **one line (~200 characters)** — if it grew into a paragraph, verify the details exist in the daily file and compress it; strict tags from `taxonomy.md` only; entries with 5+ tags are **flagged** in the report (poorly granular sessions), without modifying them.
+2. **Episodic ↔ semantic boundary:** episodic details infiltrating semantic memory (session dates, "today we did X") return to their day or are deleted. An episodic daily record containing something already promoted to semantic memory is correct: episodic memory is an immutable log.
 
-## Phase 4: Cross-File Validation
+## Phase 4: Cross-Validation
 
-Verify consistency across the semantic memory files:
+- `architecture` ↔ `stack`: every tool is reflected in the architecture and vice versa.
+- `conventions` ↔ `architecture`: no contradictions.
+- `business-rules` ↔ `architecture`: domain entities aligned with system structure.
+- `taxonomy` ↔ `timeline`: every tag in use exists in taxonomy.
+- `active-tasks` ↔ roadmap: current task aligns with phase.
 
-1. **`architecture.md` ↔ `stack.md`:** Every technology in `stack.md` should be architecturally reflected. Every architectural module should use technologies listed in `stack.md`.
-2. **`conventions.md` ↔ `architecture.md`:** Coding conventions should not contradict architectural decisions.
-3. **`business-rules.md` ↔ `architecture.md`:** Business domain entities should align with the module structure.
-4. **`taxonomy.md` ↔ `timeline.md`:** All tags in use in the timeline must exist in the taxonomy.
-5. **`active-tasks.md` ↔ roadmap (if any):** The current task should be coherent with the roadmap phase.
+**Contradiction →** resolve using the truth hierarchy (`start.md`): first the primary source and the user's active instructions; consolidation dates only break ties between memories with equal backing. Do not turn defective behavior into policy or a scheduled date into a confirmed fact.
 
-If contradictions are found, resolve them by treating the **most recently consolidated semantic file** as the source of truth, then update the outdated file.
+## Phase 4.5: Knowledge System (Skills and Workflows)
 
-## Phase 5: Feature Documentation Optimization (Optional)
+1. **Skills router:** every skill listed in `AGENTS.md` exists as a directory and vice versa, and its description matches the actual `SKILL.md`. Descriptions live **only** in the router; memory does not duplicate them.
+2. **Path integrity:** paths to `.agents/` and `docs/` cited from workflows and `AGENTS.md` exist. Exclude `SKILL.md` files from this sweep: their paths are relative to the skill folder.
+3. **Workflow ↔ skill:** a workflow instructs a process; a skill holds knowledge. Dense knowledge accumulated in a workflow → move to the skill, leaving a pointer.
+4. **Update external skills without losing project files** (if the project uses a skills CLI):
+   - First inspect what the update command deletes or overwrites. If it touches folders containing custom files (local skills, local notes within external skills), **run it in an isolated copy** and bring over only the reviewed changes for external skills and their lockfile.
+   - Review the actual diff, not just the lockfile hash; separate substance from formatting. If a skill description changed, update the router.
+   - Without network or permissions: report the update as pending and complete the local phases.
+5. **Process improvements:** correct contradictions and dead paths in local workflows and skills. Do not alter permissions, user decisions, or dependencies based on editorial preference.
 
-If the project keeps detailed feature documentation (e.g., `docs/features/*`):
+## Phase 4.6: Memory against the PRIMARY SOURCE (what no script can do)
 
-1. **Inventory the feature docs.**
-2. **Audit and compress** them applying the same principles as Phase 2 (remove redundancy, optimize tokens).
-3. **Cross-consistency:** ensure the architecture, flows, and decisions described there do not contradict the "absolute truth" consolidated in semantic memory (`architecture.md`, `business-rules.md`).
+Previous checks are internal (paths exist, valid tags, no contradictions): **they pass in green even while memory describes a system that no longer exists.**
 
-## Phase 6: Environment Cleanup (Optional)
+Take **verifiable** statements from semantic memory — names, limits, values, "single point of X", suppliers, deadlines — and contrast them against the primary source (search code; inspect the system of record). Record statement, evidence, and correction. Separate what was verified in the source, what depends on an external environment or system, and what could not be verified: the latter must remain **dated**, never declared active by inference.
 
-Since this workflow runs periodically, it is a good moment to purge heavy build/tooling caches that accumulate over time.
+- 🔴 **State drift has a known direction: it is PESSIMISTIC.** Memory ages by declaring pending what was already done, causing work that already exists to be redone.
+- 🔴 **Requires judgment, not a script:** well-written memory mentions what does NOT exist (debts, antipatterns), so "absent from source" and "correctly documented as absent" can only be distinguished by reading the sentence.
+- **Prioritize what would be costly to believe:** a "single calculation point" that now has two, a limit whose value changed, a replaced supplier. One finding here is worth more than ten formatting fixes.
+- **`active-tasks.md` is also verified:** each pending item is searched in the source. Whatever the source cannot confirm (a manual check, something that happened outside the system) is listed for the user to decide (Phase 7).
 
-1. **Purge build caches:** Run your toolchain's cache-clean command (e.g., the build tool's `clean` task) to free accumulated space. Adapt the command to your stack.
-2. **Storage reminder:** If you develop inside a virtualized filesystem (e.g., WSL2), add a reminder to the final report that reclaiming disk space may require compacting the virtual disk image at the OS level.
+## Phase 5: Documentation
 
-> Skip this phase entirely if your project has no heavy build caches.
+1. Audit `docs/` following the principles of Phase 2.
+2. Ensure nothing contradicts the consolidated truth in memory.
+3. 🔴 **Hunt for STATE drift, not just format drift:** statements made false by the passage of time, especially those that **promise a future action** ("before launch", "once we have customers", "still in testing mode", "must do this before…"). Build a search pattern using phrases specific to your project; broad patterns ("pending", "not yet") only return noise and get abandoned.
+   - **Prioritize the COSTLY direction:** a doc that **underestimates risk** (claims "test environment" where real data or money is already present) does far more damage than one that is merely outdated.
+   - The search proposes; **you deliver the verdict**, knowing the true state.
+4. An archived doc that no longer represents anything current and whose historical value is covered → propose its removal to the user.
+5. **Is the brief still valid?** If `docs/00-PROJECT-BRIEF.md` contains goals already accomplished or past due, or has gone more than six months without review, propose a **re-alignment** (`references/alignment-interview.md`).
 
-## Phase 7: Defrag Report
+## Phase 6: Hygiene and Environment
 
-Present a summary to the user covering:
+1. **Sensitive data:** with git, every folder with credentials, sessions, or personal data must be ignored and have no versioned files — anything versioned is a **critical** finding. Without git, the same: if the folder syncs to the cloud or is shared, memory must not contain sensitive data.
+2. **Caches (optional):** if the project accumulates heavy caches, purge them with your toolchain command — verifying beforehand what it deletes (some `clean` tasks also remove dependencies).
+3. If working inside a virtual disk (e.g. WSL2), remind in the report that reclaiming disk space may require compacting the image from the host system.
 
-1. **Files modified:** List each semantic file that was rewritten, with a one-line description of what changed.
-2. **Redundancies removed:** Concrete examples of duplicated or misplaced information that was cleaned up.
-3. **Knowledge routed:** If information was moved to skills, indicate what was moved and where.
-4. **Cross-file issues found:** Any contradictions or drift that was corrected.
-5. **Episodic observations:** Timeline health, tag distribution issues.
-6. **Environment & System:** Confirm any cache cleanup performed and leave the storage-compaction reminder if applicable.
-7. **Recommendation:** Suggest when the next defrag should be run (e.g., "after 15-20 more sessions" or "when semantic files exceed N lines").
+## Phase 7: Report
 
-_Internal note for the LLM: This workflow is idempotent — running it twice in succession should produce no further changes. If the memory is already optimized, report that to the user and skip unnecessary rewrites._
+Summarize for the user:
+
+- Rewritten files (one line each) and **always-loaded tier size before → after**.
+- Removed redundancies and entries compressed to rule + citation (with target doc), and checker results.
+- **Statements refuted by the primary source (Phase 4.6)** — the most important part of the report.
+- State drift corrected in `docs/`, highlighting any that underestimated risk.
+- Router, dead paths, and updated skills; timeline health and tag distribution; hygiene.
+- **Pending items that only the user can confirm**, numbered, so they can cross off any that no longer apply.
+- Suggested next defrag (e.g. after 15-20 sessions).
+
+🔴 **Separate COSMETIC changes from substantive ones.** A count of touched files does not convey how much knowledge changed, and a number inflated by reformatting damages credibility.
+
+## Phase 8: Independent Review
+
+If another agent or model is available, ask it to review the defrag changes before concluding (with git, the diff before committing): verify that each citation points to the **section** covering the topic and that each correction has evidence in the primary source. The checker only confirms that cited files exist. Without a reviewer, perform a second pass yourself with that specific focus.
+
+## Phase 9: Logging
+
+- Timeline entry tagged **only** `[CortexMD]` (so routing skips it).
+- In `.agents/memory/maintenance-log.md`: date of the last defrag, resulting always-loaded tier in tokens, and postponements reset to zero.
+
+_Idempotent: running twice in a row should produce no further changes. If memory is already optimal, report it and skip unnecessary rewrites._

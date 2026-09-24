@@ -14,11 +14,15 @@
 - **Description:** [Brief description of what the project does. E.g.: Financial management platform for SMBs.]
 - **Main Stack:** [E.g.: Next.js, TypeScript, DrizzleORM, TailwindCSS]
 
-*Note: For detailed code conventions and architecture, consult your semantic memory (see section 3).*
+*Note: For detailed code conventions and architecture, consult your semantic memory (see section 3). The project's why lives in `docs/00-PROJECT-BRIEF.md` and decision criteria in `docs/01-GUIDELINES.md` (created by `init.md`).*
 
 ## 3. Continuous Memory System (Cortex-MD)
 
 This repository implements the Cortex-MD framework for context persistence. You are prohibited from operating under the assumption that you remember the entire project history from your base training. Your memory physically resides in the `.agents/memory/` folder.
+
+- **Truth hierarchy:** primary source (the code, or the system of record declared by `stack.md`) > semantic memory > episodic memory. Memory ages by declaring completed work as pending: verify against the source before claiming something is missing.
+- **Memory gives the rule; detail lives in `docs/`**, which each rule cites. Episodic memory is history and is never cited as current state.
+- **Single memory:** if your tool has native memory, do not use it for this project. Only the agent conversing with the user consolidates.
 
 To interact safely and avoid hallucinations, you are obligated to use the following Workflows at the designated moments of your lifecycle.
 
@@ -32,15 +36,25 @@ To interact safely and avoid hallucinations, you are obligated to use the follow
 
 #### B. Consolidation Workflow (Session End)
 
-- **When to use it:** When the user indicates the task is finished, that the session is closing, or when they explicitly ask you to "consolidate memory" or "execute shutdown".
+- **When to use it:** When the user indicates the task is finished, that the session is closing, or when they explicitly ask you to "consolidate memory" or "execute shutdown". If they signal ending without asking, **offer it yourself**.
 - **File to invoke:** `.agents/workflows/end.md`
 - **Instruction:** Read the `end.md` file and execute the synthesis of today's actions. Write your technical reasoning to the file system, update the index, and modify the project state. It is your responsibility to ensure that your future instance inherits precise architectural knowledge.
 
 #### C. Defragmentation Workflow (On Demand)
 
-- **When to use it:** When the user explicitly requests memory optimization, defragmentation, or asks to "run defrag".
+- **When to use it:** When the user asks for it ("optimize memory", "run defrag") or when the weekly check recommends it and the user agrees.
 - **File to invoke:** `.agents/workflows/defrag.md`
 - **Instruction:** This is a deep maintenance operation that audits and restructures the entire memory system. It requires a high-capability reasoning model. Always wait for user confirmation before proceeding.
+
+### Automatic Maintenance (Proposed by the Agent)
+
+The user does not need to remember to maintain memory: the agent proposes it.
+
+- **Maintenance day:** Friday — asked by `init.md`; the user can change it whenever they want, or write "disabled".
+- **Weekly check:** on the first session on or after that day without a recorded check, execute `.agents/workflows/maintenance.md` (lightweight, does not rewrite memory). Its state lives in `.agents/memory/maintenance-log.md`.
+- **Propose, do not impose:** consolidation, cleanup, defrag, and re-alignment are proposed in a single line and executed only with the user's consent. If postponed, do not insist until the next maintenance day.
+- **Session close:** if the user signals completion ("done", "thanks, that's all") or significant work was completed, offer to consolidate with `end.md`.
+- **Owner:** _(only in multi-person teams)_ the agent for _[name]_ is the only one who proposes maintenance.
 
 ### Optional Extension Workflows
 
@@ -82,7 +96,7 @@ Organize your skills into domains so the right instructions are easy to locate. 
 
 - **`[<domain-skill>]`**: Project-specific domain flows (auth, payments, AI, etc.). 📖 `.agents/skills/<domain-skill>/SKILL.md`
 
-*If a skill is managed by an external CLI (registered in `skills-lock.json`), treat its folder as read-only — see the Knowledge Routing phase in `end.md`.*
+*If a skill is managed by an external CLI (registered in `skills-lock.json`), treat its folder as read-only — see `end.md § Phase 5`.*
 
 ## 5. Strict File Modification Rules
 
@@ -90,6 +104,8 @@ Organize your skills into domains so the right instructions are easy to locate. 
 - When modifying files in the `.agents/memory/` folder, ensure you use the required Markdown format without altering the pre-existing tag or directory structure.
 - **Strict Taxonomy:** Whenever you add entries to the historical index, you must consult and mandatorily use the tags defined in `.agents/memory/semantic/taxonomy.md`. If you consider a new tag is necessary, **recommend it to the user and wait for their approval** before adding it.
 - **`[CortexMD]` Skip Rule:** During hippocampal routing (context search at session start), **skip** timeline entries tagged exclusively with `[CortexMD]`. These are memory maintenance sessions and do not contain project-relevant context.
+- **Memory Contract:** when writing to rule files, follow `end.md § Phase 3` (rule + citation to `docs/`, ≤ ~400 characters) and verify with `node .agents/check-memory-contract.js`. Never store credentials or third-party personal data in memory.
+- **`ai-helpers/` Barrier:** its content is ephemeral (plans, specs, briefs). When work finishes, it is moved to `docs/` and memory, and deleted; therefore neither memory nor `docs/` reference paths inside `ai-helpers/`.
 
 ### Strict Modularity (Inviolable)
 

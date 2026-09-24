@@ -1,5 +1,9 @@
 # Technology Stack
 
+> **Contract:** each entry is a rule in imperative mood + at most one sentence of rationale + citation to canonical doc (`→ docs/...`), ≤ ~400 characters. Details live in `docs/`; history lives in episodic memory. Checker: `node .agents/check-memory-contract.js`.
+
+- **Primary source:** *E.g.: this repository's code — or the `Stock 2026` spreadsheet / the ERP. It takes precedence over memory in case of discrepancy.*
+
 ## Languages
 
 | Language | Usage |

@@ -6,6 +6,8 @@ This document defines the **strict** list of `[Tags]` that can be used in `timel
 
 ## Allowed Tags
 
+> These are the default tags for a software project. In another domain, `init.md` proposes replacements or additions (e.g. `[Stock]`, `[Suppliers]`, `[Customers]`, `[Payments]`) and the user approves them. `[CortexMD]` is always preserved.
+
 - `[Core]`: Changes to root configuration, initialization, or project tooling.
 - `[UI]`: User interface, visual components, styles, animations.
 - `[Auth]`: Authentication, authorization, session management, security.
@@ -14,6 +16,6 @@ This document defines the **strict** list of `[Tags]` that can be used in `timel
 - `[Testing]`: Unit tests, integration tests, E2E, QA.
 - `[DevOps]`: CI/CD, deployments, infrastructure, containers.
 - `[Refactor]`: Code restructuring without changes to external functionality.
-- `[Bugfix]`: Resolution of detected errors and failures.
+- `[Bugfix]`: Resolution of detected errors and bugs.
 - `[Docs]`: Documentation updates, semantic memory, README.
-- `[CortexMD]`: Memory maintenance sessions (defrag, optimization). Sessions tagged **only** with `[CortexMD]` are not project-relevant and should be skipped during hippocampal routing.
+- `[CortexMD]`: Memory maintenance sessions (defrag, optimization). Sessions tagged **only** with `[CortexMD]` are not relevant to the project and must be skipped during hippocampal routing.

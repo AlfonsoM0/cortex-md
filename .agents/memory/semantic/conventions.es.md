@@ -1,5 +1,9 @@
 # Convenciones de Código
 
+> **Contrato:** cada entrada es una regla en imperativo + a lo sumo una frase de razón + cita al doc canónico (`→ docs/...`), ≤ ~400 caracteres. El detalle vive en `docs/`; la historia, en el episódico. Verificador: `node .agents/check-memory-contract.js`.
+
+> En un proyecto no técnico, este archivo guarda el **estilo de la casa**: formatos de documentos, tono y plantillas de comunicación, nomenclatura de archivos y registros.
+
 ## Estilo General
 
 - **Indentación:** *Ej: 2 espacios*

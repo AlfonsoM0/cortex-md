@@ -6,6 +6,8 @@ Este documento define la lista **estricta** de etiquetas `[Tags]` que pueden uti
 
 ## Etiquetas Permitidas
 
+> Estas son las etiquetas por defecto para un proyecto de software. En otro dominio, `init.md` propone reemplazos o adiciones (ej. `[Stock]`, `[Proveedores]`, `[Clientes]`, `[Pagos]`) y el usuario los aprueba. `[CortexMD]` se conserva siempre.
+
 - `[Core]`: Cambios en la configuración raíz, inicialización, o tooling del proyecto.
 - `[UI]`: Interfaz de usuario, componentes visuales, estilos, animaciones.
 - `[Auth]`: Autenticación, autorización, gestión de sesiones, seguridad.

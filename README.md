@@ -4,6 +4,8 @@ Cortex-MD is a persistent memory framework built entirely on Markdown files. It 
 
 The system emulates the memory structures of the human brain, separating information into **semantic memory** (global project state) and **episodic memory** (indexed chronological records), drastically optimizing token usage and preventing hallucinations caused by context loss.
 
+**Born for software development, but useful for any agent working continuously:** inventory tracking, supplier evaluation, secretarial work, customer support, research. The workflows refer to the **primary source** — the code in a repository, the system of record (spreadsheet, ERP, CRM) in an administrative operation — and to a **canonical knowledge base** in `docs/`. See the [example of an administrative agent](#example-memory-for-an-administrative-agent).
+
 > 🌐 [Leer en Español (README.es.md)](README.es.md)
 
 ## Why Cortex-MD?
@@ -16,44 +18,35 @@ The system emulates the memory structures of the human brain, separating informa
 
 ## Quick Start
 
-### 1. Copy the structure into your project
+### Option A: Let your agent install it (recommended)
 
-Copy the `.agents/` directory and `AGENTS.md` from this repository into the root of your project:
+In your usual tool (Claude Code, Cursor, Codex CLI, Gemini CLI, or any other), paste this message to your agent:
 
-```bash
-# Clone and copy
-git clone https://github.com/YOUR_USER/cortex-md.git /tmp/cortex-md
-cp -r /tmp/cortex-md/.agents/ your-project/.agents/
-cp /tmp/cortex-md/AGENTS.md your-project/AGENTS.md
+```text
+Read the Cortex-MD framework at https://github.com/AlfonsoM0/cortex-md (start with INSTALL.md) and install its memory system in this workspace. Then run its init workflow.
 ```
 
-### 2. Run the initial bootstrap
+The agent downloads the framework, copies only what is needed in your language, connects your tool, and begins an **alignment interview**: a conversation to understand your project before writing memory. The instructions it follows are in [`INSTALL.md`](INSTALL.md).
 
-Ask your AI agent to execute the bootstrap workflow to populate the semantic memory by analyzing your existing codebase:
+### Option B: Manual installation
 
-```
-Read and execute .agents/workflows/init.md
-```
+1. **Copy the structure** to your project ([`INSTALL.md`](INSTALL.md) details what to copy):
 
-### 3. Configure your IDE
+   ```bash
+   git clone --depth 1 https://github.com/AlfonsoM0/cortex-md.git /tmp/cortex-md
+   cp -r /tmp/cortex-md/.agents/ your-project/.agents/
+   cp /tmp/cortex-md/AGENTS.md your-project/AGENTS.md
+   ```
 
-Ensure your IDE/agent reads `AGENTS.md` automatically at session start:
+2. **Connect your tools.** Memory only works if every session loads it: each tool must **read `AGENTS.md` at launch**, **execute `start.md` before responding**, and **not use its own memory in parallel**. Codex CLI reads `AGENTS.md` natively; **Claude Code** does not (it loads `CLAUDE.md`), so it needs a bridge file and supports a session start hook; Gemini CLI, Cursor, Aider, and Copilot are configured pointing to `AGENTS.md`. Ready-to-copy snippets: [`docs/agent-bridges.md`](docs/agent-bridges.md).
 
-| Tool                | Configuration                                                              |
-| ------------------- | -------------------------------------------------------------------------- |
-| **Claude Code**     | Reads `AGENTS.md` automatically from root. No config needed.               |
-| **Cursor**          | Add `AGENTS.md` to your project rules, or place content in `.cursorrules`. |
-| **Gemini CLI**      | In `.gemini/settings.json`: `{ "context": { "fileName": "AGENTS.md" } }`   |
-| **Aider**           | In `.aider.conf.yml`: `read: AGENTS.md`                                    |
-| **VS Code Copilot** | Add reference in `.github/copilot-instructions.md`.                        |
-| **Other agents**    | Instruct the agent to read `AGENTS.md` as its first action.                |
+3. **Run the bootstrap:** ask your agent _"Read and execute `.agents/workflows/init.md`"_.
 
-> **Multi-agent orchestrators:** if you use a tool that coordinates multiple sub-agents (e.g., Zoo Code, Roo Code agents, custom orchestrators), configure their global rule files so each agent mode reads `AGENTS.md` and executes `start.md` automatically. With the `rules-{mode}/` pattern, you can add mode-specific rules as well (e.g., Code following the frontend workflow). This eliminates the need to manually copy conventions in every orchestrated plan.
+### Day-to-day: you don't have to remember anything
 
-### 4. Use the daily workflows
-
-- **Session start:** The agent reads `AGENTS.md` → executes `start.md` → loads context.
-- **Session end:** Tell the agent: _"Consolidate memory"_ or _"Execute `.agents/workflows/end.md`"_.
+- **At the start**, the agent loads memory automatically (`start.md`) and, if the previous session closed without saving, offers to log it.
+- **At the end**, when you say "done" or "thanks", it offers to save learnings (`end.md`).
+- **Once a week** — on the day you chose in the interview; default: **Friday** —, it runs a lightweight memory check (`maintenance.md`) and proposes, only if needed, a cleanup, deep optimization (`defrag.md`), or a new alignment conversation. Nothing is modified without your consent.
 
 ## Recommended Environment: Direct API + Agentic Extensions
 
@@ -84,9 +77,12 @@ Cortex-MD integrates within the standard `.agents/` convention (based on [Anthro
 │   └── ...
 ├── workflows/                         # Agent orchestration flows
 │   ├── init.md                        # ★ Core: First-time bootstrap ("Onboarding")
+│   ├── references/
+│   │   └── alignment-interview.md     # ★ Core: Alignment interview question bank
 │   ├── start.md                       # ★ Core: Session start ("Wake Up")
+│   ├── maintenance.md                 # ★ Core: Automated weekly check (lightweight)
 │   ├── end.md                         # ★ Core: Session end ("Sleep")
-│   ├── defrag.md                      # ★ Core: Memory optimization ("Defrag")
+│   ├── defrag.md                      # ★ Core: Memory optimization and verification ("Defrag")
 │   ├── deep-plan.md                   # ★ Extension: Deep planning with Proof of Work
 │   ├── audit.md                       # ★ Extension: Post-feature audit with evidence
 │   └── commit.md                      # ★ Optional: stage review + intentful commit
@@ -98,69 +94,179 @@ Cortex-MD integrates within the standard `.agents/` convention (based on [Anthro
 │   │   ├── conventions.md             #     Code conventions and style
 │   │   ├── business-rules.md          #     Business logic and domain rules
 │   │   └── active-tasks.md            #     Working memory: tasks in progress
+│   ├── maintenance-log.md             #   Dates of weekly check, last defrag, and brief review
 │   └── episodic/                      #   Hippocampus: Indexed chronological record
 │       ├── timeline.md                #     Quick search index by [Tags] (max 50 sessions)
 │       └── YYYY/
 │           └── MM/
-│               └── DD.md              #     Detailed session record (files, commits, decisions)
+│               ├── DD.md              #     Detailed session record (changes, decisions, errors)
+│               └── DD-s2.md           #     Second session of the same day
+├── check-memory-contract.js           # ★ Cortex-MD: memory contract verifier (Node, zero dependencies)
 ├── .mcp.json                          # (Convention) Local MCP server configuration
 ├── sync-mcp.js                        # ★ Optional (MCP module): generate per-IDE configs from one source
 ├── mcp_config.json                    # ★ Optional (MCP module): canonical server list (placeholders, no secrets)
 ├── mcp_config.zoo-overrides.json      # ★ Optional (MCP module): per-IDE overrides example
-├── ai-helpers/                        # ★ Cortex-MD: Stepwise Execution Pipeline module
-│   ├── generators/                    #     Active prompts (Stepwise engines)
-│   ├── idea-development/              #     Static templates and workbench files
-│   └── prompts/                       #     Master orchestration prompts
-└── docs/                              # ★ Cortex-MD: Guides and documentation (incl. mcp-sync.md)
+└── backups/                           # Without git only: memory backups before each defrag (3 most recent)
+
+/AGENTS.md                             # Base instructions, loaded in every session
+/ai-helpers/                           # ★ Optional: Stepwise Execution Pipeline module
+/docs/                                 # Canonical knowledge base for YOUR project: the detail memory cites
+
+# Framework repository only (not copied to your project):
+/INSTALL.md                            # Installation instructions for the agent
+/docs/                                 # Framework guides (agent-bridges, mcp-sync, multi-dev)
 ```
 
 Additionally, `AGENTS.md` is located at the **repository root**. It acts as the entry point (_system prompt_) that the IDE automatically injects into the agent, and is responsible for directing the LLM to Cortex-MD's workflows. It also hosts the **Skill Router** (a categorized, on-demand index of the project's skills) and the **inviolable rules** (strict modularity & anti-redundancy) — guardrails that must stay in the always-loaded context, since `conventions.md` and skills are loaded only selectively. This follows the [AGENTS.md standard](https://agents.md) adopted by 60k+ open-source projects and supported by tools like Codex, Jules, Cursor, VS Code Copilot, and many more.
 
+## The Principles of Memory
+
+What turns a folder of Markdown into a reliable memory is not the file structure: it is five rules that the workflows enforce on every cycle.
+
+1. **The primary source beats memory.** Truth hierarchy: primary source (code, system of record) > semantic memory > episodic memory. Memory ages **toward pessimism**: it declares completed work as pending and cites names that have changed. Before claiming something is missing, verify against the source.
+2. **Memory holds the rule; detail lives in `docs/`.** Each entry in rule files is: imperative rule + at most one sentence of rationale + citation to the canonical doc, in ≤ ~400 characters. Metrics, examples, and rationale go to the doc; the discovery history goes to episodic memory. This keeps the memory read in every session lean without losing anything.
+3. **Three file types, three contracts:**
+   - `architecture` · `stack` · `conventions` · `business-rules` answer **"what is the rule?"** → rule + citation.
+   - `active-tasks` answers **"what remains to be done?"** → pending items only; **completed work is deleted**, not checked off with ✅. External state includes a verification date; tracked items (`[Watch]`) include their trigger.
+   - `taxonomy` answers **"what tags are valid?"** → closed list.
+4. **Episodic memory is history, never authority.** It explains why and what was attempted (including the **agent's own reasoning errors**), but is never cited from memory or `docs/`: it ages by design.
+5. **What is always read has a budget.** `start.md` loads an always-loaded tier (`architecture`, `stack`, `active-tasks`, roadmap) paid every session; everything else opens on demand. The roadmap tracks **scope**, not progress.
+
+**Verifier:** `node .agents/check-memory-contract.js` checks formatting (long entries without citations, citations to non-existent docs, citations to episodic memory) and reports the size of the always-loaded tier in estimated tokens. It measures **structure**, not truth: defrag handles truth by contrasting memory against the primary source.
+
 ## Workflows
 
-Cortex-MD provides **four core workflows** (the memory lifecycle) and **two extension workflows** (development methodology):
+Cortex-MD provides **five core workflows** (the memory lifecycle) and **two extension workflows** (development methodology):
 
 ### 0. First-time bootstrap: `init.md`
 
-Run once when adopting Cortex-MD in an existing project. The LLM analyzes the codebase and populates all semantic memory files automatically.
+Run once when adopting Cortex-MD, and starts with an **alignment interview**: a friendly conversation in which agent and user agree on what problems the project solves, what goals it pursues and how success is measured, what current procedures look like and which to automate, what tasks have zero-error tolerance and which are urgent, how much autonomy the agent has, where information lives, and what its SWOT is. The question bank (`references/alignment-interview.md`) combines proven practices — project kickoff, pre-mortem, automation criteria, autonomy levels based on how easy a task is to verify and undo — and indicates which document or memory file each answer goes to.
+
+With the synthesis approved by the user, `init` creates the canonical documentation (`docs/00-PROJECT-BRIEF.md`, `docs/01-GUIDELINES.md`, procedures), populates memory respecting the contract, adapts `AGENTS.md` (context, autonomy, communication) and taxonomy, and connects tools so every session loads memory. The interview is partially repeated when the project changes stages (**re-alignment**).
 
 ### 1. The "Wake Up" cycle: `start.md`
 
-When you start a new session, the LLM reads `.agents/workflows/start.md` and performs an efficient manual RAG (Retrieval-Augmented Generation):
-
-- **Step 1 (Semantic Loading):** Always reads `architecture.md` and `stack.md` as mandatory baseline. Selectively loads `conventions.md`, `business-rules.md`, and `taxonomy.md` based on the task.
-- **Step 2 (Hippocampal Routing):** Scans `episodic/timeline.md` looking for tags (e.g., `[Auth]`, `[UI]`, `[DB]`) related to the current objective.
-- **Step 3 (Episodic Retrieval):** Only if relevant matches are found, opens the corresponding daily files (`YYYY/MM/DD.md`) to retrieve prior reasoning and commit hashes.
+- **Truth hierarchy:** read before loading anything.
+- **Phase 1 (Semantic loading):** always loads the always-loaded tier (`architecture`, `stack`, `active-tasks`, and roadmap if present); `conventions`, `business-rules`, and `taxonomy` based on the task. Memory gives the rule: cited docs open when the task calls for them.
+- **Phase 2 (Hippocampal routing):** searches `timeline.md` for tags matching the task's domains.
+- **Phase 3 (Episodic retrieval):** only if matches are found, reads those days (including `DD-sN.md`) as history, not current state.
 
 ### 2. The "Sleep and Consolidation" cycle: `end.md`
 
-At the end of your coding session, the LLM consolidates long-term memory:
-
-- **Episodic Generation:** Creates the day's file (`DD.md`) with a structured template documenting files modified, commit hashes, technical decisions, and error resolutions.
-- **Index Update:** Adds a tagged entry to `timeline.md` (max 50 sessions). Tags come strictly from `taxonomy.md`.
-- **Semantic Consolidation (Critical):** Evaluates whether today's actions altered the global architecture, rules, or conventions. If so, overwrites the corresponding semantic file.
-- **Working Memory Flush:** Updates `active-tasks.md` for the next session, classifying the backlog by **Eisenhower priority (P1–P4)** + **T-shirt effort sizing** — the single source of technical debt.
-- **Knowledge Routing:** If a new pattern or bug solution was discovered, routes it to the correct file (semantic memory, skill, or docs) instead of bloating `AGENTS.md`. An **External Skills Guard** protects folders managed by an external skill CLI (`skills-lock.json`).
-- **Planning & Feature-Docs Sync (Optional):** If the project has a master roadmap or feature docs (`docs/features/*`), updates them to reflect completed milestones and the as-built implementation.
+- **Pre-consolidation hygiene** and, in multi-agent teams, **only the lead consolidates**.
+- **Episodic:** the day's record with changes, decisions, and errors — including the **agent's own reasoning errors**, the costliest to repeat.
+- **Timeline:** a ~200-character line with tags from taxonomy (max 50 sessions).
+- **Semantic consolidation** following the three file-type contracts; no credentials or personal data.
+- **Documentation and roadmap:** behavior belongs in `docs/`; roadmap changes only if scope changed; **consistency sweeps** whenever a value or name changes.
+- **Skills** with the External Skills Guard.
+- **`active-tasks` flush:** delete completed tasks (verifying first that their detail lives in `docs/`), dated external states, `[Watch]` with triggers, Eisenhower + T-shirt backlog.
+- **User wrap-up:** list pending items that only a human can confirm, so they can dismiss anything no longer applicable.
 
 ### 3. Memory Defragmentation: `defrag.md`
 
-Triggered on demand when the user detects that memory files have grown with redundancies, format inefficiencies, or cross-file inconsistencies. This is analogous to disk defragmentation — reorganizing data for optimal performance without losing information.
+On demand, every 15-20 sessions. In addition to compressing and deduplicating:
 
-- **Safety Gate:** Warns the user and requires explicit confirmation that a high-capability reasoning model is active.
-- **Full Inventory:** Reads all semantic and recent episodic memory to build a complete picture.
-- **Semantic Compression:** Rewrites each semantic file for optimal LLM token consumption — dense lists over prose, imperative voice, zero filler words.
-- **Episodic Optimization:** Audits the timeline for tag inflation and enforces the 50-session limit.
-- **Cross-File Validation:** Detects contradictions and drift between `architecture.md`, `stack.md`, `conventions.md`, and `business-rules.md`.
-- **Feature-Docs Optimization (Optional):** Applies the same compression to detailed feature docs (`docs/features/*`).
-- **Environment Cleanup (Optional):** Purges heavy build/tooling caches as part of periodic maintenance.
-- **Defrag Report:** Presents a summary of all changes for user review.
+- **Pre-defrag commit** to ensure reversibility, and **inventory with measured always-loaded tier** (before → after).
+- **Blocking contract:** the verifier must report zero findings.
+- **Memory against primary source (Phase 4.6):** contrasts names, boundaries, and "single points of X" against code or the system of record. This is the only check that detects memory describing a system that no longer exists — and the most valuable part of the report.
+- **State drift in `docs/`:** assertions that time has rendered false, prioritizing those that **underestimate risk**.
+- **Knowledge system:** skill router, dead paths, updating external skills without overwriting project-specific files.
+- **Hygiene:** sensitive data kept outside version control.
+- **Report separating cosmetic from substantive changes**, and **independent review** of the diff by another agent or model before committing.
 
-> **When to run it:** Every 15-20 sessions, or when semantic memory files grow beyond what feels reasonable for the project's complexity. The workflow is idempotent — running it on already-optimized memory produces no changes.
+> **Idempotent:** running it on already-optimized memory produces no changes.
+
+### 4. Weekly Check: `maintenance.md`
+
+The user does not need to know when to optimize memory or re-align: this check decides, triggered automatically by `start.md` on the first session on or after the **maintenance day** (chosen by the user in `init`; default: Friday). Since the agent has no clock between sessions, if no work happens on that day, it runs on the following session.
+
+- **Lightweight without rewriting memory:** runs the verifier, checks for unconsolidated sessions (via commits or, without git, modified files), expired pending items or tasks marked done, sessions since the last defrag, always-loaded tier growth, and brief age.
+- **One recommendation, not a list:** consolidate, clean up, **defrag only when needed** (≥ 15 sessions, always-loaded tier +25%, verifier findings, or > 60 days), quick brief review (> 90 days), or re-alignment upon signs of change.
+- **Propose, never impose:** three lines at most; if the user postpones, it does not insist until the following week. Its state lives in `.agents/memory/maintenance-log.md`.
+
+## Example: memory for an administrative agent
+
+An agent that manages inventory, evaluates suppliers, responds to customers, and acts as a clerk for a wholesale business. There is no code: the **primary source** is the inventory spreadsheet and the billing system, and `docs/` stores procedures and supplier profiles.
+
+```text
+.agents/memory/semantic/
+├── stack.md            # systems in use and which is the primary source
+├── architecture.md     # functional areas and workflows
+├── conventions.md      # house style
+├── business-rules.md   # business rules
+├── active-tasks.md     # pending items, with dated state
+└── taxonomy.md         # [Stock] [Suppliers] [Customers] [Payments] [Calendar] [Docs] [CortexMD]
+docs/
+├── 00-PROJECT-BRIEF.md            # problems, goals, SWOT (from alignment interview)
+├── 01-GUIDELINES.md               # decision criteria and zero-error items
+├── procedimientos/reposicion.md
+├── procedimientos/pagos.md
+├── proveedores/evaluacion.md
+└── atencion/respuestas-tipo.md
+```
+
+**`stack.md`**
+
+```markdown
+- **Primary source:** `Stock` spreadsheet (inventory and minimums) and the billing system (sales and receipts). In case of discrepancy, they win. → `docs/sistemas.md`
+- **Supplier orders:** via email from the purchasing inbox; WhatsApp only for emergencies, followed by email confirmation. → `docs/procedimientos/reposicion.md`
+```
+
+**`architecture.md`**
+
+```markdown
+- **Restocking:** low-stock alert → order to preferred supplier → receipt with delivery note → entry into spreadsheet → payment at 30 days. → `docs/procedimientos/reposicion.md`
+- **Customer complaints:** recorded in the `Reclamos` spreadsheet before responding. → `docs/atencion/reclamos.md`
+```
+
+**`business-rules.md`**
+
+```markdown
+- **Never approve a payment without a signed delivery note:** missing items must be claimed before paying. → `docs/procedimientos/pagos.md §2`
+- **Evaluate suppliers quarterly** for punctuality, shortages, and price; two consecutive late deliveries reduce their priority. → `docs/proveedores/evaluacion.md`
+- **Minimum stock for each product is defined by the spreadsheet**, not memory: memory names the column, never copies values.
+```
+
+**`conventions.md`**
+
+```markdown
+- **Respond to every customer in their language, in ≤ 5 lines:** result, thank you, and sign-off, without internal jargon. → `docs/atencion/respuestas-tipo.md`
+- **Every message to a customer or supplier must be approved by a human before being sent.**
+- **Name files** `AAAA-MM-DD_proveedor_tipo.pdf`.
+```
+
+**`active-tasks.md`**
+
+```markdown
+## 📍 Status
+- Stock reconciled with physical count (verified 2026-09-20 in spreadsheet).
+
+## 🚀 Next Steps
+1. **[🚨 P1] [🟢 Snack]** Claim the 12 missing units from delivery note 4521 with Supplier B before Friday's payment.
+
+## 👀 Watch
+- **[🧯 P3] [Watch]** Supplier A promised delivery on 03/10: verify receipt that day; if not arrived, order from Supplier C.
+
+## 📋 Backlog
+- **[🧭 P2] [🟡 Session]** Quarterly supplier evaluation (Q3).
+```
+
+**A timeline entry and a reasoning error in episodic memory:**
+
+```markdown
+- 2026-09-24: [Suppliers] [Payments] Missing items in delivery note 4521 from Supplier B: payment withheld until claim; Q3 evaluation started.
+```
+
+```markdown
+- **Own reasoning error:** assumed order 118 was received because dispatch email was present; spreadsheet did not have the entry.
+  - **Prevention:** receipt is confirmed in the spreadsheet (primary source), never by supplier notification.
+```
+
+The same applies to any other domain: change what serves as primary source, what `docs/` stores, and what tags taxonomy uses. The workflows do not change.
 
 ## Extension Workflows: Adaptive Execution Modes
 
-While the four core workflows manage the memory lifecycle, Cortex-MD also provides **extension workflows** that adapt to the capabilities of the model executing them. They solve two problems simultaneously:
+While the five core workflows manage the memory lifecycle, Cortex-MD also provides **extension workflows** that adapt to the capabilities of the model executing them. They solve two problems simultaneously:
 
 1. **Quality degradation** when lightweight models (Haiku, Flash, mini) process complex engineering tasks.
 2. **Latency overhead** when heavyweight models (Opus, o1) are forced through unnecessary micro-management steps.
@@ -187,7 +293,7 @@ Each extension workflow supports **three modes** that the user selects at invoca
 
 > **Non-negotiable across all modes:** The Technical Validation gateway (lint, typecheck, build) is always mandatory and blocking. No model — regardless of capability — can skip objective compiler verification.
 
-### 4. Deep Planning: `deep-plan.md`
+### 5. Deep Planning: `deep-plan.md`
 
 A structured planning workflow with three phases (Discovery → Constraints → Partition) that adapts its rigor:
 
@@ -197,7 +303,7 @@ A structured planning workflow with three phases (Discovery → Constraints → 
 
 > **When to use it:** Before implementing any feature that spans more than 3 files or crosses module boundaries.
 
-### 5. Post-Feature Audit: `audit.md`
+### 6. Post-Feature Audit: `audit.md`
 
 An evidence-based validation workflow with seven phases (Inventory → Modularity → Redundancy → Conventions → Technical Validation → Roadmap & Feature-Docs Sync → Report):
 
@@ -238,7 +344,8 @@ Cortex-MD is an open architecture licensed under [MIT](LICENSE). Current researc
 - Optimization of the tag taxonomy in `taxonomy.md`.
 - Creation of automation scripts (Bash/Node.js) to initialize the folder structure. _(An optional Node helper, `sync-mcp.js`, already ships to generate per-IDE MCP configs from one canonical source — see [docs/mcp-sync.md](docs/mcp-sync.md).)_
 - Impact evaluation on context retention in projects with over 100k lines of code.
-- **Token metrics for defrag:** Adding estimated token count (before vs. after) to the defrag report would help users quantify optimization impact. This could be implemented as an optional phase in `defrag.md`.
+- **More precise token metrics:** `check-memory-contract.js` estimates the always-loaded tier by dividing bytes by 4; an actual tokenizer per model family would improve measurement.
+- **Verification of cited sections:** the verifier confirms that the cited file exists, not that the section (`§2`) addresses the topic.
 - **Extension workflow research:** Testing and refining the Proof of Work methodology across different model families (Claude, GPT, Gemini, open-source) and project sizes.
 
 If you have improvements to the workflow prompts, please open a Pull Request or start an Issue to discuss the cognitive approach.

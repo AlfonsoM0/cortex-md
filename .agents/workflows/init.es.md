@@ -1,43 +1,107 @@
+---
+description: Bootstrap inicial (Onboarding)
+---
+
 # Workflow: Bootstrap del Proyecto (Onboarding Inicial)
 
-**Contexto del Sistema:** Eres un agente de IA y esta es la **primera vez** que Cortex-MD se activa en este repositorio. Los archivos de memoria semántica son templates vacíos. Tu trabajo es analizar el codebase existente y poblar el sistema de memoria para que las sesiones futuras puedan iniciar con contexto completo.
+**Contexto del Sistema:** Es la **primera vez** que Cortex-MD se activa en este proyecto y los archivos de memoria son plantillas vacías. Antes de escribir una sola regla, **alineate con el usuario**: una memoria poblada con suposiciones hace que el agente optimice lo que no importa. Ejecutá las fases en orden.
 
-Ejecuta las siguientes fases en estricto orden secuencial.
+## Fase 0: Preparación silenciosa
 
-## Fase 1: Análisis del Codebase
+Antes de preguntar nada, leé lo que ya existe para no preguntar lo que el proyecto ya dice:
 
-Escanea el proyecto para entender su estructura antes de escribir nada.
+- **Software:** estructura de directorios, archivos de configuración (`package.json`, `pyproject.toml`, `go.mod`…), `README.md`, documentación.
+- **Otro tipo de proyecto:** los documentos, planillas o carpetas que el usuario haya compartido.
 
-1. **Lee la raíz del proyecto:** Lista todos los archivos y directorios de nivel superior para identificar el tipo de proyecto (monorepo, aplicación única, librería, etc.).
-2. **Identifica el stack:** Busca archivos de configuración (`package.json`, `tsconfig.json`, `Cargo.toml`, `requirements.txt`, `go.mod`, `Gemfile`, etc.) para determinar lenguajes, frameworks y dependencias clave.
-3. **Identifica la arquitectura:** Busca patrones de directorios (`src/`, `apps/`, `packages/`, `lib/`, `routes/`, `controllers/`, `models/`, etc.) para entender la estructura de módulos.
-4. **Identifica las convenciones:** Busca configuración de linting/formateo (`.eslintrc`, `.prettierrc`, `biome.json`, `rustfmt.toml`, etc.) y examina algunos archivos fuente representativos para detectar patrones de nombrado y estilo de código.
-5. **Identifica las reglas de negocio:** Lee el `README.md` y cualquier documentación existente para entender el dominio y propósito del proyecto.
+Armá una lista breve de hipótesis ("parece un comercio mayorista que lleva el stock en una planilla") para **confirmarlas** en la entrevista, no para darlas por ciertas.
 
-## Fase 2: Población de la Memoria Semántica
+**¿Hay control de versiones?** Averiguá si la carpeta es un repositorio git. Cortex-MD funciona igual en una carpeta común: sin git, el defrag respalda la memoria copiándola antes de reescribir. Si el usuario no usa git, no lo exijas; a lo sumo ofrecelo en una frase ("permite deshacer cualquier cambio; es opcional") y respetá la respuesta.
 
-Escribe los hallazgos en los archivos de memoria semántica. Sigue la estructura del template ya definida en cada archivo.
+## Fase 1: Entrevista de alineación (conversación con el usuario)
 
-1. **Escribe:** `.agents/memory/semantic/stack.md`
-   - Completa los lenguajes, frameworks, librerías, base de datos, herramientas y servicios externos basándote en tu análisis.
-2. **Escribe:** `.agents/memory/semantic/architecture.md`
-   - Documenta la estructura de módulos, patrones de diseño observados y flujo de datos.
-3. **Escribe:** `.agents/memory/semantic/conventions.md`
-   - Documenta el estilo de código, convenciones de nombrado, reglas de importación y cualquier patrón prohibido encontrado en las configuraciones de linting.
-4. **Escribe:** `.agents/memory/semantic/business-rules.md`
-   - Documenta el dominio, entidades clave y cualquier regla de negocio inferida del codebase y la documentación.
-5. **Escribe:** `.agents/memory/semantic/taxonomy.md`
-   - Revisa las etiquetas por defecto. Si el proyecto tiene dominios obvios no cubiertos por los defaults (ej. `[Payments]`, `[i18n]`, `[Analytics]`), **recomienda adiciones al usuario** y espera su aprobación antes de agregarlas.
+Conducí una conversación amigable siguiendo **`.agents/workflows/references/alignment-interview.md`**. Al terminar, el agente tiene que poder responder, sin suponer:
 
-## Fase 3: Inicialización de la Memoria de Trabajo
+- Qué es el proyecto, para quién, en qué etapa y quién decide.
+- Qué **problemas** resuelve y cuáles quiere resolver el usuario con el asistente.
+- Qué **objetivos** persigue, cómo se mide el éxito y qué quedó afuera a propósito.
+- Cómo son los **procedimientos actuales** y cuáles conviene automatizar — con un script, con el agente o con el agente y aprobación humana.
+- Qué tareas son **importantes** (no admiten error, son irreversibles) y cuáles **urgentes** (fechas límite, bloqueos, temporadas).
+- Cuánta **autonomía** tiene el agente: qué hace solo, qué propone y qué nunca.
+- **Dónde está la información**, cuál es la fuente de verdad de cada dato y cómo está organizada.
+- El **FODA** del proyecto y los riesgos del pre-mortem.
+- Las restricciones, los criterios de decisión y la forma de trabajo que prefiere el usuario.
 
-1. **Escribe:** `.agents/memory/semantic/active-tasks.md`
-   - Establece la tarea actual como "Onboarding inicial completado" y define el siguiente paso lógico basándote en la solicitud del usuario.
+🔴 **Puerta:** cerrá la fase con la síntesis de una página (lo que entendí · lo que no sé · lo que voy a hacer) y **esperá la confirmación explícita del usuario**. Sin síntesis aprobada no se escribe la memoria.
 
-## Fase 4: Confirmación
+Si el usuario tiene poco tiempo, hacé las preguntas esenciales (★) y dejá el resto como pendiente en `active-tasks.md`: la entrevista puede completarse en sesiones siguientes.
 
-1. Presenta un resumen breve al usuario de lo que se pobló en cada archivo de memoria semántica.
-2. Pide al usuario que revise el contenido generado y corrija cualquier imprecisión.
-3. Informa al usuario que el sistema está listo y que las sesiones futuras deben comenzar con `start.md`.
+## Fase 2: Análisis del proyecto
 
-*Nota interna para el LLM: Este workflow debe ejecutarse solo una vez por proyecto. Después del bootstrap inicial, usa `start.md` y `end.md` para la gestión regular de sesiones.*
+Con lo aprendido, profundizá donde la entrevista lo indicó:
+
+- **Software:** estilo y convenciones reales del código, linters, módulos, flujo de datos.
+- **Otro tipo de proyecto:** los sistemas y planillas nombrados, las plantillas en uso (emails, pedidos, facturas), los procedimientos escritos que existan.
+
+Si el análisis contradice algo de la entrevista, preguntá: no elijas en silencio.
+
+## Fase 3: Documentación canónica
+
+La memoria cita documentos, así que los documentos van primero. Creá en `docs/` lo que la entrevista justificó (el destino de cada respuesta está en la tabla de síntesis de la referencia):
+
+- `docs/00-PROJECT-BRIEF.md` — el **por qué**: proyecto, problemas, objetivos y métricas, no-objetivos, FODA, pre-mortem, restricciones.
+- `docs/01-GUIDELINES.md` — **cómo se decide**: criterios ante conflictos, lo que no admite error, lo irreversible.
+- Un documento por procedimiento o feature relevante, y `docs/glossary.md` si hay vocabulario propio.
+
+Un roadmap (`docs/00-MASTER-ROADMAP.md`) solo si el proyecto tiene fases o alcance que gestionar.
+
+## Fase 4: Memoria semántica
+
+Escribí los archivos respetando el **contrato de los archivos de reglas** (`end.md § Fase 3`): regla en imperativo + a lo sumo una frase de razón + cita a `docs/`, ≤ ~400 caracteres por entrada.
+
+1. `stack.md` — herramientas, servicios y proveedores; **la fuente primaria en la primera línea** (y cuál manda para cada tipo de dato, si hay varias).
+2. `architecture.md` — cómo está armado el sistema o la operación: módulos, o flujos de trabajo y sus responsables.
+3. `conventions.md` — el estilo de la casa: código, o formatos, tono y plantillas de comunicación.
+4. `business-rules.md` — entidades del dominio y reglas invariables (lo que no admite error).
+5. `taxonomy.md` — proponé las etiquetas según las áreas que surgieron en la entrevista (ej. `[Stock]`, `[Proveedores]`) y **esperá la aprobación del usuario**. `[CortexMD]` se conserva siempre.
+
+🔴 **Nunca escribas en la memoria credenciales ni datos personales de terceros:** nombrá el sistema donde viven.
+
+## Fase 5: Memoria de trabajo
+
+Escribí `active-tasks.md` con:
+
+- El **estado** verificado, con fecha.
+- Las **urgencias** como P1 y lo que hay que vigilar como `[Watch]` con su disparador (fechas límite, riesgos del pre-mortem).
+- Los **candidatos a automatizar**, clasificados por prioridad y esfuerzo, indicando si van con script, con el agente o con aprobación humana.
+- Las **incógnitas** de la entrevista, como pendientes a verificar, y los bloques de la entrevista que hayan quedado sin hacer.
+- El **próximo paso** acordado.
+
+## Fase 6: Adaptar `AGENTS.md`
+
+`AGENTS.md` se carga en toda sesión: guarda solo lo que tiene que estar siempre presente.
+
+- **Identidad y contexto:** el rol del agente y un resumen de 3-5 líneas del proyecto, citando `docs/00-PROJECT-BRIEF.md`.
+- **Autonomía:** qué hace solo, qué propone y espera aprobación, y qué nunca — tal como se acordó en la entrevista. Reemplaza la regla genérica de "Autonomía Limitada".
+- **Comunicación:** idioma, tono y cómo consultar al usuario.
+- **Criterios de decisión:** un puntero a `docs/01-GUIDELINES.md`.
+- **Router de skills:** reemplazá o eliminá los placeholders según las skills reales del proyecto.
+- **Mantenimiento automático:** anotá el día de mantenimiento que eligió el usuario en la entrevista (bloque 13; por defecto, **viernes**, para cerrar la semana) o "desactivado". En equipos de varias personas, anotá quién es el responsable.
+
+Creá `.agents/memory/maintenance-log.md` con la fecha de hoy como último chequeo y última revisión del brief, y "nunca" como último defrag.
+
+## Fase 7: Integración con las herramientas
+
+La memoria solo funciona si cada sesión la carga. Para cada herramienta que use el usuario, verificá:
+
+1. **Que lea `AGENTS.md` al iniciar.** No todas lo hacen solas: algunas necesitan un archivo puente o una configuración. La guía `docs/agent-bridges.md` del repositorio de Cortex-MD (no se copia al proyecto) tiene los snippets.
+2. **Que ejecute `start.md` antes de responder.** Si la herramienta admite un hook de inicio de sesión, usalo.
+3. **Que su memoria nativa esté desactivada** (si la tiene): dos memorias sobre el mismo proyecto divergen.
+
+## Fase 8: Registro y confirmación
+
+1. Registrá la sesión de alineación con `end.md` (Fases 1 y 2): es el primer día del episódico, con las decisiones y aprendizajes de la entrevista.
+2. Corré `node .agents/check-memory-contract.js` (Node ≥ 18; sin Node, revisá el contrato a mano).
+3. Resumí al usuario qué quedó en cada archivo y pedile que corrija imprecisiones.
+4. Explicale al usuario, en tres frases y sin jerga, qué va a pasar de ahora en más: el agente carga la memoria solo al empezar cada sesión; ofrece guardar lo aprendido cuando la sesión termina; y el día de mantenimiento revisa la memoria y propone, solo si hace falta, una optimización o una nueva charla de alineación. **No tiene que acordarse de nada.**
+
+_Este workflow se ejecuta una sola vez por proyecto; la re-alineación, cuando el proyecto cambia._

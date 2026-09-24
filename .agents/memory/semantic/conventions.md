@@ -1,5 +1,9 @@
 # Code Conventions
 
+> **Contract:** each entry is a rule in imperative mood + at most one sentence of rationale + citation to canonical doc (`→ docs/...`), ≤ ~400 characters. Details live in `docs/`; history lives in episodic memory. Checker: `node .agents/check-memory-contract.js`.
+
+> In a non-technical project, this file stores the **house style**: document formats, communication tone and templates, file and record naming conventions.
+
 ## General Style
 
 - **Indentation:** *E.g.: 2 spaces*

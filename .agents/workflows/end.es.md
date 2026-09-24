@@ -1,128 +1,120 @@
+---
+description: Fin de sesión (Consolidación)
+---
+
 # Workflow: Fin de Sesión (Consolidación Cognitiva)
 
-**Contexto del Sistema:** Eres un agente de IA y la sesión de trabajo actual ha concluido. Es imperativo ejecutar un proceso de consolidación de memoria análogo al ciclo de sueño humano para evitar la degradación de tu contexto en futuras intervenciones. Debes evaluar qué información retener, qué indexar y cómo modificar el estado global del proyecto.
+**Contexto del Sistema:** La sesión terminó — porque el usuario lo pidió, o porque lo ofreciste ante señales de cierre y aceptó (`AGENTS.md § Mantenimiento automático`). Consolidá la memoria para que tu instancia futura herede un conocimiento preciso: qué retener, qué indexar y qué cambió del estado global. Ejecutá las fases en orden.
 
-Ejecuta los siguientes pasos en estricto orden secuencial.
+> **Quién consolida:** en un equipo de varios agentes, consolida **solo el agente que conversa con el usuario** (el líder). Los ayudantes le reportan; si todos escriben la memoria, se pisan y se contradicen. Lo operativo de los agentes (cuotas, costos, preferencias de reparto) no es memoria del proyecto: va a un archivo propio del líder.
 
-## Fase 1: Creación de Memoria Episódica
+## Fase 0: Higiene previa
 
-Genera el registro detallado de las experiencias y razonamientos de esta sesión para preservar el "qué" y el "por qué".
+- Revisá qué cambió (con git: `git status`; en una carpeta común: los archivos modificados durante la sesión) y corré la validación que corresponda al alcance. No repitas chequeos ya aprobados si nada relevante cambió.
+- Si vas a tocar la memoria semántica, al final corré `node .agents/check-memory-contract.js`.
 
-1. Determina la fecha actual en formato `YYYY`, `MM`, `DD`.
-2. Crea o actualiza el archivo: `.agents/memory/episodic/YYYY/MM/DD.md`
-   - **Múltiples sesiones por día:** Si hay más de una sesión distinta en el mismo día, agregá un slug descriptivo para mantenerlas separadas y buscables: `.agents/memory/episodic/YYYY/MM/DD-<slug>.md` (ej. `2026/06/04-inventory-redesign.md`). Usá un `DD.md` simple para la sesión única de rutina.
-3. Utiliza el siguiente template como estructura obligatoria:
+## Fase 1: Memoria Episódica
+
+1. Creá o actualizá `.agents/memory/episodic/YYYY/MM/DD.md`. Para otra sesión distinta el mismo día usá `DD-s2.md`, `DD-s3.md`… sin pisar la anterior (el sufijo numérico ordena solo y el timeline lo nombra).
+2. Usá esta estructura y omití las secciones que no apliquen:
 
 ```markdown
 # Sesión: YYYY-MM-DD
 
 ## Resumen
 
-Breve descripción (2-3 líneas) del objetivo de la sesión y el resultado alcanzado.
+2-3 líneas: objetivo y resultado.
 
-## Archivos Modificados
+## Cambios
 
-| Archivo | Acción | Descripción del cambio |
-|---|---|---|
-| `ruta/al/archivo.ts` | Creado / Modificado / Eliminado | Qué se hizo y por qué |
+| Archivo / registro | Acción                          | Descripción           |
+| ------------------ | ------------------------------- | --------------------- |
+| `ruta/al/archivo`  | Creado / Modificado / Eliminado | Qué se hizo y por qué |
 
 ## Control de Versiones
 
-- **Rama:** `nombre-de-la-rama`
-- **Commits:** `abc1234`, `def5678` (o indicar si no hubo commits)
+- **Rama:** `rama` · **Commits:** `abc1234`, … (o "sin commits")
 
-## Decisiones Técnicas
+## Decisiones
 
-- **Decisión:** Descripción de la decisión arquitectónica o de diseño tomada.
-  - **Contexto:** Por qué se tomó esta decisión (alternativas evaluadas, restricciones).
+- **Decisión:** qué se decidió.
+  - **Contexto:** por qué (alternativas, restricciones, quién decidió).
 
-## Errores Encontrados y Resoluciones
+## Errores y Resoluciones
 
-- **Error:** Descripción del bug o problema.
-  - **Causa raíz:** Qué lo causaba.
-  - **Solución:** Cómo se resolvió.
-  - **Prevención:** Qué evitar en el futuro para no repetirlo.
+- **Error:** descripción.
+  - **Causa raíz:** … · **Solución:** … · **Prevención:** …
 
 ## Contexto para la Próxima Sesión
 
-Descripción clara de en qué punto quedó el trabajo y qué se debería hacer a continuación para retomarlo sin fricción.
+Dónde quedó el trabajo y qué sigue.
 ```
 
-4. Rellena todas las secciones aplicables. Si una sección no aplica (ej. no hubo errores), omítela del archivo generado.
+> **Registrá también los errores de razonamiento propios**, no solo los del sistema: una hipótesis que el usuario corrigió, un dato que diste por cierto sin verificar, un "bloqueante" que no existía. Son los más caros de repetir y ningún test los detecta. Anotá **qué lo causó** (una doc desactualizada, un registro de otro entorno, asumir un error donde había una decisión) y **cómo evitarlo**.
 
-## Fase 2: Actualización del Índice Hipocampal
+En un proyecto sin control de versiones, "Control de Versiones" se reemplaza por la referencia al registro afectado (ej. número de pedido, fila de la planilla, id del ticket).
 
-Crea la "etiqueta sináptica" para que tu instancia futura pueda encontrar rápidamente la memoria episódica generada en la Fase 1.
+## Fase 2: Índice Hipocampal (timeline)
 
-1. **Lee el archivo:** `.agents/memory/semantic/taxonomy.md`
-   - **Objetivo:** Obtener la lista estricta de etiquetas permitidas. Si ninguna etiqueta cubre el dominio trabajado, **recomienda una nueva al usuario y espera su aprobación** antes de usarla.
-2. **Lee el archivo:** `.agents/memory/episodic/timeline.md`
-3. Añade una nueva entrada al principio del archivo bajo el mes correspondiente.
-   - **Formato estricto:** `- YYYY-MM-DD: [Tag1] [Tag2] Resumen de una sola línea de lo realizado.`
-   - **Que sea autocontenido:** el resumen debe ser una línea ejecutiva densa — con suficiente scope (archivos/conceptos clave tocados) para que el enrutamiento hipocampal pueda decidir relevancia sin abrir el archivo diario. Agregá un marcador opcional `Pendiente: ...` si el trabajo quedó inconcluso.
-4. **Límite de Crecimiento (Purga):** Revisa que el archivo `timeline.md` no contenga más de las **últimas 50 sesiones** registradas. Si supera este límite, elimina silenciosamente las sesiones más antiguas del final del archivo para mantener la economía de tokens.
+1. Leé `.agents/memory/semantic/taxonomy.md`. Si ninguna etiqueta cubre el dominio, **recomendá una al usuario y esperá su aprobación**.
+2. Agregá una entrada al **inicio** de `.agents/memory/episodic/timeline.md`:
+   - Formato: `- YYYY-MM-DD: [Tag1] [Tag2] Resumen de una línea.`
+   - **~200 caracteres en total**, densa y autocontenida, para decidir relevancia sin abrir el día. Nombrá el archivo (`DD-s2.md`) si hubo varias sesiones.
+   - El detalle vive en el episódico; no lo dupliques en el índice.
+3. Límite: **50 sesiones**. Si se excede, eliminá las más antiguas del final.
 
 ## Fase 3: Consolidación Semántica (Neuroplasticidad)
 
-Esta es la fase crítica del proceso. Debes evaluar si el trabajo de hoy alteró la "verdad absoluta" del sistema (el estado global).
+¿Lo de hoy cambió la verdad vigente (herramienta nueva, estructura, patrón, convención, regla del dominio)? **Sí →** sobrescribí la información obsoleta en el archivo afectado. La memoria semántica no tiene tiempo: es una foto del presente, no una crónica.
 
-1. Evalúa cognitivamente: ¿Las acciones de hoy implementaron una nueva tecnología, cambiaron un patrón de diseño global, modificaron la estructura, o alteraron las convenciones o reglas de negocio?
-2. Si la respuesta es SÍ:
-   - Identifica cuál de los archivos semánticos fue afectado (`architecture.md`, `conventions.md`, `business-rules.md`, `stack.md`).
-   - Abre el archivo correspondiente y sobrescribe la información obsoleta. Modifica el documento para que refleje el estado arquitectónico y lógico actual.
-   - **Advertencia estricta:** No agregues texto como si fuera un historial cronológico. La memoria semántica no tiene tiempo, debe ser una radiografía exacta del presente.
+🔴 **Tres tipos de archivo, tres contratos. Identificá cuál tocás ANTES de escribir:**
 
-## Fase 4: Vaciado de la Corteza Prefrontal (Memoria de Trabajo)
+| Archivo                                                     | Responde              | Contrato                                                                                                          |
+| ----------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `architecture` · `stack` · `conventions` · `business-rules` | ¿cuál es la regla?    | **Regla + cita a `docs/`**, ≤ ~400 caracteres. Describe algo que ya existe, así que siempre hay doc donde citar. |
+| `active-tasks`                                              | ¿qué falta hacer?     | Tarea en 1-2 frases, sin cita obligatoria. **Lo terminado se borra** (Fase 6).                                    |
+| `taxonomy`                                                  | ¿qué etiquetas valen? | Lista cerrada; una etiqueta nueva exige aprobación.                                                               |
 
-Prepara el entorno para que la próxima sesión inicie sin fricción cognitiva.
+**Anatomía de una entrada de reglas:** regla en imperativo + a lo sumo **una** frase de razón + cita al doc canónico. Ejemplo: _"Nunca aprobar un pago sin remito conformado: el faltante se reclama antes de pagar. → `docs/procedimientos/pagos.md §2`"_.
 
-1. **Abre el archivo:** `.agents/memory/semantic/active-tasks.md`
-2. Limpia las tareas que fueron completadas exitosamente durante esta sesión.
-3. **Clasificá el backlog:** Asegurate de que toda tarea restante esté organizada bajo la siguiente matriz (Prioridad + Esfuerzo):
-   - **Jerarquía principal (Prioridad — Eisenhower):**
-     - `🚨 P1: Crítico (Importante y Urgente)` — blockers, vulnerabilidades, fallas de facturación.
-     - `🧭 P2: Estratégico (Importante, NO Urgente)` — refactors preventivos, core features / roadmap.
-     - `🧯 P3: Ruido (Urgente, NO Importante)` — cambios cosméticos menores, issues de baja criticidad.
-     - `🗄️ P4: Archivo (Ni Importante, Ni Urgente)` — icebox de ideas, deuda menor.
-   - **Etiqueta secundaria (Esfuerzo — T-Shirt Sizing):** prefijá cada tarea con su esfuerzo:
-     - `[🟢 Snack]` — (< 1 h) tarea rápida.
-     - `[🟡 Sesión]` — (2-4 h) trabajo profundo de una tarde.
-     - `[🔴 Épica]` — (> 1 día) tarea enorme que DEBE dividirse en sub-tareas antes de empezar.
-4. **Define el próximo paso:** Escribe de manera clara y concisa cuál debería ser la primera acción lógica para la siguiente iteración, priorizando siempre las tareas de **P1: Crítico**.
+- **Lo que NO entra** (va al doc que la entrada cita): mediciones, ejemplos y contraejemplos; argumentación de más de una frase. La **historia del descubrimiento** ("se detectó cuando…", "reemplaza a la regla anterior") ni siquiera va al doc: es narrativa de sesión y vive solo en el episódico.
+- **Test rápido:** si al dejar solo la regla y la cita la entrada sigue siendo accionable, el resto sobraba.
+- **Sin doc donde citar → crealo o extendé uno en `docs/`** y recién entonces escribí la entrada. La memoria nunca es el único lugar donde vive un detalle importante.
+- **Citá `docs/` (comportamiento, procedimientos) o una skill local (conocimiento técnico); nunca el episódico.** El episódico envejece por diseño: citarlo inyecta datos viejos en la foto del presente.
+- **Nunca en la memoria:** credenciales, tokens ni datos personales de terceros (clientes, empleados, proveedores). La memoria se versiona y se comparte: nombrá el sistema donde viven, no el dato.
+- **Lo verifica `node .agents/check-memory-contract.js`:** entradas largas sin cita, citas a docs inexistentes y citas al episódico. Mide la **forma**, no si lo escrito es cierto.
 
-> **Fuente única de deuda técnica:** toda deuda técnica detectada en la sesión se registra acá, en el backlog clasificado de `active-tasks.md`. Nunca permitas que la deuda se disperse en issues sin clasificar o notas sueltas — esto garantiza visibilidad clara de lo urgente, lo importante y lo que puede esperar.
+## Fase 4: Documentación y Roadmap
 
-## Fase 5: Enrutamiento de Conocimiento (Aprendizaje Continuo)
+1. **`docs/` es el destino por defecto del comportamiento vigente.** Si lo que cambió tiene doc propio (una feature, un procedimiento), actualizalo para que refleje lo que existe ahora.
+2. **El roadmap solo cambia si cambió el ALCANCE** (algo entra, sale o se reclasifica). 🔴 **El avance de ejecución no va al roadmap:** se lee en toda sesión (`start.md`), así que lo que se le agrega lo pagan todas las sesiones futuras. Terminar una tarea o cerrar una verificación va a `docs/` y a `active-tasks.md`.
+3. **Barrido de coherencia** (obligatorio si cambió un valor, un límite o un nombre): buscá el valor VIEJO en `docs/` y en la memoria semántica, y corregí cada aparición. Aplica también a lo que se **elimina**: una pieza borrada suele sobrevivir en varios documentos que nadie volvió a mirar.
 
-Si durante la sesión descubriste un nuevo patrón, una solución a un bug recurrente, o una mejora arquitectónica:
+## Fase 5: Aprendizaje Continuo (Skills)
 
-1. **NO lo agregues directamente a `AGENTS.md`.** El system prompt raíz debe mantenerse liviano y estable.
-2. **Identificá el destino correcto:** Determiná si el aprendizaje pertenece a:
-   - Un **archivo de memoria semántica** (`conventions.md`, `architecture.md`, `stack.md`, `business-rules.md`) — si altera una verdad global.
-   - Un **archivo de skill** (`.agents/skills/[nombre]/SKILL.md`) — si es una técnica reutilizable o un patrón específico de dominio.
-   - Un **archivo de documentación** (`docs/`) — si es una explicación o especificación a nivel de producto.
-3. **Enrutá el conocimiento** al archivo apropiado. Solo agregá a `AGENTS.md` si constituye una nueva regla universal o requiere la creación de una nueva entrada de skill.
+Un patrón nuevo, la solución a un problema recurrente o una mejora de método va al `SKILL.md` del dominio, **no a `AGENTS.md`** (salvo una regla universal nueva o el alta de una skill). `AGENTS.md` se carga siempre: todo lo que se le agrega lo paga cada sesión.
 
-### Guarda de Skills Externas (Inmutable)
+**Guarda de Skills Externas (inmutable):** nunca modifiques skills registradas en `skills-lock.json`; las gestiona un CLI externo y toda edición local se pierde.
 
-**NUNCA modifiques** archivos dentro de skills registradas en `skills-lock.json`. Esas carpetas son gestionadas por un CLI de skills externo (ej. `npx skills update`) y cualquier edición local se perderá en la próxima actualización.
+- Conocimiento **específico del proyecto** en el dominio de una skill externa → escribilo en la skill **local** más cercana.
+- Conocimiento **genérico de la tecnología** → no lo persistas: llegará con la actualización oficial.
 
-- **Cómo identificarlas:** leé `skills-lock.json` en la raíz del proyecto. Cada clave bajo `"skills"` corresponde a una carpeta de solo-lectura en `.agents/skills/`.
-- **Si el conocimiento descubierto pertenece al dominio de una skill externa:**
-  1. **Específico del proyecto** (ej. "no usar el auth del proveedor X porque colisiona con nuestra config"): escribilo en la skill **local** más cercana a ese dominio.
-  2. **Genérico de la tecnología** (ej. un bug conocido de upstream): no lo persistas — ya estará cubierto en la próxima actualización oficial de la skill.
+## Fase 6: Flush de la Memoria de Trabajo (`active-tasks.md`)
 
-*Fundamento: Esto previene el "system prompt bloat" — una inflación gradual del archivo raíz que degrada la economía de tokens y diluye las directivas centrales del agente — a la vez que protege el código gestionado externamente de pérdidas silenciosas.*
+1. 🔴 **Borrá lo TERMINADO, no lo marques como hecho.** Este archivo responde "¿qué falta?": un ítem cerrado ya migró su conocimiento a `docs/` y a las reglas, y dejarlo lo convierte en basura que todas las sesiones pagan al leerlo.
+   - **Un ✅ en este archivo es un hallazgo**, salvo que califique algo que sigue pendiente (ej. "el formulario ✅ existe; falta publicarlo").
+   - **Antes de borrar, verificá que su detalle viva en `docs/`**; si no, movelo primero (Fase 4).
+2. **Estados externos con fecha y entorno de verificación.** Lo que vive fuera de la fuente primaria (configuración de terceros, una entrega prometida, un pago programado) envejece sin que nada lo delate: anotá cuándo y dónde se verificó. Una fecha programada no prueba que algo ocurrió; al vencer, queda "verificar" hasta tener evidencia.
+3. **Ítems `[Watch]`:** algo que no se hace hoy pero hay que vigilar, con su **disparador** para retomarlo (una fecha, un umbral, un evento). Sin disparador, es ruido.
+4. **Clasificá el backlog** por Prioridad (Eisenhower) + Esfuerzo (T-Shirt):
+   - `🚨 P1` Crítico (importante y urgente) · `🧭 P2` Estratégico (importante, no urgente) · `🧯 P3` Ruido (urgente, no importante) · `🗄️ P4` Archivo (icebox).
+   - `[🟢 Snack]` < 1 h · `[🟡 Sesión]` 2-4 h · `[🔴 Épica]` > 1 día (se divide antes de empezar) · `[Watch]` sin esfuerzo propio, con disparador.
+5. Escribí el **próximo paso** lógico, priorizando P1.
 
-## Fase 6: Sincronización de Planificación y Feature-Docs (Opcional)
+**Estilo:** cada ítem en 1-2 frases; si necesita más, citá el doc. El detalle exhaustivo vive en el episódico del día.
 
-Si el proyecto mantiene un roadmap maestro, tablero de tareas o documento de planificación (ej. `docs/ROADMAP.md`, `docs/00-MASTER-ROADMAP.md`):
+> **Fuente única de pendientes y deuda:** todo lo pendiente se registra acá, clasificado — nunca disperso en notas sueltas.
 
-1. Revisá el documento de planificación.
-2. Si la sesión de hoy completó un hito, marcálo como completado.
-3. Si la sesión reveló nuevos pasos, bloqueos o pivotes arquitectónicos, actualizá el documento en consecuencia.
-4. **El documento de planificación, como la memoria semántica, debe reflejar siempre la verdad actual** — no un registro histórico.
+## Fase 7: Cierre con el usuario
 
-**Documentación de features (as-built):** Si los archivos modificados en esta sesión pertenecen a un dominio o feature con documentación dedicada (ej. `docs/features/*`), auditá y actualizá esos documentos para que reflejen la implementación final. Esto evita que la deuda de documentación "as-built" se acumule entre sesiones.
-
-*Nota interna para el LLM: Una vez ejecutadas estas 6 fases y modificados los archivos correspondientes en el sistema, informá al usuario con un mensaje breve que la memoria ha sido consolidada exitosamente y que la sesión puede cerrarse.*
+Informá en pocas líneas que la memoria quedó consolidada. Si hay pendientes cuyo cierre **solo puede confirmar una persona** (una verificación manual, una decisión, algo que pasó fuera del sistema), listalos numerados y pedile que marque los que ya no aplican: la fuente primaria no los delata, y sin esa pregunta sobreviven indefinidamente.

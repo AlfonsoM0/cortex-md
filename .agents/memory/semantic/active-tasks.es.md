@@ -1,47 +1,37 @@
 # 🧠 Tareas Activas (Memoria de Trabajo)
 
-## 🎯 Foco
+> **Este archivo responde "¿qué falta hacer?".** Solo lo pendiente o en curso: lo terminado se **borra** (su conocimiento ya vive en `docs/` y en las reglas). El comportamiento vigente vive en `docs/`; el alcance, en el roadmap.
+>
+> 🔴 **La fuente primaria le gana a este archivo.** Un documento de estado envejece hacia el pesimismo (declara pendiente lo ya hecho). Verificá contra la fuente antes de declarar algo pendiente o bloqueado.
 
-*La única tarea principal actualmente en curso.*
+## 📍 Estado
 
-- **Objetivo:**
-- **Estado:** *Ej: En progreso / Bloqueada / Pendiente de revisión*
-- **Archivos clave:**
+_El estado verificado del sistema, con fecha y cómo verificarlo. Lo externo (configuración de terceros, entregas, pagos programados) lleva cuándo y dónde se comprobó._
 
-## 🚀 Próximos Pasos (Próxima Sesión)
+- _Ej: Producción al día con la versión `abc1234` (verificado AAAA-MM-DD con `<comando>`)._
 
-*La(s) primera(s) acción(es) lógica(s) para la próxima sesión, en orden. Prefijá cada una con prioridad + esfuerzo.*
+## 🚀 Próximos Pasos
 
-1. **[🧭 P2: Estratégico] [🟡 Sesión]** *Describí el próximo paso concreto.*
+_La primera acción lógica de la próxima sesión, priorizando P1. Prefijo: prioridad + esfuerzo._
 
----
+1. **[🧭 P2] [🟡 Sesión]** _Describí el próximo paso concreto._
 
-## 📋 Backlog (Clasificado)
+## 👀 Watch
 
-> Clasificá cada tarea por **Prioridad (Eisenhower)** y prefijala con **Esfuerzo (T-shirt sizing)**:
-> `[🟢 Snack]` (< 1h) · `[🟡 Sesión]` (2-4h) · `[🔴 Épica]` (> 1 día, debe dividirse antes de empezar).
-> Este archivo es la **fuente única de deuda técnica** — nunca dejes que la deuda se disperse en notas sueltas.
+_Lo que no se hace hoy pero hay que vigilar. Cada ítem lleva su **disparador** (fecha, umbral o evento); sin disparador es ruido._
 
-### 🚨 P1: Crítico (Importante y Urgente)
+- **[🧯 P3] [Watch]** _Ej: Primer cobro recurrente el AAAA-MM-DD: verificar que se registró._
 
-*Blockers, vulnerabilidades, fallas de facturación. Hacer ahora.*
+## 📋 Backlog
 
-- *(ninguna)*
+> **Prioridad (Eisenhower):** `🚨 P1` crítico · `🧭 P2` estratégico · `🧯 P3` ruido · `🗄️ P4` archivo.
+> **Esfuerzo (T-Shirt):** `[🟢 Snack]` < 1 h · `[🟡 Sesión]` 2-4 h · `[🔴 Épica]` > 1 día (se divide antes de empezar) · `[Watch]` con disparador.
+> Cada ítem en 1-2 frases; si necesita más, citá el doc. **Fuente única de pendientes y deuda.**
 
-### 🧭 P2: Estratégico (Importante, NO Urgente)
+_Agrupá por dominio cuando el backlog crezca (ej. Seguridad, Datos — o Stock, Proveedores). Dentro de cada grupo, de mayor a menor prioridad._
 
-*Core del roadmap, refactors preventivos. Planificar y hacer metódicamente.*
+- _(ninguno)_
 
-- *(ninguna)*
+## 🗄️ Archivo (Icebox)
 
-### 🧯 P3: Ruido (Urgente, NO Importante)
-
-*Cambios cosméticos o reportes de baja criticidad. Hacer rápido o delegar.*
-
-- *(ninguna)*
-
-### 🗄️ P4: Archivo (Ni Importante, Ni Urgente)
-
-*Icebox de ideas, deuda técnica menor, features des-priorizados.*
-
-- *(ninguna)*
+- _(ninguno)_
