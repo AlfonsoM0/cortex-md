@@ -38,7 +38,7 @@ El agente descarga el framework, copia solo lo necesario en tu idioma, conecta t
    cp /tmp/cortex-md/AGENTS.md tu-proyecto/AGENTS.md
    ```
 
-2. **Conectá tus herramientas.** La memoria solo funciona si cada sesión la carga: cada herramienta tiene que **leer `AGENTS.md` al iniciar**, **ejecutar `start.md` antes de responder** y **no usar una memoria propia en paralelo**. Codex CLI lee `AGENTS.md` de forma nativa; **Claude Code** no (carga `CLAUDE.md`), así que necesita un archivo puente y admite un hook de inicio de sesión; Gemini CLI, Cursor, Aider y Copilot se configuran apuntando a `AGENTS.md`. Snippets listos para copiar: [`docs/agent-bridges.es.md`](docs/agent-bridges.es.md).
+2. **Conectá tus herramientas.** La memoria solo funciona si cada sesión la carga: cada herramienta tiene que **leer `AGENTS.md` al iniciar**, **ejecutar `start.md` antes de responder** y **no usar una memoria propia en paralelo**. Codex CLI lee `AGENTS.md` de forma nativa; **Claude Code** no (carga `CLAUDE.md`), así que necesita un archivo puente y admite un hook de inicio de sesión; **Hermes Agent** tampoco: se rutea con un `.hermes.md` puente; Gemini CLI, Cursor, Aider y Copilot se configuran apuntando a `AGENTS.md`. Snippets listos para copiar: [`docs/agent-bridges.es.md`](docs/agent-bridges.es.md).
 
 3. **Ejecutá el bootstrap:** pedile a tu agente _"Leé y ejecutá `.agents/workflows/init.md`"_.
 
@@ -48,16 +48,21 @@ El agente descarga el framework, copia solo lo necesario en tu idioma, conecta t
 - **Al terminar**, cuando le digas "listo" o "gracias", ofrece guardar lo aprendido (`end.md`).
 - **Una vez por semana** — el día que elegiste en la entrevista; por defecto, **viernes** —, hace un chequeo liviano de la memoria (`maintenance.md`) y te propone, solo si hace falta, una limpieza, una optimización profunda (`defrag.md`) o una nueva charla de alineación. Nada se modifica sin tu sí.
 
-## Entorno Recomendado: API Directa + Extensiones Agentiles
+## Entorno Recomendado: Suscripción con Arnés Propio + Prompt Caching
 
-Para obtener el máximo rendimiento y la mejor relación costo-beneficio con Cortex-MD, recomendamos utilizar **herramientas agentiles conectadas directamente a la API de los modelos** en lugar de interfaces de chat o IDEs comerciales con suscripción.
+Cortex-MD está pensado para correr sobre un **servicio por suscripción que incluya su propio arnés agentil y prompt caching** (por ejemplo, Claude Code con un plan de Claude o Codex CLI con un plan de ChatGPT). También funciona con un **arnés libre**, como [Hermes Agent](https://hermes-agent.nousresearch.com), conectado a la API key del LLM que prefieras.
 
-- **Eficiencia en Prompt Caching (Start):** Cortex-MD inyecta contexto estático constante (`architecture.md`, `stack.md`, etc.) al inicio de cada sesión. Al usar APIs modernas, este contexto se almacena en caché y **reduce drásticamente el costo de lectura de tokens** (a menudo en más de un 90%). Las herramientas o IDEs comerciales no siempre garantizan un control predecible de este caché, consumiendo rápidamente tus cuotas premium de uso.
-- **Autonomía para actualizar memoria (End):** El ciclo de finalización demanda lectura y escritura autónoma en múltiples archivos (`YYYY/MM/DD.md`, `timeline.md`, etc.). Una extensión agentil tiene permisos granulares para gestionar el sistema de archivos local y preparar commits. Las interfaces tradicionales suelen requerir copiado, pegado y creación de archivos de forma manual.
-- **Ventanas de contexto intactas:** La planificación arquitectónica requiere la ventana de contexto íntegra (muchos modelos ofrecen hoy cientos de miles de tokens). La conexión cruda a la API te entrega el 100% de esta capacidad sin la compresión o el descarte silencioso de información que algunas herramientas aplican en segundo plano para ahorrar costos.
-- **Ejecución estricta de workflows:** El protocolo requiere auditorías y validaciones rigurosas. Un agente autónomo bien configurado fuerza el cumplimiento de instrucciones sin desviarse. Las herramientas cerradas a veces priorizan la velocidad, lo que a menudo provoca que el modelo "olvide" o ignore instrucciones largas del sistema.
+Lo que el framework necesita del entorno, y por qué:
 
-Para una implementación óptima, conecta tu propia llave de API a tu extensión agentil de preferencia y apunta el agente para que lea `AGENTS.md` en la raíz de tu repositorio.
+- **Prompt caching:** `AGENTS.md` y lo que carga `start.md` (`architecture.md`, `stack.md`, `active-tasks.md`) forman un prefijo estable que se relee en cada turno de la sesión. Con caché, esa relectura cuesta una fracción del precio normal; por eso el nivel siempre cargado tiene un presupuesto de tamaño (`defrag.md § Fase 1`).
+- **Arnés agentil con acceso al sistema de archivos:** `end.md` lee y escribe varios archivos (`YYYY/MM/DD.md`, `timeline.md`, memoria semántica) y `start.md` tiene que ejecutarse antes de responder. Un arnés lo hace solo y, si admite hooks de inicio de sesión, lo garantiza; una interfaz de chat obliga a copiar y pegar a mano.
+- **Costo predecible:** cada sesión paga el ciclo `start` → `end` y, cada tanto, un `defrag`. Con tarifa plana ese costo fijo no se nota; con API se paga por token.
+- **Una sola memoria:** los arneses con memoria propia (la automática de Claude Code, la integrada de Hermes) tienen que desactivarse para el proyecto. Snippets en [`docs/agent-bridges.es.md`](docs/agent-bridges.es.md).
+
+**Con arnés libre + API key**, además:
+
+- Elegí un proveedor y modelo **con prompt caching**; sin caché, cada turno paga el contexto completo.
+- Reservá el modelo más capaz para `defrag.md` y los workflows en modo `strict`; las sesiones rutinarias pueden usar uno más económico (ver [Tres Modos de Ejecución](#la-solución-tres-modos-de-ejecución)).
 
 ## Fundamentos Neurocientíficos del Sistema
 

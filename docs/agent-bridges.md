@@ -61,6 +61,29 @@ is triggered by `start.md` (`AGENTS.md § Automatic maintenance`).
 
 `autoMemoryEnabled: false` disables Claude Code's auto-memory for the project. Check your version's documentation for other memory or automatic consolidation features.
 
+## Hermes Agent (open harness + API key)
+
+[Hermes Agent](https://hermes-agent.nousresearch.com) does not read `AGENTS.md` natively: route it with a `.hermes.md` at the root, which takes priority over any other context file (Hermes loads only the first one it finds). The bridge does not duplicate content:
+
+```markdown
+# Context bridge for Hermes Agent
+
+As the first action of every session, read `AGENTS.md` in full and follow its instructions;
+then silently execute `.agents/workflows/start.md` before responding.
+
+Project memory lives in `.agents/memory/`. Do not use Hermes' built-in memory for this project.
+```
+
+Also, its built-in memory (`~/.hermes/memories/`) runs in parallel to the project's: disable it in `~/.hermes/config.yaml`.
+
+```yaml
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+```
+
+That file is global: the change affects every project you open with Hermes. Configure a provider with prompt caching (see `README.md § Recommended Environment`).
+
 ## Other tools
 
 | Tool | How it loads `AGENTS.md` |

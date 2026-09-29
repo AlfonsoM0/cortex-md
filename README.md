@@ -38,7 +38,7 @@ The agent downloads the framework, copies only what is needed in your language, 
    cp /tmp/cortex-md/AGENTS.md your-project/AGENTS.md
    ```
 
-2. **Connect your tools.** Memory only works if every session loads it: each tool must **read `AGENTS.md` at launch**, **execute `start.md` before responding**, and **not use its own memory in parallel**. Codex CLI reads `AGENTS.md` natively; **Claude Code** does not (it loads `CLAUDE.md`), so it needs a bridge file and supports a session start hook; Gemini CLI, Cursor, Aider, and Copilot are configured pointing to `AGENTS.md`. Ready-to-copy snippets: [`docs/agent-bridges.md`](docs/agent-bridges.md).
+2. **Connect your tools.** Memory only works if every session loads it: each tool must **read `AGENTS.md` at launch**, **execute `start.md` before responding**, and **not use its own memory in parallel**. Codex CLI reads `AGENTS.md` natively; **Claude Code** does not (it loads `CLAUDE.md`), so it needs a bridge file and supports a session start hook; **Hermes Agent** doesn't either: route it with a bridge `.hermes.md`; Gemini CLI, Cursor, Aider, and Copilot are configured pointing to `AGENTS.md`. Ready-to-copy snippets: [`docs/agent-bridges.md`](docs/agent-bridges.md).
 
 3. **Run the bootstrap:** ask your agent _"Read and execute `.agents/workflows/init.md`"_.
 
@@ -48,16 +48,21 @@ The agent downloads the framework, copies only what is needed in your language, 
 - **At the end**, when you say "done" or "thanks", it offers to save learnings (`end.md`).
 - **Once a week** — on the day you chose in the interview; default: **Friday** —, it runs a lightweight memory check (`maintenance.md`) and proposes, only if needed, a cleanup, deep optimization (`defrag.md`), or a new alignment conversation. Nothing is modified without your consent.
 
-## Recommended Environment: Direct API + Agentic Extensions
+## Recommended Environment: Subscription with Built-in Harness + Prompt Caching
 
-For maximum performance and cost-efficiency with Cortex-MD, we recommend using **agentic tools connected directly to model APIs** rather than standard chat interfaces or commercial subscription-based IDEs.
+Cortex-MD is designed to run on a **subscription service that includes its own agentic harness and prompt caching** (for example, Claude Code with a Claude plan, or Codex CLI with a ChatGPT plan). It also works with an **open harness**, such as [Hermes Agent](https://hermes-agent.nousresearch.com), connected to the API key of your preferred LLM.
 
-- **Prompt Caching Efficiency (Start):** Cortex-MD injects constant static context (`architecture.md`, `stack.md`, etc.) at the start of each session. By using modern APIs, this context is cached, **dropping token read costs drastically** (often by more than 90%). Commercial tools cannot always guarantee predictable control over this cache, rapidly consuming premium usage quotas.
-- **Autonomous Memory Updates (End):** The end-of-session cycle demands autonomous reading and writing across multiple files (`YYYY/MM/DD.md`, `timeline.md`, etc.). An agentic extension has granular permissions to manage the local file system and stage commits. Traditional chat interfaces often force manual copying, pasting, and file creation.
-- **Intact Context Windows:** Architectural planning requires the full context window (many models today offer hundreds of thousands of tokens). A raw API connection gives you 100% of this capacity without the compression or silent information discarding that some tools apply in the background to save costs.
-- **Strict Workflow Execution:** The protocol requires rigorous audits and validations. A well-configured autonomous agent enforces instruction compliance without drifting. Closed tools sometimes prioritize speed, which often causes the model to "forget" or ignore long system instructions.
+What the framework needs from the environment, and why:
 
-For an optimal implementation, simply connect your own API key to your preferred agentic extension and point the agent to read `AGENTS.md` at the root of your repository.
+- **Prompt caching:** `AGENTS.md` and whatever `start.md` loads (`architecture.md`, `stack.md`, `active-tasks.md`) form a stable prefix that is re-read on every turn of the session. With caching, that re-read costs a fraction of the normal price; this is why the always-loaded tier has a size budget (`defrag.md § Phase 1`).
+- **Agentic harness with file system access:** `end.md` reads and writes several files (`YYYY/MM/DD.md`, `timeline.md`, semantic memory) and `start.md` must run before responding. A harness does this on its own and, if it supports session-start hooks, guarantees it; a chat interface forces manual copy and paste.
+- **Predictable cost:** every session pays for the `start` → `end` cycle and, now and then, a `defrag`. On a flat-rate plan that fixed cost goes unnoticed; on an API you pay per token.
+- **A single memory:** harnesses with their own memory (Claude Code's auto-memory, Hermes' built-in memory) must have it disabled for the project. Snippets in [`docs/agent-bridges.md`](docs/agent-bridges.md).
+
+**With an open harness + API key**, also:
+
+- Choose a provider and model **with prompt caching**; without it, every turn pays for the full context.
+- Reserve the most capable model for `defrag.md` and workflows in `strict` mode; routine sessions can use a cheaper one (see [Three Execution Modes](#the-solution-three-execution-modes)).
 
 ## Neuroscientific Foundations
 

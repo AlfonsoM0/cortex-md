@@ -61,6 +61,29 @@ lo dispara `start.md` (`AGENTS.md § Mantenimiento automático`).
 
 `autoMemoryEnabled: false` desactiva la memoria automática de Claude Code para el proyecto. Revisá la documentación de tu versión por otras funciones de memoria o consolidación automática.
 
+## Hermes Agent (arnés libre + API key)
+
+[Hermes Agent](https://hermes-agent.nousresearch.com) no lee `AGENTS.md` de forma nativa: se rutea con un `.hermes.md` en la raíz, que tiene prioridad sobre cualquier otro archivo de contexto (Hermes carga solo el primero que encuentra). El puente no duplica contenido:
+
+```markdown
+# Puente de contexto para Hermes Agent
+
+Como primera acción de cada sesión, leé `AGENTS.md` completo y seguí sus instrucciones;
+después ejecutá `.agents/workflows/start.md` en silencio antes de responder.
+
+La memoria del proyecto vive en `.agents/memory/`. No uses la memoria integrada de Hermes para este proyecto.
+```
+
+Además, su memoria integrada (`~/.hermes/memories/`) es paralela a la del proyecto: desactivala en `~/.hermes/config.yaml`.
+
+```yaml
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+```
+
+Ese archivo es global: el cambio afecta a todos los proyectos que abras con Hermes. Configurá un proveedor con prompt caching (ver `README.es.md § Entorno Recomendado`).
+
 ## Otras herramientas
 
 | Herramienta         | Cómo carga `AGENTS.md`                                                                  |
