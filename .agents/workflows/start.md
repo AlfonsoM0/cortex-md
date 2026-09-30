@@ -38,10 +38,18 @@ In case of discrepancy, the higher level wins. 🔴 **Memory ages toward pessimi
 
 ## Phase 2: Recent Memory (yesterday and the last sessions)
 
-**ALWAYS read** — like waking up and remembering yesterday:
+**If you work on assignment from another agent (with a brief), skip this phase:** your context is the brief.
+
+Otherwise, **ALWAYS read** — like waking up and remembering yesterday:
 
 1. `.agents/memory/episodic/timeline.md` — the hippocampal index: one line per session, the 50 most recent. It tells you what was worked on lately and where each record is.
-2. **The last session:** the most recent record in `.agents/memory/episodic/YYYY/MM/` (`DD.md` or the highest `DD-sN.md`), starting with its **Context for Next Session**. If it is only memory maintenance (`[CortexMD]`), also read the last project session.
+2. **The last session, with this exact command** — do not open the whole record:
+
+   ```bash
+   node .agents/check-memory-contract.js --recent
+   ```
+
+   It prints the **Summary** and the **Context for Next Session** of the most recent record and, if that session was only memory maintenance (`[CortexMD]`), also those of the last project session. Open the rest of the record only if the task needs it. Without Node: open the most recent record (`DD.md` or the highest `DD-sN.md`) and read only those two sections.
 
 ## Phase 3: Hippocampal Routing (older memories, on demand)
 

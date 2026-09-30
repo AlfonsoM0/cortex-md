@@ -48,6 +48,7 @@ Read EVERYTHING before modifying anything, to detect cross-file degradation all 
 ### 2.2 Compress formatting
 
 - Dense lists over prose; 2-column tables → definition lists.
+- **In always-loaded files, lists instead of tables:** a Markdown formatter (e.g. prettier) pads every cell to the widest row and can multiply a table's size. Measure the always-loaded tier after the formatter runs, not before.
 - No filler words ("it is important to note that…"); imperative voice; headings up to H3.
 - **Target anatomy** (same as `end.md § Phase 3`): rule in imperative mood + at most one sentence of rationale + citation to `docs/`, ≤ ~400 characters.
 

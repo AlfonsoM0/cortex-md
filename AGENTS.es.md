@@ -21,15 +21,13 @@ Este archivo es mi base y se carga primero en cada sesión. Desde acá sé quié
 
 Mi memoria vive en archivos, modelada sobre un cerebro humano: no recuerdo nada que los archivos no digan. Cargo poco y amplío solo lo que la tarea necesita.
 
-| Componente | Como… | Guarda | Lo leo |
-| --- | --- | --- | --- |
-| `.agents/memory/semantic/` `architecture` · `stack` · `business-rules` · `active-tasks` | Neocorteza: lo que sé hoy | Reglas cortas del presente, reglas del dominio, pendientes | En cada sesión |
-| `semantic/` `conventions` · `taxonomy` | Neocorteza | Estilo de la casa, etiquetas | Cuando la tarea los toca — si dudo, los leo |
-| `.agents/memory/episodic/timeline.md` + la última sesión | Recuerdos recientes y de ayer | Índice de las últimas 50 sesiones; qué pasó la última vez | En cada sesión |
-| `.agents/memory/episodic/YYYY/MM/` | Recuerdos antiguos | El registro de cada sesión | Cuando necesito historia |
-| `docs/` | Conocimiento detallado | Cómo funciona el proyecto; cada regla cita su doc | Cuando una regla apunta ahí |
-| `.agents/skills/` | Habilidades | Saber especializado | Cuando la tarea lo necesita (§ 4) |
-| `.agents/workflows/` | Hábitos | Despertar, dormir, ejercitar la memoria | Ver abajo |
+- `.agents/memory/semantic/` `architecture` · `stack` · `business-rules` · `active-tasks` — Neocorteza: lo que sé hoy: Reglas cortas del presente, reglas del dominio, pendientes. **Lo leo:** En cada sesión.
+- `semantic/` `conventions` · `taxonomy` — Neocorteza: Estilo de la casa, etiquetas. **Lo leo:** Cuando la tarea los toca — si dudo, los leo.
+- `.agents/memory/episodic/timeline.md` + la última sesión — Recuerdos recientes y de ayer: Índice de las últimas 50 sesiones; qué pasó la última vez. **Lo leo:** En cada sesión, salvo que trabaje por encargo.
+- `.agents/memory/episodic/YYYY/MM/` — Recuerdos antiguos: El registro de cada sesión. **Lo leo:** Cuando necesito historia.
+- `docs/` — Conocimiento detallado: Cómo funciona el proyecto; cada regla cita su doc. **Lo leo:** Cuando una regla apunta ahí.
+- `.agents/skills/` — Habilidades: Saber especializado. **Lo leo:** Cuando la tarea lo necesita (§ 4).
+- `.agents/workflows/` — Hábitos: Despertar, dormir, ejercitar la memoria. **Lo leo:** Ver abajo.
 
 - **Jerarquía de verdad:** fuente primaria > memoria semántica y `docs/` (el presente) > memoria episódica (la historia). La memoria envejece declarando pendiente lo ya hecho: verifico contra la fuente antes de afirmar que algo falta.
 - **La memoria da la regla; el detalle vive en `docs/`**, que cada regla cita. El episódico nunca se cita como estado vigente.
@@ -40,12 +38,10 @@ Mi memoria vive en archivos, modelada sobre un cerebro humano: no recuerdo nada 
 
 ### Workflows del ciclo de vida
 
-| Cuándo | Workflow |
-| --- | --- |
-| **Despertar** — primer mensaje de cada sesión, en silencio, antes de responder | `.agents/workflows/start.md` |
-| **Dormir** — el usuario dice que terminó o pide guardar; si da señales de cierre sin pedirlo, **lo ofrezco** | `.agents/workflows/end.md` |
-| **Chequeo** — primera sesión desde el día de mantenimiento sin chequeo registrado | `.agents/workflows/maintenance.md` (liviano, no reescribe la memoria) |
-| **Ejercitar la memoria** — el usuario lo pide ("optimizá la memoria"), lo recomienda el chequeo, o después de la instalación (defrag + purga) — con confirmación y el modelo más capaz de mi servicio | `.agents/workflows/defrag.md` |
+- **Despertar** — primer mensaje de cada sesión, en silencio, antes de responder → `.agents/workflows/start.md`
+- **Dormir** — el usuario dice que terminó o pide guardar; si da señales de cierre sin pedirlo, **lo ofrezco** → `.agents/workflows/end.md`
+- **Chequeo** — primera sesión desde el día de mantenimiento sin chequeo registrado → `.agents/workflows/maintenance.md` (liviano, no reescribe la memoria)
+- **Ejercitar la memoria** — el usuario lo pide ("optimizá la memoria"), lo recomienda el chequeo, o después de la instalación (defrag + purga) — con confirmación y el modelo más capaz de mi servicio → `.agents/workflows/defrag.md`
 
 <!-- cortex:optional:deep-plan -->
 - **Planificación profunda:** antes de un cambio que abarque más de 3 archivos o cruce límites entre módulos, `.agents/workflows/deep-plan.md`. Propongo el modo (`strict` · `standard` · `autonomous`) que corresponde a mi modelo; el usuario puede elegir otro.

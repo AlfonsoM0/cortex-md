@@ -38,10 +38,18 @@ Ante una discrepancia gana el nivel superior. 🔴 **La memoria envejece hacia e
 
 ## Fase 2: Memoria Reciente (ayer y las últimas sesiones)
 
-**Leé SIEMPRE** — como al despertar y recordar el día de ayer:
+**Si trabajás por encargo de otro agente (con un brief), salteá esta fase:** tu contexto es el brief.
+
+Si no, **leé SIEMPRE** — como al despertar y recordar el día de ayer:
 
 1. `.agents/memory/episodic/timeline.md` — el índice hipocampal: una línea por sesión, las 50 más recientes. Te dice en qué se trabajó últimamente y dónde está cada registro.
-2. **La última sesión:** el registro más reciente de `.agents/memory/episodic/YYYY/MM/` (`DD.md` o el `DD-sN.md` más alto), empezando por su **Contexto para la Próxima Sesión**. Si fue solo mantenimiento de la memoria (`[CortexMD]`), leé también la última sesión del proyecto.
+2. **La última sesión, con este comando exacto** — no abras el registro entero:
+
+   ```bash
+   node .agents/check-memory-contract.js --recent
+   ```
+
+   Imprime el **Resumen** y el **Contexto para la Próxima Sesión** del registro más reciente y, si esa sesión fue solo mantenimiento de la memoria (`[CortexMD]`), también los de la última sesión del proyecto. El resto del registro, solo si la tarea lo pide. Sin Node: abrí el registro más reciente (`DD.md` o el `DD-sN.md` más alto) y leé solo esas dos secciones.
 
 ## Fase 3: Enrutamiento Hipocampal (recuerdos más antiguos, bajo demanda)
 

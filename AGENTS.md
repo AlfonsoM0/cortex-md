@@ -21,15 +21,13 @@ This file is my foundation and is loaded first in every session. From here I kno
 
 My memory lives in files, modeled on a human brain: I do not remember anything the files do not say. I load little and expand only what the task needs.
 
-| Component | Like… | Holds | I read it |
-| --- | --- | --- | --- |
-| `.agents/memory/semantic/` `architecture` · `stack` · `business-rules` · `active-tasks` | Neocortex: what I know now | Short rules of the present, domain rules, pending tasks | Every session |
-| `semantic/` `conventions` · `taxonomy` | Neocortex | House style, tags | When the task touches them — if in doubt, I read them |
-| `.agents/memory/episodic/timeline.md` + the last session | Recent memories and yesterday | Index of the last 50 sessions; what happened last time | Every session |
-| `.agents/memory/episodic/YYYY/MM/` | Old memories | The record of every session | When I need history |
-| `docs/` | Detailed knowledge | How the project works; each rule cites its doc | When a rule points there |
-| `.agents/skills/` | Abilities | Specialized know-how | When the task needs it (§ 4) |
-| `.agents/workflows/` | Habits | Waking up, sleeping, exercising memory | See below |
+- `.agents/memory/semantic/` `architecture` · `stack` · `business-rules` · `active-tasks` — Neocortex: what I know now: Short rules of the present, domain rules, pending tasks. **I read it:** Every session.
+- `semantic/` `conventions` · `taxonomy` — Neocortex: House style, tags. **I read it:** When the task touches them — if in doubt, I read them.
+- `.agents/memory/episodic/timeline.md` + the last session — Recent memories and yesterday: Index of the last 50 sessions; what happened last time. **I read it:** Every session, unless I work on a brief.
+- `.agents/memory/episodic/YYYY/MM/` — Old memories: The record of every session. **I read it:** When I need history.
+- `docs/` — Detailed knowledge: How the project works; each rule cites its doc. **I read it:** When a rule points there.
+- `.agents/skills/` — Abilities: Specialized know-how. **I read it:** When the task needs it (§ 4).
+- `.agents/workflows/` — Habits: Waking up, sleeping, exercising memory. **I read it:** See below.
 
 - **Truth hierarchy:** primary source > semantic memory and `docs/` (the present) > episodic memory (history). Memory ages by declaring completed work as pending: I verify against the source before claiming something is missing.
 - **Memory gives the rule; detail lives in `docs/`**, which each rule cites. Episodic memory is never cited as current state.
@@ -40,12 +38,10 @@ My memory lives in files, modeled on a human brain: I do not remember anything t
 
 ### Lifecycle workflows
 
-| When | Workflow |
-| --- | --- |
-| **Waking up** — first message of every session, silently, before responding | `.agents/workflows/start.md` |
-| **Sleeping** — the user says the work is done or asks to save it; if they signal closing without asking, I **offer it** | `.agents/workflows/end.md` |
-| **Check-up** — first session on or after the maintenance day without a recorded check | `.agents/workflows/maintenance.md` (lightweight, does not rewrite memory) |
-| **Exercising memory** — the user asks ("optimize the memory"), the check-up recommends it, or after installation (defrag + purge) — with confirmation and the most capable model of my service | `.agents/workflows/defrag.md` |
+- **Waking up** — first message of every session, silently, before responding → `.agents/workflows/start.md`
+- **Sleeping** — the user says the work is done or asks to save it; if they signal closing without asking, I **offer it** → `.agents/workflows/end.md`
+- **Check-up** — first session on or after the maintenance day without a recorded check → `.agents/workflows/maintenance.md` (lightweight, does not rewrite memory)
+- **Exercising memory** — the user asks ("optimize the memory"), the check-up recommends it, or after installation (defrag + purge) — with confirmation and the most capable model of my service → `.agents/workflows/defrag.md`
 
 <!-- cortex:optional:deep-plan -->
 - **Deep planning:** before a change that spans more than 3 files or crosses module boundaries, `.agents/workflows/deep-plan.md`. I propose the mode (`strict` · `standard` · `autonomous`) that fits my model; the user can choose another.

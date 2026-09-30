@@ -216,7 +216,7 @@ With the synthesis approved by the user, `init` creates the documentation (`docs
 
 - **Truth hierarchy** and the third-party rule, read before loading anything.
 - **Phase 1 (What I know):** the short rules of the present (`architecture`, `stack`, `business-rules`, `active-tasks`, `maintenance-log`, and roadmap if present); `conventions` and `taxonomy` when the task touches them — if in doubt, it reads them.
-- **Phase 2 (Yesterday and recent memories):** always the timeline and the last session, starting with its "Context for Next Session".
+- **Phase 2 (Yesterday and recent memories):** always the timeline and, with an exact command (`node .agents/check-memory-contract.js --recent`), only the Summary and Context for Next Session of the last session. An agent working on a brief skips it.
 - **Phase 3 (Older memories):** only if the task's domains match timeline tags, reads those sessions as history, not current state; searches older sessions when needed.
 - **Phase 4:** reminds what is due (P1 and `[Watch]` items due today or tomorrow) and recommends at most one thing — continue an incomplete installation, the post-installation defrag + purge, logging an unconsolidated session (only with git), or the weekly check-up.
 

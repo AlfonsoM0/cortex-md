@@ -3,7 +3,10 @@
  * check-memory-contract.js — Cortex-MD guardrail for the SHAPE of semantic memory.
  * Zero dependencies (Node >= 18). Run from anywhere inside the workspace:
  *
- *   node .agents/check-memory-contract.js
+ *   node .agents/check-memory-contract.js           → contract + always-loaded tier
+ *   node .agents/check-memory-contract.js --recent  → prints yesterday's memory
+ *     (Summary + Context for Next Session of the last session, and of the last
+ *     project session if the last one was only [CortexMD]) — `start.md § Phase 2`
  *
  * The contract (see `.agents/workflows/end.md § Phase 3`):
  *   a rule file entry = rule (imperative) + at most 1 sentence of reason
@@ -29,9 +32,9 @@
  *   - Short list items WITHOUT a citation: allowed, but the contract prefers
  *     rule + citation, so the defrag should review them.
  *   - Size of the ALWAYS-LOADED tier (what every session reads: `AGENTS.md`,
- *     the bridge, `start.md`, the short rules, the timeline and the last
- *     session), in bytes and estimated tokens, so the defrag report can
- *     measure it.
+ *     the bridge, `start.md`, the short rules, the timeline and the recent
+ *     memory that `--recent` prints), in bytes and estimated tokens, so the
+ *     defrag report can measure it.
  *
  * 🔴 What it can NOT detect — it measures FORM, never TRUTH:
  *   - A short entry that lies (a renamed helper, a changed limit). That is
@@ -204,8 +207,12 @@ function auditFile(fileName) {
   return findings;
 }
 
-/** The most recent session record (`YYYY/MM/DD.md` or `DD-sN.md`), if any. */
-function lastSession() {
+/** The two sections of a session record that the next session reads. */
+const RECENT_SECTION =
+  /^## (Summary|Resumen|Context for Next Session|Contexto para la Pr[oó]xima Sesi[oó]n)\b/;
+
+/** Session records (`YYYY/MM/DD.md`, `DD-sN.md`), newest first. */
+function sessionRecords() {
   const episodic = path.join(root, ".agents", "memory", "episodic");
   const records = [];
   const walk = (dir, rel) => {
@@ -215,31 +222,66 @@ function lastSession() {
       const relName = rel ? `${rel}/${name}` : name;
       if (fs.statSync(full).isDirectory()) walk(full, relName);
       const m = relName.match(/^(\d{4})\/(\d{2})\/(\d{2})(?:-s(\d+))?\.md$/);
-      if (m) records.push({ key: [m[1], m[2], m[3], Number(m[4] || 1)], relName });
+      if (m) {
+        const date = `${m[1]}-${m[2]}-${m[3]}`;
+        records.push({ rel: `.agents/memory/episodic/${relName}`, date, file: name, n: Number(m[4] || 0) });
+      }
     }
   };
   walk(episodic, "");
-  const cmp = (a, b) => {
-    for (let i = 0; i < 4; i++) {
-      if (a.key[i] !== b.key[i]) return a.key[i] < b.key[i] ? -1 : 1;
-    }
-    return 0;
-  };
-  records.sort(cmp);
-  const last = records.pop();
-  return last ? `.agents/memory/episodic/${last.relName}` : null;
+  return records.sort((a, b) =>
+    a.date === b.date ? b.n - a.n : a.date < b.date ? 1 : -1,
+  );
+}
+
+/** Was the session ONLY memory maintenance? Its timeline entry says so. */
+function isMaintenanceOnly(record, timeline) {
+  const sameDay = timeline.split("\n").filter((l) => l.startsWith(`- ${record.date}:`));
+  const entry =
+    sameDay.find((l) => l.includes(record.file)) ||
+    (record.n ? undefined : sameDay.find((l) => !/\d{2}-s\d+\.md/.test(l)));
+  if (!entry) return false;
+  const tags = [...entry.matchAll(/\[([A-Za-z0-9]+)\]/g)].map(([, t]) => t);
+  return tags.length > 0 && tags.every((t) => t === "CortexMD");
+}
+
+/** Summary + Context for Next Session of a record. */
+function recentSections(rel) {
+  const out = [];
+  let keep = false;
+  for (const line of fs.readFileSync(path.join(root, rel), "utf8").split(/\r?\n/)) {
+    if (line.startsWith("## ")) keep = RECENT_SECTION.test(line);
+    if (keep) out.push(line);
+  }
+  return out.join("\n").trim();
+}
+
+/** Yesterday's memory: what `start.md § Phase 2` reads, and what is measured. */
+function recentMemory() {
+  const tl = path.join(root, ".agents", "memory", "episodic", "timeline.md");
+  const timeline = fs.existsSync(tl) ? fs.readFileSync(tl, "utf8") : "";
+  const blocks = [];
+  for (const record of sessionRecords()) {
+    blocks.push(`# ${record.rel}\n\n${recentSections(record.rel)}`);
+    if (!isMaintenanceOnly(record, timeline)) break;
+  }
+  return blocks.join("\n\n");
 }
 
 function reportAlwaysLoaded() {
   let total = 0;
   const rows = [];
-  const last = lastSession();
-  for (const rel of last ? [...ALWAYS_LOADED, last] : ALWAYS_LOADED) {
+  for (const rel of ALWAYS_LOADED) {
     const file = path.join(root, rel);
     if (!fs.existsSync(file)) continue;
     const bytes = fs.statSync(file).size;
     total += bytes;
     rows.push(`   ${rel}: ${bytes} B`);
+  }
+  const recent = Buffer.byteLength(recentMemory(), "utf8");
+  if (recent > 0) {
+    total += recent;
+    rows.push(`   recent memory (--recent): ${recent} B`);
   }
   console.log(
     `ℹ️  Always-loaded tier: ${total} B (~${Math.round(total / BYTES_PER_TOKEN)} tokens)`,
@@ -248,6 +290,10 @@ function reportAlwaysLoaded() {
 }
 
 function main() {
+  if (process.argv.includes("--recent")) {
+    console.log(recentMemory());
+    return 0;
+  }
   const findings = RULE_FILES.flatMap(auditFile);
   reportAlwaysLoaded();
   if (uncited.length > 0) {

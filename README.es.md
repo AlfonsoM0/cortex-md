@@ -215,7 +215,7 @@ Con la síntesis aprobada por el usuario, `init` crea la documentación (`docs/0
 
 - **Jerarquía de verdad** y la regla de contenido de terceros, antes de cargar nada.
 - **Fase 1 (Lo que sé):** las reglas cortas del presente (`architecture`, `stack`, `business-rules`, `active-tasks`, `maintenance-log` y el roadmap si existe); `conventions` y `taxonomy` cuando la tarea los toca — ante la duda, los lee.
-- **Fase 2 (Ayer y los recuerdos recientes):** siempre el timeline y la última sesión, empezando por su "Contexto para la Próxima Sesión".
+- **Fase 2 (Ayer y los recuerdos recientes):** siempre el timeline y, con un comando exacto (`node .agents/check-memory-contract.js --recent`), solo el Resumen y el Contexto para la Próxima Sesión de la última sesión. Un agente que trabaja por encargo la saltea.
 - **Fase 3 (Recuerdos más antiguos):** solo si los dominios de la tarea coinciden con etiquetas del timeline, lee esas sesiones como historia, no como estado; busca en las sesiones antiguas cuando hace falta.
 - **Fase 4:** recuerda lo que vence (P1 y `[Watch]` que vencen hoy o mañana) y recomienda a lo sumo una cosa — continuar una instalación incompleta, el defrag + purga post-instalación, registrar una sesión sin consolidar (solo con git) o el chequeo semanal.
 

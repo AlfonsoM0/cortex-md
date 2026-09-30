@@ -48,6 +48,7 @@ Leé TODO antes de cambiar nada, para detectar degradación entre archivos a la 
 ### 2.2 Comprimir formato
 
 - Listas densas sobre prosa; tablas de 2 columnas → lista de definición.
+- **En los archivos de lectura fija, listas en vez de tablas:** un formateador de Markdown (p. ej. prettier) rellena cada celda hasta la fila más ancha y puede multiplicar el tamaño de la tabla. Medí la carga fija después de que corre el formateador, no antes.
 - Sin relleno ("es importante notar que…"); voz imperativa; encabezados hasta H3.
 - **Anatomía objetivo** (misma de `end.md § Fase 3`): regla en imperativo + a lo sumo una frase de razón + cita a `docs/`, ≤ ~400 caracteres.
 
