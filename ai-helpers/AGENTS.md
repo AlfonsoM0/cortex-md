@@ -1,10 +1,7 @@
 # AI Helpers — Context Barrier
 
-This folder is for **exclusive manual use by the user**. 
+This folder holds the working material of the stepwise pipeline (briefs, breakdowns, specs, prompts, audits).
 
-**Agents and IDEs:** Do NOT index, read, or reference any file in this directory 
-unless the user explicitly instructs you to do so.
+**Agents and IDEs:** do NOT index or read this folder on your own initiative. Read and write it **only when the user or a pipeline prompt asks you to** (e.g. `prompts/breakdown-orchestrator.md`, `generators/*`): then work here normally.
 
-The content here is invoked strictly on-demand as part of a stepwise execution 
-pipeline. Reading it automatically would pollute your context window with 
-irrelevant working drafts.
+Reading it automatically would pollute your context window with irrelevant working drafts.

@@ -1,32 +1,28 @@
-# Code Conventions
+# Conventions (House Style)
 
 > **Contract:** each entry is a rule in imperative mood + at most one sentence of rationale + citation to canonical doc (`→ docs/...`), ≤ ~400 characters. Details live in `docs/`; history lives in episodic memory. Checker: `node .agents/check-memory-contract.js`.
 
-> In a non-technical project, this file stores the **house style**: document formats, communication tone and templates, file and record naming conventions.
+<!-- cortex:example — replace the placeholders with real entries and delete this block (init.md § Phase 4)
+Software:
+- **Name components in PascalCase and utilities in kebab-case** (`UserProfile.tsx`, `date-utils.ts`). → `docs/conventions/code.md`
+- **Never use `any` in TypeScript:** type the boundary or use `unknown`. → `docs/conventions/code.md`
+Administrative:
+- **Answer every customer in their language, in ≤ 5 lines:** result, thanks, and sign-off, without internal jargon. → `docs/customer-service/reply-templates.md`
+- **Name files** `YYYY-MM-DD_supplier_type.pdf`. → `docs/systems.md`
+-->
 
-## General Style
+## Style
 
-- **Indentation:** *E.g.: 2 spaces*
-- **Quotes:** *E.g.: Single (`'`)*
-- **Semicolons:** *E.g.: Yes / No*
+_In a software project: code style and structure. In any project: the format of documents and records._
 
 ## Naming
 
-| Element | Convention | Example |
-|---|---|---|
-| *Components* | *PascalCase* | *`UserProfile.tsx`* |
-| *Functions/variables* | *camelCase* | *`getUserById`* |
-| *Utility files* | *kebab-case* | *`date-utils.ts`* |
-| *Constants* | *UPPER_SNAKE_CASE* | *`MAX_RETRY_COUNT`* |
+_How files, records, folders — or components, functions, and variables — are named._
 
-## Component Structure
+## Communication and Templates
 
-*Describe the standard pattern for creating a component (e.g., where logic goes, where styles go, use of barrel exports, etc.).*
+_Tone, length, and templates for messages to customers, suppliers, or the team._
 
-## Import Rules
+## Prohibited
 
-*Describe the import order and whether path aliases are used (e.g., `@/`).*
-
-## Prohibited Patterns
-
-*List practices that MUST NOT be used in the project (e.g., `any` in TypeScript, `!important` in CSS, etc.).*
+_Practices that must never be used._

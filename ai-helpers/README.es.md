@@ -122,4 +122,4 @@ Al finalizar una característica, **es responsabilidad del usuario** ejecutar `.
 
 Los prompts en `generators/` y `prompts/` pueden y deben ser personalizados para adaptarse a las herramientas y convenciones específicas de tu equipo. Son simples archivos Markdown diseñados para ser modificados.
 
-> **Nota sobre los modos de workflow:** Los workflows de extensión (`deep-plan.md`, `audit.md`) soportan tres modos (`strict`, `standard`, `autonomous`). Si tu equipo no utiliza modelos de razonamiento de alta capacidad (Opus, o1, Deep Research), considerá **eliminar el modo `autonomous`** de tus workflows para reducir la fricción cognitiva en la selección de modo. Menos opciones = menos overhead.
+> **Nota sobre los modos de workflow:** Los workflows de extensión (`deep-plan.md`, `audit.md`) soportan tres modos (`strict`, `standard`, `autonomous`). Si el usuario no especifica uno, el agente propone el que corresponde a su propio modelo, así nadie tiene que elegir.

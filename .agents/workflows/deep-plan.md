@@ -1,5 +1,5 @@
 ---
-description: Deep planning with Proof of Work. Forces the LLM to map the repo, contrast with architecture rules, and partition work into atomic tasks. Supports three execution modes (strict, standard, autonomous) to adapt to different model capabilities. Note: autonomous mode can be removed in projects that do not use high-capacity models.
+description: Deep planning with Proof of Work. Forces the LLM to map the repo, contrast with architecture rules, and partition work into atomic tasks. Supports three execution modes (strict, standard, autonomous); the agent proposes the one that fits its model.
 ---
 
 # Workflow: Deep Planning with Proof of Work
@@ -8,27 +8,15 @@ description: Deep planning with Proof of Work. Forces the LLM to map the repo, c
 
 ## Phase 0: Mode Selection
 
-Determine the execution mode based on the user's request.
+Three execution modes adapt this workflow to the model running it:
 
-**Check the user's instruction.** They should have specified one of three modes:
+- **`strict`** — Full evidence printing and blocking gates at every phase. For lightweight, fast models (e.g., Haiku 4.5 and equivalents) that benefit from externalized reasoning.
+- **`standard`** — All phases are executed but may be consolidated; evidence printing only at key checkpoints. For mid-tier models (e.g., Sonnet 5.5 and equivalents).
+- **`autonomous`** — Holistic execution: you receive the objectives of each phase and choose how to achieve them; only the final output format is mandatory. For the highest-reasoning models (e.g., Opus 5.5 and equivalents).
 
-- **`strict`** — Full evidence printing and blocking gates at every phase. Designed for lightweight, fast models (e.g., Haiku, Flash, GPT-4o-mini) that benefit from externalized reasoning.
-- **`standard`** — All phases are executed but may be consolidated. Evidence printing required only at key checkpoints. Designed for mid-tier models (e.g., Sonnet, GPT-4o, Gemini Pro).
-- **`autonomous`** — Holistic execution. You receive the objectives of each phase but choose how to achieve them. Only the final output format is mandatory. Designed for heavyweight reasoning models (e.g., Opus, o1, Deep Research).
+**If the user specified a mode, use it.** If not, **propose the one that fits your own model** in one line and proceed unless the user chooses another:
 
-**If the user did NOT specify a mode**, ask them before proceeding:
-
-> This workflow supports three execution modes that adapt to different model capabilities:
->
-> - **`strict`** — Step-by-step with evidence gates. Best for fast/lightweight models (Haiku, Flash, mini). Maximizes accuracy at the cost of speed.
-> - **`standard`** — Balanced. All phases run but with flexibility to consolidate steps. Best for mid-tier models (Sonnet, GPT-4o).
-> - **`autonomous`** — Holistic analysis with maximum freedom. Best for heavyweight reasoning models (Opus, o1). Maximizes speed and depth.
->
-> Which mode should I use? (Next time, you can specify it directly, e.g., "Create a strict plan" or "Plan this autonomously".)
-
-**Wait for the user's response before proceeding.**
-
-> **Customization:** If your team does not use high-capacity reasoning models (Opus, o1, Deep Research), you can remove the `autonomous` mode from this workflow to reduce selection friction. Fewer options = less cognitive overhead for the user.
+> I'll plan in **`<mode>`** mode, which fits the model I'm running on. If you prefer another — `strict` (step by step, with evidence), `standard` (balanced), or `autonomous` (holistic) — just tell me.
 
 ---
 

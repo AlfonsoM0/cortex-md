@@ -1,5 +1,5 @@
 ---
-description: Auditoría post-feature con validación basada en evidencia. Verifica cambios contra las reglas de la memoria semántica usando output real de herramientas. Soporta tres modos de ejecución (strict, standard, autonomous) para adaptarse a distintas capacidades de modelo. Nota: el modo autonomous puede eliminarse en proyectos que no usen modelos de alta capacidad.
+description: Auditoría post-feature con validación basada en evidencia. Verifica cambios contra las reglas de la memoria semántica usando output real de herramientas. Soporta tres modos de ejecución (strict, standard, autonomous); el agente propone el que corresponde a su modelo.
 ---
 
 # Workflow: Auditoría Post-Feature con Evidencia
@@ -8,27 +8,17 @@ description: Auditoría post-feature con validación basada en evidencia. Verifi
 
 ## Fase 0: Selección de Modo
 
-Determiná el modo de ejecución basándote en la solicitud del usuario.
+Tres modos de ejecución adaptan este workflow al modelo que lo ejecuta:
 
-**Revisá la instrucción del usuario.** Debería haber especificado uno de tres modos:
+- **`strict`** — Cada check requiere evidencia impresa (output de herramientas, resultados de grep, conteos de líneas); cada fase es un dominio cognitivo separado ejecutado secuencialmente. Para modelos ligeros (ej. Haiku 4.5 y equivalentes).
+- **`standard`** — Todas las fases se ejecutan pero la evidencia impresa se requiere solo en checkpoints clave; las fases pueden consolidarse. Para modelos de rango medio (ej. Sonnet 5.5 y equivalentes).
+- **`autonomous`** — Evaluación holística: recibís los objetivos de la auditoría y elegís cómo verificarlos. Para los modelos de mayor razonamiento (ej. Opus 5.5 y equivalentes).
 
-- **`strict`** — Cada check requiere evidencia impresa (output de herramientas, resultados de grep, conteos de líneas). Cada fase es un dominio cognitivo separado ejecutado secuencialmente. Diseñado para modelos ligeros (ej. Haiku, Flash, GPT-4o-mini).
-- **`standard`** — Todas las fases se ejecutan pero la evidencia impresa se requiere solo en checkpoints clave. Las fases pueden consolidarse. Diseñado para modelos de rango medio (ej. Sonnet, GPT-4o, Gemini Pro).
-- **`autonomous`** — Evaluación holística. Recibís los objetivos de auditoría pero elegís cómo verificarlos. Solo la fase de Validación Técnica (lint/build/typecheck) es obligatoria y bloqueante, sin importar el modo. Diseñado para modelos pesados (ej. Opus, o1, Deep Research).
+En todos los modos, la fase de Validación Técnica es obligatoria y bloqueante.
 
-**Si el usuario NO especificó un modo**, preguntale antes de continuar:
+**Si el usuario especificó un modo, usalo.** Si no, **proponé el que corresponde a tu propio modelo** en una línea y seguí salvo que el usuario elija otro:
 
-> Este workflow de auditoría soporta tres modos de ejecución:
->
-> - **`strict`** — Cada check requiere evidencia impresa. Ideal para modelos rápidos/ligeros (Haiku, Flash, mini). Maximiza la rigurosidad.
-> - **`standard`** — Balanceado. Todos los checks se ejecutan pero con flexibilidad. Ideal para modelos de rango medio (Sonnet, GPT-4o).
-> - **`autonomous`** — Evaluación holística con máxima libertad. Ideal para modelos pesados de razonamiento (Opus, o1). Solo los gates de lint/build/typecheck son obligatorios.
->
-> ¿Qué modo debo usar? (La próxima vez, podés especificarlo directamente, ej. "Ejecutá una auditoría estricta" o "Auditá autónomamente".)
-
-**Esperá la respuesta del usuario antes de continuar.**
-
-> **Personalización:** Si tu equipo no utiliza modelos de razonamiento de alta capacidad (Opus, o1, Deep Research), podés eliminar el modo `autonomous` de este workflow para reducir la fricción en la selección. Menos opciones = menos overhead cognitivo para el usuario.
+> Voy a auditar en modo **`<modo>`**, que corresponde al modelo en el que estoy corriendo. Si preferís otro — `strict` (evidencia en cada check), `standard` (balanceado) o `autonomous` (holístico) — decímelo.
 
 ---
 
@@ -123,6 +113,8 @@ Ejecutá las herramientas de validación automatizada del proyecto.
 4. **Ejecutá tests relacionados** si existen para los paquetes/módulos modificados.
 
 **Regla de gateway:** Si cualquier comando en esta fase falla, NO avances al reporte. Corregí los problemas primero, luego volvé a ejecutar.
+
+**Sin toolchain:** si el proyecto no tiene linter, verificador de tipos ni build (revisá `stack.md`), registralo en el reporte y ejecutá lo que sí exista (tests, `node .agents/check-memory-contract.js`). El gateway bloquea ante fallas, nunca ante comandos que no existen.
 
 ---
 

@@ -1,4 +1,4 @@
-# Entrevista de Alineación (referencia de `init.md`)
+# Entrevista de Alineación (referencia para la instalación y la re-alineación)
 
 **Para qué:** que el agente y el usuario compartan la misma imagen del proyecto — qué problema resuelve, qué se quiere lograr, cómo se trabaja hoy, qué no admite error, qué apura, dónde está la información y cuánta autonomía tiene el agente. Sin esa imagen, la memoria registra suposiciones y el agente optimiza lo que no importa.
 
@@ -7,19 +7,31 @@ Sirve para cualquier proyecto: un producto de software, un comercio, una consult
 ## Cómo conducirla
 
 - **Conversación, no formulario.** Dos o tres preguntas por turno, empezando por las abiertas. Seguí el hilo del usuario: si al contestar una pregunta ya responde otras, no las repitas.
+- **Guiá a quien no sabe qué necesita.** Muchos usuarios nunca le describieron su trabajo a un asistente. Ante un "no sé" o una respuesta muy vaga: ofrecé 2-4 opciones concretas de su dominio y recomendá una; partí de los **dolores**, no de los requisitos (_"¿Qué hiciste esta semana que fue repetitivo, o que te dio miedo equivocarte?"_); usá las respuestas de ejemplo (_Ej._) para mostrar el nivel de detalle esperado.
+- **Sin jerga.** La primera vez que uses una palabra técnica, traducila: *modelo* = el "cerebro" de IA con el que hablás; *herramienta* o *arnés* = la app donde hablás con él, que puede leer y escribir tus archivos; *memoria* = las notas que el agente guarda en esta carpeta para recordar entre conversaciones; *contexto* = lo que el agente puede tener presente durante una conversación.
+- **Verificá la comprensión** con un ejemplo concreto antes de cerrar un bloque (_"Entonces, si un proveedor entrega tarde dos veces, le bajo la prioridad — ¿es así?"_).
 - **Primero leé, después preguntá.** Lo que ya dicen el repositorio, el README o los documentos compartidos no se pregunta: se **confirma** ("Entiendo que X, ¿es así?").
 - **Pedí lo concreto.** Ante una respuesta vaga, pedí un ejemplo, un número o "la última vez que pasó". _"Los proveedores fallan"_ → _"¿Cuál fue el último que falló, y qué costó?"_
-- **Reflejá al cerrar cada bloque:** 3-5 viñetas con lo que entendiste, y pedí que corrija. Es donde se detectan los malentendidos.
+- **Reflejá al cerrar cada bloque:** 3-5 viñetas con lo que entendiste, y pedí que corrija. Es donde se detectan los malentendidos. Durante la instalación, agregá los puntos confirmados a las notas de la entrevista (`.cortex-tmp/interview-notes.md`).
 - **Respetá el tiempo.** Al empezar, preguntá de cuánto tiempo dispone. Las preguntas ★ son esenciales; el resto profundiza. La entrevista puede repartirse en varias sesiones: lo que falte queda como pendiente en `active-tasks.md`.
 - **"No sé" es una respuesta válida.** Registrala como incógnita a verificar; nunca la completes con una suposición.
 - **Nunca pidas credenciales ni datos personales de terceros.** Preguntá **dónde** viven, no qué dicen.
-- **Profundidad proporcional al riesgo.** Un proyecto personal chico puede quedarse en los bloques 1, 2, 3, 6 y 9; uno que maneja dinero, datos de terceros o clientes recorre todos.
+- **Profundidad proporcional al riesgo.** Un proyecto personal chico puede quedarse en los bloques 0, 1, 2, 3, 6 y 9; uno que maneja dinero, datos de terceros o clientes recorre todos.
 
 ## Bloques de preguntas
 
+### 0. Tu entorno de trabajo
+
+- ★ ¿Para qué me vas a usar más: trabajo de gestión (documentos, planillas, correo, proveedores, clientes) o programar? _Ej.: "llevar el local: pedidos, proveedores y precios" · "desarrollar nuestra app de reservas"._
+- ★ ¿Desde qué app estamos hablando ahora? Vos ya lo sabés: **confirmalo** en palabras simples (_"Estamos hablando en Claude Cowork, la app de Claude para trabajar con tus archivos"_).
+- ¿Pagás una suscripción (Claude, ChatGPT, Gemini…) o usás una API key con pago por uso? ¿Hay un límite de gasto? Si el usuario no lo sabe, deducilo de la herramienta y confirmalo.
+- ★ ¿Esta carpeta se sincroniza con la nube (Drive, OneDrive, Dropbox) o la comparte alguien más? Afecta los datos sensibles y las copias de respaldo.
+
+**Recomendá desde lo que sos.** Partí de tu propio servicio y recomendá su forma de uso adecuada al trabajo, con su modelo de mayor razonamiento (investigalos en su documentación oficial): p. ej., Claude → Cowork para gestión y Claude Code para programar (el mismo servicio en dos formas); OpenAI → ChatGPT Work para gestión y Codex para programar; Antigravity → con su Gemini de mayor razonamiento. Sugerí otro entorno solo si el actual no cubre el uso (p. ej., trabajar desde WhatsApp o Telegram, o sin suscripción → Hermes Agent con una API key, para usuarios avanzados). Recomendá, nunca exijas: la memoria se instala en la herramienta que el usuario está usando.
+
 ### 1. El proyecto y su gente
 
-- ★ ¿Qué es el proyecto, en dos frases, y para quién es?
+- ★ ¿Qué es el proyecto, en dos frases, y para quién es? _Ej.: "una distribuidora de bebidas que vende a bares de la zona" · "una app para que los restaurantes tomen pedidos"._
 - ★ ¿En qué etapa está: idea, en construcción, operando, creciendo, en crisis?
 - ★ ¿Cuál es tu rol, y quién más participa o se ve afectado (socios, empleados, clientes, proveedores, otros agentes de IA)?
 - ¿Quién decide qué? ¿Hay alguien más a quien el agente deba rendir cuentas o consultar?
@@ -27,13 +39,13 @@ Sirve para cualquier proyecto: un producto de software, un comercio, una consult
 ### 2. Problemas
 
 - ★ ¿Qué problema resuelve el proyecto para sus clientes o destinatarios?
-- ★ ¿Qué problema querés resolver **vos** con la ayuda de un asistente? ¿Qué te quita más tiempo, dinero o tranquilidad hoy?
+- ★ ¿Qué problema querés resolver **vos** con la ayuda de un asistente? ¿Qué te quita más tiempo, dinero o tranquilidad hoy? _Ej.: "los lunes me la paso comparando listas de precios de proveedores" · "cada versión rompe algo que nadie probó"._
 - ¿Cuándo fue la última vez que ese problema te costó algo concreto? ¿Cuánto?
 - ¿Qué pasa si no se resuelve en los próximos meses?
 
 ### 3. Objetivos y éxito
 
-- ★ ¿Qué querés lograr en 3, 6 y 12 meses? (Buscá objetivos específicos, medibles y con fecha.)
+- ★ ¿Qué querés lograr en 3, 6 y 12 meses? (Buscá objetivos específicos, medibles y con fecha.) _Ej.: "cero faltantes de los 20 productos más vendidos para diciembre" · "10 restaurantes pagando en 6 meses"._
 - ★ ¿Cómo vas a saber que funcionó? ¿Qué número o señal lo prueba?
 - ¿Qué **no** es un objetivo? ¿Qué quedó afuera a propósito?
 - Cuando velocidad, calidad y costo chocan, ¿cuál gana, y en qué casos cambia?
@@ -43,7 +55,7 @@ Sirve para cualquier proyecto: un producto de software, un comercio, una consult
 
 Recorré con el usuario **una semana típica**, y para cada procedimiento que aparezca:
 
-- ★ ¿Qué lo dispara (un pedido, una fecha, un aviso)? ¿Cuáles son los pasos, con qué herramienta, y qué produce al final?
+- ★ ¿Qué lo dispara (un pedido, una fecha, un aviso)? ¿Cuáles son los pasos, con qué herramienta, y qué produce al final? _Ej.: "cuando el stock baja del mínimo, le mando un correo al proveedor y anoto el pedido en la planilla"._
 - ★ ¿Quién lo hace, cada cuánto y cuánto tarda?
 - ¿Dónde suele fallar o demorarse? ¿Qué excepciones aparecen y quién las resuelve?
 - ¿Está escrito en algún lado, o vive en la cabeza de alguien?
@@ -62,7 +74,7 @@ Recorré con el usuario **una semana típica**, y para cada procedimiento que ap
 
 ### 6. Lo importante: dónde hay que tener cuidado
 
-- ★ ¿Qué tareas no admiten error? (Dinero, datos personales, temas legales o fiscales, reputación, la relación con un cliente clave.)
+- ★ ¿Qué tareas no admiten error? (Dinero, datos personales, temas legales o fiscales, reputación, la relación con un cliente clave.) _Ej.: "pagar dos veces una factura" · "borrar datos de clientes"._
 - ★ ¿Qué acciones son **irreversibles**?
 - ¿Qué salió mal alguna vez y no puede repetirse?
 - ¿Qué reglas no se rompen nunca, aunque alguien lo pida con apuro?
@@ -83,7 +95,7 @@ Ubicá cada tipo de tarea según **si su resultado se puede verificar fácil** y
 | **Fácil de verificar** | El agente actúa solo | El agente actúa y avisa; el usuario revisa |
 | **Difícil de verificar** | El agente propone; el usuario decide | Solo con aprobación explícita, o nunca |
 
-- ★ ¿Qué puede hacer el agente sin preguntar? ¿Qué tiene que proponer y esperar tu aprobación? ¿Qué no debe hacer nunca?
+- ★ ¿Qué puede hacer el agente sin preguntar? ¿Qué tiene que proponer y esperar tu aprobación? ¿Qué no debe hacer nunca? _Ej.: "puede redactar correos, pero los envío yo; nunca paga nada"._
 - ★ ¿Un mensaje a un cliente o a un proveedor puede salir sin que lo leas?
 - ¿Puede gastar dinero, borrar información o cambiar configuraciones? ¿Con qué límite?
 - Cuando el agente tenga que consultarte, ¿cómo lo preferís? (Recomendación: que traiga su propuesta y el costo de equivocarse, para que puedas responder en una palabra; y que agrupe las consultas.)
@@ -91,11 +103,14 @@ Ubicá cada tipo de tarea según **si su resultado se puede verificar fácil** y
 ### 9. Dónde está la información
 
 - ★ ¿Dónde vive la información útil: sistemas, planillas, carpetas, correo, chats, papel, tu cabeza?
-- ★ Para cada tipo de dato (stock, clientes, ventas, código, documentos), ¿cuál es la **fuente de verdad**? Si dos lugares dicen cosas distintas, ¿cuál gana?
+- ★ Para cada tipo de dato (stock, clientes, ventas, código, documentos), ¿qué **archivo o sistema** es la **fuente de verdad**? Si dos lugares dicen cosas distintas, ¿cuál gana? _Ej.: "la planilla `proveedores.xlsx` de la carpeta Proveedores" · "el código del repositorio y la base de datos de producción"._
+- ¿Hay algo fuera de esta carpeta (una unidad en la nube, un sistema en línea, un conector)? ¿Cómo llega el agente ahí?
 - ¿Quién la actualiza y cada cuánto? ¿Qué está desactualizado o duplicado?
 - ¿Cómo está organizada y nombrada? ¿Hay convenciones de carpetas o de archivos?
 - ¿A qué puede acceder el agente, y con permiso de lectura o también de escritura?
 - ¿Qué conocimiento importante no está escrito en ningún lado?
+
+Los archivos del negocio se quedan donde están: `docs/` va a explicar cómo se usan y dónde vive cada dato, nunca copiarlos.
 
 ### 10. FODA y pre-mortem
 
@@ -124,6 +139,7 @@ Ubicá cada tipo de tarea según **si su resultado se puede verificar fácil** y
 - ¿Con qué frecuencia vas a trabajar con el agente? ¿Cómo querés que te avise de un problema?
 - ¿Qué te molesta de un asistente? (Ej. que pregunte demasiado, que asuma, que se extienda.)
 - ¿Qué términos, siglas o nombres propios usa el proyecto? (Arman el glosario.)
+- ¿Querés ponerle un nombre y una personalidad a tu asistente? _Ej.: "Ana, paciente y práctica" · "un ingeniero senior que cuestiona mis decisiones"._ Si al usuario le da igual, proponé uno acorde al proyecto.
 - ★ Una vez por semana el agente revisa la memoria y, si hace falta, propone ordenarla. ¿Qué día te queda mejor? (Por defecto, **viernes**, para cerrar la semana. Se puede desactivar.)
 
 ### 14. Historia y aprendizajes
@@ -137,15 +153,17 @@ La entrevista no se guarda como transcripción: cada respuesta se convierte en d
 
 | Respuestas | Destino |
 | --- | --- |
-| Proyecto, problemas, objetivos y métricas, no-objetivos, FODA, pre-mortem, restricciones | `docs/00-PROJECT-BRIEF.md` — el **por qué** del proyecto. `AGENTS.md § Contexto` guarda un resumen de 3-5 líneas y lo cita. |
+| Entorno de trabajo (bloque 0) | `docs/agent-environment.md` y una línea en `stack.md`; la recomendación de forma de uso, al cierre de la instalación. |
+| Proyecto, problemas, objetivos y métricas, no-objetivos, FODA, pre-mortem, restricciones | `docs/00-PROJECT-BRIEF.md` — el **por qué** del proyecto. `AGENTS.md § Contexto del Proyecto` guarda un resumen de 3-5 líneas y lo cita. |
 | Criterios de decisión, lo que no admite error, lo irreversible | `docs/01-GUIDELINES.md` — cómo se decide. Las reglas invariables pasan a `business-rules.md` con su cita. |
 | Autonomía del agente y forma de consultar | `AGENTS.md` (se carga siempre: los permisos tienen que estar presentes en toda sesión). |
 | Procedimientos actuales | `docs/` (un doc por procedimiento o por feature); los flujos principales, como regla + cita en `architecture.md`. |
-| Fuente de verdad por tipo de dato, sistemas y accesos | `stack.md` (la fuente primaria, en la primera línea) y `architecture.md`. |
+| Fuente de verdad por tipo de dato, sistemas y accesos | `stack.md` (la fuente primaria, en la primera línea: archivos del negocio, carpetas o sistemas, incluidos los que están fuera de la carpeta) y el mapa del espacio de trabajo en `architecture.md`. |
 | Candidatos a automatizar | `active-tasks.md`, clasificados por prioridad y esfuerzo, indicando script / agente / agente con aprobación. |
 | Urgencias, fechas límite, temporadas | `active-tasks.md`: P1 o `[Watch]` con su disparador. |
 | Riesgos del pre-mortem y amenazas | `active-tasks.md` como `[Watch]` con disparador, y el detalle en el brief. |
-| Idioma, tono, estilo | `AGENTS.md` (comportamiento base) y `conventions.md` (formatos y plantillas). |
+| Nombre, personalidad y propósito del asistente | `AGENTS.md` (el encabezado de identidad, en primera persona). |
+| Idioma, tono, estilo | `AGENTS.md` (comportamiento base) y `conventions.md` (formatos y plantillas), citando un documento de `docs/` con el tono y las plantillas (p. ej. `docs/comunicacion.md`). |
 | Día de mantenimiento | `AGENTS.md § Mantenimiento automático` (por defecto, viernes). |
 | Glosario | `docs/glossary.md`, citado desde `conventions.md`. |
 | Áreas o dominios del proyecto | Propuesta de etiquetas para `taxonomy.md` (con aprobación). |

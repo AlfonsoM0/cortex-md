@@ -1,4 +1,4 @@
-# Alignment Interview (`init.md` reference)
+# Alignment Interview (reference for installation and re-alignment)
 
 **Purpose:** for the agent and the user to share the same mental model of the project — what problem it solves, what they want to achieve, how work is done today, what has zero-error tolerance, what is urgent, where information lives, and how much autonomy the agent has. Without this shared model, memory records assumptions and the agent optimizes for what does not matter.
 
@@ -7,19 +7,31 @@ Works for any project: a software product, a retail or wholesale business, a con
 ## How to conduct it
 
 - **Conversation, not a form.** Two or three questions per turn, starting with open-ended ones. Follow the user's thread: if answering one question already answers others, do not repeat them.
+- **Guide those who don't know what they need.** Many users have never described their work to an assistant. Faced with "I don't know" or a very vague answer: offer 2-4 concrete options from their domain and recommend one; start from **pains**, not requirements (_"What did you do this week that was repetitive, or that you were afraid to get wrong?"_); use the example answers (_E.g._) to show the expected level of detail.
+- **No jargon.** The first time you use a technical word, translate it: *model* = the AI "brain" you are talking to; *tool* or *harness* = the app where you talk to it, which can read and write your files; *memory* = the notes the agent keeps in this folder to remember between conversations; *context* = what the agent can keep in mind during one conversation.
+- **Check understanding** with a concrete example before closing a block (_"So if a supplier delivers late twice, I lower their priority — right?"_).
 - **Read first, ask second.** What the repository, README, or shared documents already state is not asked: it is **confirmed** ("I understand that X, is that right?").
 - **Ask for specifics.** Faced with a vague answer, ask for an example, a number, or "the last time that happened." _"Suppliers fail"_ → _"Which one failed most recently, and what did it cost?"_
-- **Reflect back when closing each block:** 3-5 bullet points with what you understood, and ask for corrections. This is where misunderstandings are caught.
+- **Reflect back when closing each block:** 3-5 bullet points with what you understood, and ask for corrections. This is where misunderstandings are caught. During installation, add the confirmed points to the interview notes (`.cortex-tmp/interview-notes.md`).
 - **Respect time.** When starting, ask how much time is available. Questions marked with ★ are essential; the rest go deeper. The interview can be spread across multiple sessions: whatever remains incomplete stays as pending items in `active-tasks.md`.
 - **"I don't know" is a valid answer.** Record it as an unknown to verify; never fill it with an assumption.
 - **Never ask for credentials or third-party personal data.** Ask **where** they live, not what they contain.
-- **Depth proportional to risk.** A small personal project can stick to blocks 1, 2, 3, 6, and 9; one handling money, third-party data, or customers should cover all of them.
+- **Depth proportional to risk.** A small personal project can stick to blocks 0, 1, 2, 3, 6, and 9; one handling money, third-party data, or customers should cover all of them.
 
 ## Question blocks
 
+### 0. Your work environment
+
+- ★ What will you use me for most: management work (documents, spreadsheets, email, suppliers, customers) or programming? _E.g.: "running the shop: orders, suppliers, and prices" · "developing our booking app"._
+- ★ Which app are we talking in right now? You already know it: **confirm** it in plain words (_"We are talking in Claude Cowork, the Claude app for working with your files"_).
+- Do you pay a subscription (Claude, ChatGPT, Gemini…) or use an API key with pay-per-use? Is there a spending limit? If the user does not know, infer it from the tool and confirm.
+- ★ Is this folder synced to the cloud (Drive, OneDrive, Dropbox) or shared with someone else? It affects sensitive data and backups.
+
+**Recommend from what you are.** Start from your own service and recommend its form of use suited to the work, with its highest-reasoning model (research them in its official documentation): e.g., Claude → Cowork for management and Claude Code for programming (the same service in two forms); OpenAI → ChatGPT Work for management and Codex for programming; Antigravity → with its highest-reasoning Gemini. Suggest another environment only when the current one does not cover the use (e.g., working from WhatsApp or Telegram, or without a subscription → Hermes Agent with an API key, for advanced users). Recommend, never require: memory is installed in the tool the user is using.
+
 ### 1. The project and its people
 
-- ★ What is the project, in two sentences, and who is it for?
+- ★ What is the project, in two sentences, and who is it for? _E.g.: "a beverage shop that sells to bars in the area" · "an app for restaurants to take orders"._
 - ★ What stage is it in: idea, under construction, operating, growing, in crisis?
 - ★ What is your role, and who else participates or is affected (partners, employees, customers, suppliers, other AI agents)?
 - Who decides what? Is there anyone else the agent must report to or consult?
@@ -27,13 +39,13 @@ Works for any project: a software product, a retail or wholesale business, a con
 ### 2. Problems
 
 - ★ What problem does the project solve for its customers or target audience?
-- ★ What problem do **you** want to solve with the help of an assistant? What takes up the most time, money, or peace of mind today?
+- ★ What problem do **you** want to solve with the help of an assistant? What takes up the most time, money, or peace of mind today? _E.g.: "I spend Mondays comparing supplier price lists" · "every release breaks something nobody tested"._
 - When was the last time that problem cost you something concrete? How much?
 - What happens if it isn't resolved in the coming months?
 
 ### 3. Goals and success
 
-- ★ What do you want to achieve in 3, 6, and 12 months? (Seek specific, measurable, time-bound goals.)
+- ★ What do you want to achieve in 3, 6, and 12 months? (Seek specific, measurable, time-bound goals.) _E.g.: "no stockouts of the 20 best-selling products by December" · "10 paying restaurants in 6 months"._
 - ★ How will you know it worked? What metric or signal proves it?
 - What is **not** a goal? What was intentionally left out?
 - When speed, quality, and cost conflict, which one wins, and in what cases does that change?
@@ -43,7 +55,7 @@ Works for any project: a software product, a retail or wholesale business, a con
 
 Walk through **a typical week** with the user, and for each procedure that comes up:
 
-- ★ What triggers it (an order, a date, a notification)? What are the steps, using which tool, and what does it produce in the end?
+- ★ What triggers it (an order, a date, a notification)? What are the steps, using which tool, and what does it produce in the end? _E.g.: "when stock drops below the minimum, I email the supplier and note the order in the spreadsheet"._
 - ★ Who does it, how often, and how long does it take?
 - Where does it usually fail or get delayed? What exceptions arise and who resolves them?
 - Is it written down anywhere, or does it live in someone's head?
@@ -62,7 +74,7 @@ Walk through **a typical week** with the user, and for each procedure that comes
 
 ### 6. The critical path: where caution is required
 
-- ★ What tasks have zero-error tolerance? (Money, personal data, legal or tax matters, reputation, relationship with a key customer.)
+- ★ What tasks have zero-error tolerance? (Money, personal data, legal or tax matters, reputation, relationship with a key customer.) _E.g.: "paying an invoice twice" · "deleting customer data"._
 - ★ What actions are **irreversible**?
 - What went wrong in the past that cannot happen again?
 - What rules are never broken, even if someone asks in a rush?
@@ -83,7 +95,7 @@ Place each task type according to **whether its result is easy to verify** and *
 | **Easy to verify** | Agent acts autonomously | Agent acts and notifies; user reviews |
 | **Hard to verify** | Agent proposes; user decides | Explicit approval only, or never |
 
-- ★ What can the agent do without asking? What must it propose and wait for your approval? What should it never do?
+- ★ What can the agent do without asking? What must it propose and wait for your approval? What should it never do? _E.g.: "it can draft emails, but I send them; it never pays anything"._
 - ★ Can a message to a customer or supplier go out without you reading it?
 - Can it spend money, delete information, or change settings? With what limits?
 - When the agent needs to consult you, how do you prefer it? (Recommendation: bring its proposal and the cost of being wrong, so you can reply with a single word; and batch questions together.)
@@ -91,11 +103,14 @@ Place each task type according to **whether its result is easy to verify** and *
 ### 9. Where information lives
 
 - ★ Where does useful information live: systems, spreadsheets, folders, email, chats, paper, your head?
-- ★ For each data type (stock, customers, sales, code, documents), what is the **primary source**? If two places say different things, which one wins?
+- ★ For each data type (stock, customers, sales, code, documents), which **file or system** is the **primary source**? If two places say different things, which one wins? _E.g.: "the `suppliers.xlsx` spreadsheet in the Suppliers folder" · "the repository code and the production database"._
+- Is any of it outside this folder (cloud drive, an online system, a connector)? How does the agent reach it?
 - Who updates it and how often? What is outdated or duplicated?
 - How is it organized and named? Are there folder or file naming conventions?
 - What can the agent access, and with read-only or also write permissions?
 - What critical knowledge is not written down anywhere?
+
+The business files stay where they are: `docs/` will explain how they are used and where each piece of data lives, never copy them.
 
 ### 10. SWOT and pre-mortem
 
@@ -124,6 +139,7 @@ Place each task type according to **whether its result is easy to verify** and *
 - How often will you work with the agent? How do you want to be alerted about a problem?
 - What annoys you in an assistant? (E.g., asking too many questions, assuming, being verbose.)
 - What terms, acronyms, or proper names does the project use? (These form the glossary.)
+- Would you like to give your assistant a name and a personality? _E.g.: "Ana, patient and practical" · "a senior engineer who questions my decisions"._ If the user does not care, propose one that fits the project.
 - ★ Once a week the agent reviews memory and, if needed, proposes organizing it. What day works best for you? (Default: **Friday**, to close out the week. Can be disabled.)
 
 ### 14. History and learnings
@@ -137,15 +153,17 @@ The interview is not stored as a transcript: each answer becomes a document, rul
 
 | Answers | Destination |
 | --- | --- |
-| Project, problems, goals and metrics, non-goals, SWOT, pre-mortem, constraints | `docs/00-PROJECT-BRIEF.md` — the **why** of the project. `AGENTS.md § Context` holds a 3-5 line summary and cites it. |
+| Work environment (block 0) | `docs/agent-environment.md` and a line in `stack.md`; the form-of-use recommendation, at the close of the installation. |
+| Project, problems, goals and metrics, non-goals, SWOT, pre-mortem, constraints | `docs/00-PROJECT-BRIEF.md` — the **why** of the project. `AGENTS.md § Project Context` holds a 3-5 line summary and cites it. |
 | Decision criteria, zero-error items, irreversible actions | `docs/01-GUIDELINES.md` — how decisions are made. Invariable rules move to `business-rules.md` with their citation. |
 | Agent autonomy and consultation preference | `AGENTS.md` (always loaded: permissions must be present in every session). |
 | Current procedures | `docs/` (one doc per procedure or feature); primary flows as rule + citation in `architecture.md`. |
-| Primary source by data type, systems, and access | `stack.md` (primary source on the first line) and `architecture.md`. |
+| Primary source by data type, systems, and access | `stack.md` (primary source on the first line: business files, folders, or systems, including those outside the folder) and the workspace map in `architecture.md`. |
 | Automation candidates | `active-tasks.md`, ranked by priority and effort, indicating script / agent / agent with approval. |
 | Urgencies, deadlines, peak seasons | `active-tasks.md`: P1 or `[Watch]` with its trigger. |
 | Pre-mortem risks and threats | `active-tasks.md` as `[Watch]` with trigger, and detail in the brief. |
-| Language, tone, style | `AGENTS.md` (baseline behavior) and `conventions.md` (formats and templates). |
+| Assistant's name, personality, and purpose | `AGENTS.md` (the identity header, in the first person). |
+| Language, tone, style | `AGENTS.md` (baseline behavior) and `conventions.md` (formats and templates), citing a `docs/` document with the tone and templates (e.g. `docs/communication.md`). |
 | Maintenance day | `AGENTS.md § Automatic maintenance` (default: Friday). |
 | Glossary | `docs/glossary.md`, cited from `conventions.md`. |
 | Project domains or areas | Proposed tags for `taxonomy.md` (with approval). |

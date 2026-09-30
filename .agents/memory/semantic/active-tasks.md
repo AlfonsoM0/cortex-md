@@ -8,7 +8,7 @@
 
 _The verified state of the system, with date and how to verify it. External items (third-party configuration, deliveries, scheduled payments) include when and where they were verified._
 
-- _E.g.: Production up to date with version `abc1234` (verified YYYY-MM-DD with `<command>`)._
+- _E.g.: Stock reconciled with the physical count (verified YYYY-MM-DD in the spreadsheet) · Production at version `abc1234` (verified YYYY-MM-DD with `<command>`)._
 
 ## 🚀 Next Steps
 

@@ -1,32 +1,28 @@
-# Convenciones de Código
+# Convenciones (Estilo de la Casa)
 
 > **Contrato:** cada entrada es una regla en imperativo + a lo sumo una frase de razón + cita al doc canónico (`→ docs/...`), ≤ ~400 caracteres. El detalle vive en `docs/`; la historia, en el episódico. Verificador: `node .agents/check-memory-contract.js`.
 
-> En un proyecto no técnico, este archivo guarda el **estilo de la casa**: formatos de documentos, tono y plantillas de comunicación, nomenclatura de archivos y registros.
+<!-- cortex:example — reemplazá los placeholders por entradas reales y borrá este bloque (init.md § Fase 4)
+Software:
+- **Nombrá los componentes en PascalCase y las utilidades en kebab-case** (`UserProfile.tsx`, `date-utils.ts`). → `docs/conventions/code.md`
+- **Nunca uses `any` en TypeScript:** tipá el borde o usá `unknown`. → `docs/conventions/code.md`
+Administrativo:
+- **Respondé a cada cliente en su idioma, en ≤ 5 líneas:** resultado, agradecimiento y despedida, sin jerga interna. → `docs/atencion/respuestas-tipo.md`
+- **Nombrá los archivos** `AAAA-MM-DD_proveedor_tipo.pdf`. → `docs/sistemas.md`
+-->
 
-## Estilo General
+## Estilo
 
-- **Indentación:** *Ej: 2 espacios*
-- **Comillas:** *Ej: Simples (`'`)*
-- **Punto y coma:** *Ej: Sí / No*
+_En un proyecto de software: estilo y estructura del código. En cualquier proyecto: el formato de documentos y registros._
 
 ## Nombrado
 
-| Elemento | Convención | Ejemplo |
-|---|---|---|
-| *Componentes* | *PascalCase* | *`UserProfile.tsx`* |
-| *Funciones/variables* | *camelCase* | *`getUserById`* |
-| *Archivos de utilidad* | *kebab-case* | *`date-utils.ts`* |
-| *Constantes* | *UPPER_SNAKE_CASE* | *`MAX_RETRY_COUNT`* |
+_Cómo se nombran archivos, registros, carpetas — o componentes, funciones y variables._
 
-## Estructura de Componentes
+## Comunicación y Plantillas
 
-*Describe el patrón estándar para crear un componente (ej. dónde va la lógica, dónde los estilos, uso de barrel exports, etc.).*
+_Tono, extensión y plantillas de los mensajes a clientes, proveedores o al equipo._
 
-## Reglas de Importación
+## Prohibido
 
-*Describe el orden de imports y si se usan alias de rutas (ej. `@/`).*
-
-## Patrones Prohibidos
-
-*Lista prácticas que NO deben usarse en el proyecto (ej. `any` en TypeScript, `!important` en CSS, etc.).*
+_Prácticas que no se usan nunca._

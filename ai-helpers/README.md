@@ -122,4 +122,4 @@ When a feature is completed, **it is the user's responsibility** to run `.agents
 
 The prompts in `generators/` and `prompts/` can and should be customized to fit your team's specific tools and conventions. They are simple Markdown files designed to be modified.
 
-> **Note on workflow modes:** Extension workflows (`deep-plan.md`, `audit.md`) support three modes (`strict`, `standard`, `autonomous`). If your team does not use high-capacity reasoning models (Opus, o1, Deep Research), consider **removing `autonomous` mode** from your workflows to reduce cognitive friction in mode selection. Fewer options = less overhead.
+> **Note on workflow modes:** Extension workflows (`deep-plan.md`, `audit.md`) support three modes (`strict`, `standard`, `autonomous`). If the user does not specify one, the agent proposes the mode that fits its own model, so nobody has to choose.

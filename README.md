@@ -1,250 +1,308 @@
-# Cortex-MD: Continuous Memory System for LLMs in Code Repositories
+# Cortex-MD: Continuous Memory for AI Agents
 
-Cortex-MD is a persistent memory framework built entirely on Markdown files. It is designed to solve **"session amnesia"** and **"context bloat"** in Large Language Models (LLMs) operating within complex software development environments (such as Claude Code, Cursor, Gemini CLI, or custom agents).
+Cortex-MD is a persistent memory framework built entirely on Markdown files. It solves **"session amnesia"** and **"context bloat"** in AI agents that work on the same project day after day — in Claude Cowork or Claude Code, Codex or ChatGPT Work, Antigravity, Hermes Agent, or any tool that can read and write files.
 
-The system emulates the memory structures of the human brain, separating information into **semantic memory** (global project state) and **episodic memory** (indexed chronological records), drastically optimizing token usage and preventing hallucinations caused by context loss.
+The system emulates the memory structures of the human brain, separating information into **semantic memory** (the current state of the project) and **episodic memory** (indexed chronological records), drastically optimizing token usage and preventing hallucinations caused by context loss.
 
-**Born for software development, but useful for any agent working continuously:** inventory tracking, supplier evaluation, secretarial work, customer support, research. The workflows refer to the **primary source** — the code in a repository, the system of record (spreadsheet, ERP, CRM) in an administrative operation — and to a **canonical knowledge base** in `docs/`. See the [example of an administrative agent](#example-memory-for-an-administrative-agent).
+**Born for software development, useful for any continuous work:** inventory, supplier evaluation, secretarial work, customer support, research. The workflows speak of the **primary source** — the code in a repository, or the business files and systems (spreadsheets, invoices, ERP, CRM) in an administrative operation — and of the **documentation in `docs/`** that explains them. See the [example of an administrative agent](#example-memory-for-an-administrative-agent).
 
 > 🌐 [Leer en Español (README.es.md)](README.es.md)
 
 ## Why Cortex-MD?
 
-- **🧠 Solves a real problem:** Session amnesia is the #1 pain point reported by developers using AI coding assistants. Cortex-MD provides a structured solution without external dependencies.
-- **📦 Zero dependency:** No servers, no databases, no APIs. Just Markdown files that live in your repository, version-controlled with Git.
-- **🔄 Provider agnostic:** Works natively with Claude, GPT-4o, Gemini, or any local open-source model. Switch between models without losing project memory.
-- **🧩 Complements `AGENTS.md`:** Does not replace the industry standard — it extends the [AGENTS.md convention](https://agents.md) (Linux Foundation) by adding temporal memory and lifecycle workflows.
-- **🧬 Memorable cognitive metaphor:** Built around neuroscientific concepts (Neocortex, Hippocampus, Prefrontal Cortex) that make the architecture intuitive and easy to reason about.
+- **🧬 Modeled on the human brain:** the agent wakes up, sleeps, remembers yesterday, looks up old memories, and exercises its memory — see [the philosophy](#the-philosophy-of-cortex-md).
+- **🧠 Solves a real problem:** every session starts from zero; Cortex-MD gives the agent a structured memory without external dependencies.
+- **📦 Zero dependency:** no servers, no databases, no APIs. Just Markdown files in your folder; git is optional.
+- **🔄 Provider agnostic:** works with Claude, OpenAI, Google, or open models through Hermes Agent. Switch tools without losing the project's memory.
+- **🧭 Guided installation:** the agent installs it through a friendly interview — the user does not need to know what an LLM, a harness, or git is.
+- **🌱 Evolves with your project:** it is a base set of rules; the agent adapts workflows and creates skills with your approval.
+- **🧩 Complements `AGENTS.md`:** extends the [AGENTS.md convention](https://agents.md) (Linux Foundation) with temporal memory and lifecycle workflows.
+
+## The Philosophy of Cortex-MD
+
+Cortex-MD rests on five foundations. They are the base on which each user models their LLM's memory as they like — adding files, workflows, or skills — and every workflow of the framework respects them: if a change breaks one of them, memory stops working well.
+
+### 1. A memory modeled on the human brain
+
+A pre-trained LLM cannot change its weights to remember yesterday's conversation. Cortex-MD gives it an external brain made of files, with the same stages as human memory:
+
+| The brain | In Cortex-MD |
+| --- | --- |
+| **Identity** — knowing who you are | `AGENTS.md`: the agent's self (foundation 5) |
+| **Waking up** — remembering who you are, what you know, and what you did yesterday | `start.md` |
+| **Sleeping** — consolidating the day into memories and learnings | `end.md` |
+| **Yesterday's memories** | The last session's record (`episodic/YYYY/MM/DD.md`), read on waking up |
+| **Recent memories** | The timeline or "hippocampal index" (`episodic/timeline.md`): one line per session, the last 50 |
+| **Old memories** | The sessions that left the timeline: they remain in `episodic/` and are searched only when needed |
+| **Learnings** | Semantic memory (short rules of the present), `docs/` (detailed knowledge), and skills (abilities) |
+| **Memory exercises** | `defrag.md`: a deep review that corrects what was consolidated badly; `maintenance.md` is the weekly check-up that says when |
+| **Attention** — the prefrontal cortex | The context window: clean and focused on the current task |
+
+### 2. Modular design: do not saturate memory
+
+The agent does not load all of its memory: it loads a small base and expands only what the task needs.
+
+- **Knowledge:** it always reads the short rules of semantic memory. Each rule cites the doc that expands it (`→ docs/...`), and the docs cite each other and the skills; the agent follows those citations only when it needs more detail.
+- **History:** it always reads the timeline and the last session. If it needs more, it follows the timeline to the relevant sessions, and searches older sessions only for what the task asks.
+
+```text
+AGENTS.md — who I am, and where everything is
+ ├─ semantic memory (short rules) ──cites──▶ docs/ ──cite each other──▶ docs/ · skills/
+ └─ last session + timeline ──points to──▶ relevant sessions ──search──▶ old sessions
+```
+
+### 3. Token economy
+
+What every session reads — `AGENTS.md`, the bridge, `start.md`, the short rules, the timeline, and the last session — is small and stable, and it has a size budget (`defrag.md § Phase 1`, measured by `check-memory-contract.js`). Because it is stable, it takes advantage of the **prompt caching** of LLM services: re-reading it on every turn costs a fraction of the normal price. Everything else is paid for only when the task needs it, by following citations. The base is semantic memory: what the agent must always have present.
+
+What goes into that fixed base is not decided by how relevant a file is, but by **what happens if the agent does not know it needed it**. A session that forgets to load a file it needed fails silently; a file loaded unnecessarily only costs tokens, and with prompt caching that stable prefix is cheap to re-read. The real cost of fixed memory is attention: the more there is, the more what matters gets diluted. That is why the domain rules (`business-rules`) are always read, while the house style (`conventions`) and the tags (`taxonomy`) are read when the task touches them — and, when in doubt, the agent reads them: an extra file costs little; a missing one can cost a broken rule.
+
+### 4. Continuous learning
+
+Every session close (`end.md`) updates what changed in semantic memory, `docs/`, and skills, so that the agent always knows the reality and the present of the project — not what was true months ago. The update is never perfect: rules pile up, repeat themselves, or stop being true. That is why memory is **exercised** now and then (`defrag.md`): it is contrasted against the primary source, compressed, and corrected. The weekly check-up (`maintenance.md`) proposes it when it is needed.
+
+### 5. The self: `AGENTS.md`
+
+The agent's personality, identity, and reason for being live in `AGENTS.md`, together with its relation to every component of its memory. From that base file — the first one loaded in every session — the agent understands who it is, what its purpose is, how its memory works, which skills and knowledge it has, and which workflows and rules matter most. `AGENTS.md` is the router that connects the agent's whole self with all of its memory and knowledge: it holds a map of them, not their content, which is why it stays short. For example: _"I am Ana, the administrative assistant of a beverage distributor; my purpose is that no order or payment slips through the cracks"_, or _"I am a principal engineer with twenty years of experience; my mission is to build this SaaS without wasting resources"_.
 
 ## Quick Start
 
+**What you need:** an AI tool that can read and write files in a folder, running its most capable model. The most common case: **Claude Cowork** (for management) or **Claude Code** (for programming) — the same Claude service in two forms — with **Opus 5.5**.
+
 ### Option A: Let your agent install it (recommended)
 
-In your usual tool (Claude Code, Cursor, Codex CLI, Gemini CLI, or any other), paste this message to your agent:
+Open your tool in the folder of your business or project, choose the most capable model of your service, and paste:
 
 ```text
-Read the Cortex-MD framework at https://github.com/AlfonsoM0/cortex-md (start with INSTALL.md) and install its memory system in this workspace. Then run its init workflow.
+Read the Cortex-MD framework at https://github.com/AlfonsoM0/cortex-md (start with INSTALL.md) and install its memory system in this folder. Then run its init workflow.
 ```
 
-The agent downloads the framework, copies only what is needed in your language, connects your tool, and begins an **alignment interview**: a conversation to understand your project before writing memory. The instructions it follows are in [`INSTALL.md`](INSTALL.md).
+The agent checks that it is running the right model, downloads the framework into a temporary folder, copies only the core in your language, and starts an **alignment interview**: a conversation to understand your project before writing memory. Then it connects your tool, explains how everything works, and recommends closing the session. The instructions it follows are in [`INSTALL.md`](INSTALL.md).
 
 ### Option B: Manual installation
 
-1. **Copy the structure** to your project ([`INSTALL.md`](INSTALL.md) details what to copy):
+1. **Copy only the core**, in one language ([`INSTALL.md § 3`](INSTALL.md) lists it). In English:
 
    ```bash
    git clone --depth 1 https://github.com/AlfonsoM0/cortex-md.git /tmp/cortex-md
-   cp -r /tmp/cortex-md/.agents/ your-project/.agents/
-   cp /tmp/cortex-md/AGENTS.md your-project/AGENTS.md
+   cd your-project
+   mkdir -p .agents/workflows/references .agents/memory/semantic .agents/memory/episodic
+   cp /tmp/cortex-md/AGENTS.md .
+   cp /tmp/cortex-md/.agents/manifest.md /tmp/cortex-md/.agents/check-memory-contract.js .agents/
+   for f in init start end maintenance defrag; do cp /tmp/cortex-md/.agents/workflows/$f.md .agents/workflows/; done
+   cp /tmp/cortex-md/.agents/workflows/references/alignment-interview.md .agents/workflows/references/
+   cp /tmp/cortex-md/.agents/memory/maintenance-log.md .agents/memory/
+   cp /tmp/cortex-md/.agents/memory/episodic/timeline.md .agents/memory/episodic/
+   for f in architecture stack conventions business-rules active-tasks taxonomy; do cp /tmp/cortex-md/.agents/memory/semantic/$f.md .agents/memory/semantic/; done
    ```
 
-2. **Connect your tools.** Memory only works if every session loads it: each tool must **read `AGENTS.md` at launch**, **execute `start.md` before responding**, and **not use its own memory in parallel**. Codex CLI reads `AGENTS.md` natively; **Claude Code** does not (it loads `CLAUDE.md`), so it needs a bridge file and supports a session start hook; **Hermes Agent** doesn't either: route it with a bridge `.hermes.md`; Gemini CLI, Cursor, Aider, and Copilot are configured pointing to `AGENTS.md`. Ready-to-copy snippets: [`docs/agent-bridges.md`](docs/agent-bridges.md).
+   In Spanish, copy the `.es.md` versions renaming them without `.es`.
 
+2. **Connect your tool** so that every session loads memory: [`docs/agent-bridges.md`](docs/agent-bridges.md).
 3. **Run the bootstrap:** ask your agent _"Read and execute `.agents/workflows/init.md`"_.
+
+### The first two sessions
+
+1. **Installation:** interview, memory written, tool connected, and a one-page guide for you (`docs/how-to-work-with-your-agent.md`). The agent recommends closing the session: the context is full of the interview, and the next session proves that memory loads.
+2. **Defrag + purge:** in the second session the agent proposes reviewing with fresh eyes what it wrote (`defrag.md`) and deleting the framework files that are no longer needed — the installation workflow, files in other languages (`.agents/manifest.md` says which). Use your most capable model for it.
 
 ### Day-to-day: you don't have to remember anything
 
-- **At the start**, the agent loads memory automatically (`start.md`) and, if the previous session closed without saving, offers to log it.
-- **At the end**, when you say "done" or "thanks", it offers to save learnings (`end.md`).
-- **Once a week** — on the day you chose in the interview; default: **Friday** —, it runs a lightweight memory check (`maintenance.md`) and proposes, only if needed, a cleanup, deep optimization (`defrag.md`), or a new alignment conversation. Nothing is modified without your consent.
+- **At the start**, the agent wakes up: it loads its memory by itself, including what happened in the last session (`start.md`).
+- **At the end**, when you say "done" or "let's save what we learned", it goes to sleep: it records the day and turns it into learnings (`end.md`).
+- **Once a week** — on the day you chose in the interview; default: **Friday** —, it runs a lightweight memory check (`maintenance.md`) and proposes, only if needed, a cleanup, a deep optimization (`defrag.md`), or a new alignment conversation. Nothing is modified without your consent.
 
-## Recommended Environment: Subscription with Built-in Harness + Prompt Caching
+**Good habits:** memory is saved from what the conversation still remembers. Work one task per session, close with "let's save what we learned" before the conversation grows too long, and if the tool warns that it is about to compact the context, close and start a new session.
 
-Cortex-MD is designed to run on a **subscription service that includes its own agentic harness and prompt caching** (for example, Claude Code with a Claude plan, or Codex CLI with a ChatGPT plan). It also works with an **open harness**, such as [Hermes Agent](https://hermes-agent.nousresearch.com), connected to the API key of your preferred LLM.
+## Recommended Environment
+
+**Base case: one person, one LLM, one tool** — preferably a subscription service with its own agentic harness and prompt caching.
+
+| Profile | Tools | Model |
+| --- | --- | --- |
+| **Management** (documents, spreadsheets, suppliers, customers) | Claude Cowork · ChatGPT Work | The highest-reasoning model of the service (e.g. Opus 5.5) |
+| **Development** (code) | Claude Code · Codex · Antigravity | The highest-reasoning model of the service |
+| **Advanced / open source** | [Hermes Agent](https://hermes-agent.nousresearch.com) + API key of any provider (e.g. DeepSeek) | Depends on the provider |
 
 What the framework needs from the environment, and why:
 
-- **Prompt caching:** `AGENTS.md` and whatever `start.md` loads (`architecture.md`, `stack.md`, `active-tasks.md`) form a stable prefix that is re-read on every turn of the session. With caching, that re-read costs a fraction of the normal price; this is why the always-loaded tier has a size budget (`defrag.md § Phase 1`).
-- **Agentic harness with file system access:** `end.md` reads and writes several files (`YYYY/MM/DD.md`, `timeline.md`, semantic memory) and `start.md` must run before responding. A harness does this on its own and, if it supports session-start hooks, guarantees it; a chat interface forces manual copy and paste.
+- **Prompt caching:** `AGENTS.md` and what `start.md` loads form a stable prefix that is re-read on every turn of the session. With caching, that re-read costs a fraction of the normal price; this is why the always-loaded tier has a size budget (`defrag.md § Phase 1`).
+- **An agentic harness with file system access:** `end.md` reads and writes several files, and `start.md` must run before responding. A harness does this on its own and, if it supports session start hooks, guarantees it; a chat interface forces manual copy and paste.
 - **Predictable cost:** every session pays for the `start` → `end` cycle and, now and then, a `defrag`. On a flat-rate plan that fixed cost goes unnoticed; on an API you pay per token.
-- **A single memory:** harnesses with their own memory (Claude Code's auto-memory, Hermes' built-in memory) must have it disabled for the project. Snippets in [`docs/agent-bridges.md`](docs/agent-bridges.md).
+- **A single memory:** tools with their own memory (Claude's auto-memory, Hermes' built-in memory) disable it for the project; when it cannot be disabled (Cowork, ChatGPT Work), it is restricted to personal preferences. Snippets in [`docs/agent-bridges.md`](docs/agent-bridges.md).
 
-**With an open harness + API key**, also:
-
-- Choose a provider and model **with prompt caching**; without it, every turn pays for the full context.
-- Reserve the most capable model for `defrag.md` and workflows in `strict` mode; routine sessions can use a cheaper one (see [Three Execution Modes](#the-solution-three-execution-modes)).
-
-## Neuroscientific Foundations
-
-Pre-trained LLMs lack neuroplasticity; they cannot alter their parametric weights to remember a conversation from yesterday. To mitigate this, Cortex-MD structures an "external brain" (exocortex) using the repository's file system:
-
-- **Prefrontal Cortex (Context Window):** Kept clean and strictly focused on the current task.
-- **Neocortex (Semantic Memory):** Stores the "state of things" (architecture, conventions, business rules, stack, and taxonomy). It is not a historical record — it is the absolute and current truth of the project. Divided into multiple modular files to scale without generating _context bloat_.
-- **Hippocampus (Episodic Memory):** Stores the daily record of actions and reasoning (linked to Git commits), efficiently indexed in a limited timeline (last 50 sessions) for rapid retrieval when deep context is needed.
+**With an open harness + API key**, also choose a provider **with prompt caching** (without it, every turn pays for the full context) and reserve the most capable model for the installation and `defrag.md`.
 
 ## Directory Architecture
 
-Cortex-MD integrates within the standard `.agents/` convention (based on [Anthropic](https://docs.anthropic.com) and [AGENTS.md](https://agents.md) conventions) for AI agents in repositories. The `.agents/` directory is a scalable and standardized space; Cortex-MD contributes the `memory/` folder and the lifecycle workflows:
+Cortex-MD lives next to your files, in the `.agents/` convention used by [AGENTS.md](https://agents.md)-compatible tools. It never moves or modifies your business files or your code.
 
 ```text
-/.agents/                              # Standard directory for AI agents
-├── skills/                            # (Convention) Reusable skills (instructions + code)
-│   └── ...
-├── workflows/                         # Agent orchestration flows
-│   ├── init.md                        # ★ Core: First-time bootstrap ("Onboarding")
-│   ├── references/
-│   │   └── alignment-interview.md     # ★ Core: Alignment interview question bank
-│   ├── start.md                       # ★ Core: Session start ("Wake Up")
-│   ├── maintenance.md                 # ★ Core: Automated weekly check (lightweight)
-│   ├── end.md                         # ★ Core: Session end ("Sleep")
-│   ├── defrag.md                      # ★ Core: Memory optimization and verification ("Defrag")
-│   ├── deep-plan.md                   # ★ Extension: Deep planning with Proof of Work
-│   ├── audit.md                       # ★ Extension: Post-feature audit with evidence
-│   └── commit.md                      # ★ Optional: stage review + intentful commit
-├── memory/                            # ★ Cortex-MD: Persistent memory system
-│   ├── semantic/                      #   Neocortex: Global project state
-│   │   ├── taxonomy.md                #     Strict tag taxonomy for the index
-│   │   ├── architecture.md            #     Design patterns and module structure
-│   │   ├── stack.md                   #     Technologies, libraries, and key dependencies
-│   │   ├── conventions.md             #     Code conventions and style
-│   │   ├── business-rules.md          #     Business logic and domain rules
-│   │   └── active-tasks.md            #     Working memory: tasks in progress
-│   ├── maintenance-log.md             #   Dates of weekly check, last defrag, and brief review
-│   └── episodic/                      #   Hippocampus: Indexed chronological record
-│       ├── timeline.md                #     Quick search index by [Tags] (max 50 sessions)
-│       └── YYYY/
-│           └── MM/
-│               ├── DD.md              #     Detailed session record (changes, decisions, errors)
-│               └── DD-s2.md           #     Second session of the same day
-├── check-memory-contract.js           # ★ Cortex-MD: memory contract verifier (Node, zero dependencies)
-├── .mcp.json                          # (Convention) Local MCP server configuration
-├── sync-mcp.js                        # ★ Optional (MCP module): generate per-IDE configs from one source
-├── mcp_config.json                    # ★ Optional (MCP module): canonical server list (placeholders, no secrets)
-├── mcp_config.zoo-overrides.json      # ★ Optional (MCP module): per-IDE overrides example
-└── backups/                           # Without git only: memory backups before each defrag (3 most recent)
+/your-folder/
+├── AGENTS.md                            # Base instructions, loaded in every session
+├── CLAUDE.md or .hermes.md              # Bridge for your tool, if it needs one (created by init)
+├── Suppliers/ Finance/ src/ …           # YOUR business files or code: the primary source
+├── docs/                                # Documentation that EXPLAINS the project; memory cites it
+│   ├── 00-PROJECT-BRIEF.md              #   The why (from the alignment interview)
+│   ├── 01-GUIDELINES.md                 #   How decisions are made
+│   ├── agent-environment.md             #   Tool, model, and how memory is loaded
+│   └── how-to-work-with-your-agent.md   #   One-page guide for the user
+└── .agents/
+    ├── manifest.md                      # ★ Which files belong to the framework (purge, adaptations)
+    ├── check-memory-contract.js         # ★ Memory contract verifier (Node, zero dependencies)
+    ├── workflows/
+    │   ├── init.md                      # ★ Installation and onboarding (the purge deletes it)
+    │   ├── references/
+    │   │   └── alignment-interview.md   # ★ Interview question bank (also used to re-align)
+    │   ├── start.md                     # ★ Session start ("Wake Up")
+    │   ├── end.md                       # ★ Session end ("Sleep")
+    │   ├── maintenance.md               # ★ Weekly check (lightweight)
+    │   ├── defrag.md                    # ★ Optimization, verification, and purge ("Defrag")
+    │   └── deep-plan.md · audit.md · commit.md   # Extensions for software projects, on request
+    ├── memory/
+    │   ├── semantic/                    #   Neocortex: the present
+    │   │   ├── stack.md                 #     Primary source, agent environment, tools
+    │   │   ├── architecture.md          #     Structure, workspace map, main flows
+    │   │   ├── conventions.md           #     House style
+    │   │   ├── business-rules.md        #     Domain and invariable rules
+    │   │   ├── active-tasks.md          #     Working memory: what is left to do
+    │   │   └── taxonomy.md              #     Closed list of tags for the timeline
+    │   ├── maintenance-log.md           #   Installation state, weekly check, last defrag
+    │   └── episodic/                    #   Hippocampus: yesterday, recent, and old memories
+    │       ├── timeline.md              #     Recent memories: index of the last 50 sessions, by [Tags]
+    │       └── YYYY/MM/DD.md · DD-s2.md #     One record per session (the last one: yesterday)
+    ├── skills/                          # (Convention) Skills, loaded on demand
+    ├── sync-mcp.js · mcp_config*.json   # Extension: MCP module, on request
+    └── backups/                         # Without git only: backups before each defrag
 
-/AGENTS.md                             # Base instructions, loaded in every session
-/ai-helpers/                           # ★ Optional: Stepwise Execution Pipeline module
-/docs/                                 # Canonical knowledge base for YOUR project: the detail memory cites
+# Temporary, during installation only:
+/.cortex-tmp/                            # Framework copy and interview notes (init deletes it)
 
 # Framework repository only (not copied to your project):
-/INSTALL.md                            # Installation instructions for the agent
-/docs/                                 # Framework guides (agent-bridges, mcp-sync, multi-dev)
+/INSTALL.md                              # Installation instructions for the agent
+/docs/                                   # Framework guides (agent-bridges, mcp-sync)
 ```
 
-Additionally, `AGENTS.md` is located at the **repository root**. It acts as the entry point (_system prompt_) that the IDE automatically injects into the agent, and is responsible for directing the LLM to Cortex-MD's workflows. It also hosts the **Skill Router** (a categorized, on-demand index of the project's skills) and the **inviolable rules** (strict modularity & anti-redundancy) — guardrails that must stay in the always-loaded context, since `conventions.md` and skills are loaded only selectively. This follows the [AGENTS.md standard](https://agents.md) adopted by 60k+ open-source projects and supported by tools like Codex, Jules, Cursor, VS Code Copilot, and many more.
+`AGENTS.md` is the agent's self and the router of its memory (foundation 5): identity and purpose, autonomy, the memory map and its rules, the lifecycle workflows, and the skill router. It is kept short because every session pays for it; the blocks that only apply to software projects or to extensions are marked (`<!-- cortex:software-only -->`, `<!-- cortex:optional:<name> -->`) so that `init` and the purge can remove them.
 
 ## The Principles of Memory
 
-What turns a folder of Markdown into a reliable memory is not the file structure: it is five rules that the workflows enforce on every cycle.
+What turns a folder of Markdown into a reliable memory is not the file structure: the five foundations become reliable through a few rules that the workflows enforce on every cycle.
 
-1. **The primary source beats memory.** Truth hierarchy: primary source (code, system of record) > semantic memory > episodic memory. Memory ages **toward pessimism**: it declares completed work as pending and cites names that have changed. Before claiming something is missing, verify against the source.
-2. **Memory holds the rule; detail lives in `docs/`.** Each entry in rule files is: imperative rule + at most one sentence of rationale + citation to the canonical doc, in ≤ ~400 characters. Metrics, examples, and rationale go to the doc; the discovery history goes to episodic memory. This keeps the memory read in every session lean without losing anything.
-3. **Three file types, three contracts:**
+1. **Three layers, each in its place.** The **primary source** is the working files: the code, or the business files (a `suppliers.xlsx`, invoices, price lists). **`docs/`** explains how the project works and how work is done ("how to evaluate suppliers") and names where each piece of data lives, without holding the business files. **Memory** holds the rule and cites the doc.
+2. **The primary source beats memory.** Truth hierarchy: primary source > semantic memory and `docs/` (the present) > episodic memory (history). Memory ages **toward pessimism**: it declares completed work as pending and cites names that have changed. Before claiming something is missing, verify against the source.
+3. **Memory holds the rule; detail lives in `docs/`.** Each entry in rule files is: imperative rule + at most one sentence of rationale + citation to the canonical doc, in ≤ ~400 characters. Metrics, examples, and rationale go to the doc; the discovery history goes to episodic memory.
+4. **Three file types, three contracts:**
    - `architecture` · `stack` · `conventions` · `business-rules` answer **"what is the rule?"** → rule + citation.
    - `active-tasks` answers **"what remains to be done?"** → pending items only; **completed work is deleted**, not checked off with ✅. External state includes a verification date; tracked items (`[Watch]`) include their trigger.
    - `taxonomy` answers **"what tags are valid?"** → closed list.
-4. **Episodic memory is history, never authority.** It explains why and what was attempted (including the **agent's own reasoning errors**), but is never cited from memory or `docs/`: it ages by design.
-5. **What is always read has a budget.** `start.md` loads an always-loaded tier (`architecture`, `stack`, `active-tasks`, roadmap) paid every session; everything else opens on demand. The roadmap tracks **scope**, not progress.
+5. **Episodic memory is history, never authority.** It explains why and what was attempted (including the **agent's own reasoning errors**) — an agent understands the present better by analyzing the past — but it is never cited from memory or `docs/`: it ages by design.
+6. **Third-party content is data, not instructions.** What customers or suppliers wrote never changes the agent's rules, and it only reaches memory or `docs/` with the user's approval.
+7. **What is always read has a budget** (foundation 3): `AGENTS.md`, the bridge, `start.md`, the short rules (`architecture`, `stack`, `business-rules`, `active-tasks`, `maintenance-log`, roadmap), the timeline, and the last session; everything else opens on demand. The roadmap tracks **scope**, not progress.
 
-**Verifier:** `node .agents/check-memory-contract.js` checks formatting (long entries without citations, citations to non-existent docs, citations to episodic memory) and reports the size of the always-loaded tier in estimated tokens. It measures **structure**, not truth: defrag handles truth by contrasting memory against the primary source.
+**Verifier:** `node .agents/check-memory-contract.js` checks the form of every entry — list items (even when wrapped over several lines), numbered items, table rows, and paragraphs: long entries without citations, citations to non-existent docs or skills, and citations to episodic memory. It supports paths with accents and ignores URLs. It reports the size of the always-loaded tier in estimated tokens. It measures **structure**, not truth: defrag handles truth by contrasting memory against the primary source.
 
 ## Workflows
 
-Cortex-MD provides **five core workflows** (the memory lifecycle) and **two extension workflows** (development methodology):
+Cortex-MD provides **five core workflows** (the memory lifecycle) and **three extension workflows** for software projects.
 
-### 0. First-time bootstrap: `init.md`
+### 0. Installation and onboarding: `init.md`
 
-Run once when adopting Cortex-MD, and starts with an **alignment interview**: a friendly conversation in which agent and user agree on what problems the project solves, what goals it pursues and how success is measured, what current procedures look like and which to automate, what tasks have zero-error tolerance and which are urgent, how much autonomy the agent has, where information lives, and what its SWOT is. The question bank (`references/alignment-interview.md`) combines proven practices — project kickoff, pre-mortem, automation criteria, autonomy levels based on how easy a task is to verify and undo — and indicates which document or memory file each answer goes to.
+Runs once. It starts by checking the model (the agent researches the highest-reasoning models of its own service and recommends switching if needed) and continues with an **alignment interview**: a friendly conversation designed for users who do not know how to describe what they need — it offers options, starts from their pains, translates every technical term, and gives example answers. Block 0 covers the work environment (tool, use, plan); the rest covers problems, goals, procedures, what to automate, what has zero-error tolerance, what is urgent, how much autonomy the agent has, where information lives, and the SWOT. Notes are kept in an ephemeral file so nothing is lost if the conversation is cut.
 
-With the synthesis approved by the user, `init` creates the canonical documentation (`docs/00-PROJECT-BRIEF.md`, `docs/01-GUIDELINES.md`, procedures), populates memory respecting the contract, adapts `AGENTS.md` (context, autonomy, communication) and taxonomy, and connects tools so every session loads memory. The interview is partially repeated when the project changes stages (**re-alignment**).
+With the synthesis approved by the user, `init` creates the documentation (`docs/00-PROJECT-BRIEF.md`, `docs/01-GUIDELINES.md`, procedures), populates memory respecting the contract, adapts `AGENTS.md`, and connects the tool — researching its official documentation when the bridge guide is outdated. It closes with a **handoff**: how memory works, which phrase triggers each workflow, what workflows and skills are and how to ask for new ones, and good habits. It leaves two signals so that the next session proposes the **defrag + purge**, and recommends closing the session.
 
-### 1. The "Wake Up" cycle: `start.md`
+### 1. Waking up: `start.md`
 
-- **Truth hierarchy:** read before loading anything.
-- **Phase 1 (Semantic loading):** always loads the always-loaded tier (`architecture`, `stack`, `active-tasks`, and roadmap if present); `conventions`, `business-rules`, and `taxonomy` based on the task. Memory gives the rule: cited docs open when the task calls for them.
-- **Phase 2 (Hippocampal routing):** searches `timeline.md` for tags matching the task's domains.
-- **Phase 3 (Episodic retrieval):** only if matches are found, reads those days (including `DD-sN.md`) as history, not current state.
+- **Truth hierarchy** and the third-party rule, read before loading anything.
+- **Phase 1 (What I know):** the short rules of the present (`architecture`, `stack`, `business-rules`, `active-tasks`, `maintenance-log`, and roadmap if present); `conventions` and `taxonomy` when the task touches them — if in doubt, it reads them.
+- **Phase 2 (Yesterday and recent memories):** always the timeline and the last session, starting with its "Context for Next Session".
+- **Phase 3 (Older memories):** only if the task's domains match timeline tags, reads those sessions as history, not current state; searches older sessions when needed.
+- **Phase 4:** reminds what is due (P1 and `[Watch]` items due today or tomorrow) and recommends at most one thing — continue an incomplete installation, the post-installation defrag + purge, logging an unconsolidated session (only with git), or the weekly check-up.
 
-### 2. The "Sleep and Consolidation" cycle: `end.md`
+### 2. Sleeping: `end.md`
 
-- **Pre-consolidation hygiene** and, in multi-agent teams, **only the lead consolidates**.
 - **Episodic:** the day's record with changes, decisions, and errors — including the **agent's own reasoning errors**, the costliest to repeat.
-- **Timeline:** a ~200-character line with tags from taxonomy (max 50 sessions).
-- **Semantic consolidation** following the three file-type contracts; no credentials or personal data.
-- **Documentation and roadmap:** behavior belongs in `docs/`; roadmap changes only if scope changed; **consistency sweeps** whenever a value or name changes.
-- **Skills** with the External Skills Guard.
-- **`active-tasks` flush:** delete completed tasks (verifying first that their detail lives in `docs/`), dated external states, `[Watch]` with triggers, Eisenhower + T-shirt backlog.
-- **User wrap-up:** list pending items that only a human can confirm, so they can dismiss anything no longer applicable.
+- **Timeline:** a ~200-character line with tags from taxonomy; `[CortexMD]` alone only for memory maintenance.
+- **Semantic consolidation** following the three file-type contracts; no credentials, personal data, or unapproved third-party text.
+- **Documentation and roadmap:** behavior belongs in `docs/`, and docs cite each other; the roadmap changes only if scope changed; **consistency sweeps** whenever a value or name changes.
+- **Skills and workflows:** new patterns go to skills; better ways of running a workflow are proposed to the user.
+- **`active-tasks` flush:** delete completed tasks, dated external states, `[Watch]` with triggers, Eisenhower + T-shirt backlog.
+- **User wrap-up:** pending items that only a human can confirm, and a commit offer when there is git.
 
-### 3. Memory Defragmentation: `defrag.md`
+### 3. Exercising memory: `defrag.md`
 
-On demand, every 15-20 sessions. In addition to compressing and deduplicating:
+Consolidation is imperfect, so memory is exercised on demand, after installation, or when the weekly check-up recommends it. In addition to compressing and deduplicating:
 
-- **Pre-defrag commit** to ensure reversibility, and **inventory with measured always-loaded tier** (before → after).
+- **Reversible:** commit or backup beforehand, and **inventory with the measured always-loaded tier** (before → after).
 - **Blocking contract:** the verifier must report zero findings.
-- **Memory against primary source (Phase 4.6):** contrasts names, boundaries, and "single points of X" against code or the system of record. This is the only check that detects memory describing a system that no longer exists — and the most valuable part of the report.
-- **State drift in `docs/`:** assertions that time has rendered false, prioritizing those that **underestimate risk**.
-- **Knowledge system:** skill router, dead paths, updating external skills without overwriting project-specific files.
-- **Hygiene:** sensitive data kept outside version control.
-- **Report separating cosmetic from substantive changes**, and **independent review** of the diff by another agent or model before committing.
+- **Memory against the primary source (Phase 4.6):** contrasts names, limits, and "single points of X" against the code or the business files. It is the only check that detects memory describing a system that no longer exists.
+- **State drift in `docs/`**, prioritizing statements that **underestimate risk**.
+- **Purge (Phase 6.5):** after installation or on request, removes the framework files the manifest marks as no longer needed — never business files.
+- **Report separating cosmetic from substantive changes**, and **independent review** by another agent or model.
 
 > **Idempotent:** running it on already-optimized memory produces no changes.
 
-### 4. Weekly Check: `maintenance.md`
+### 4. The weekly check-up: `maintenance.md`
 
-The user does not need to know when to optimize memory or re-align: this check decides, triggered automatically by `start.md` on the first session on or after the **maintenance day** (chosen by the user in `init`; default: Friday). Since the agent has no clock between sessions, if no work happens on that day, it runs on the following session.
-
-- **Lightweight without rewriting memory:** runs the verifier, checks for unconsolidated sessions (via commits or, without git, modified files), expired pending items or tasks marked done, sessions since the last defrag, always-loaded tier growth, and brief age.
-- **One recommendation, not a list:** consolidate, clean up, **defrag only when needed** (≥ 15 sessions, always-loaded tier +25%, verifier findings, or > 60 days), quick brief review (> 90 days), or re-alignment upon signs of change.
-- **Propose, never impose:** three lines at most; if the user postpones, it does not insist until the following week. Its state lives in `.agents/memory/maintenance-log.md`.
+Triggered automatically by `start.md` on the first session on or after the **maintenance day**. Lightweight, it never rewrites memory: it runs the verifier, looks for unconsolidated sessions (with git), expired pending items, sessions since the last defrag, always-loaded tier growth, the age of the brief, and the age of the agent environment verification. It makes **one recommendation, not a list**, in three lines at most; if the user postpones, it does not insist until the following week.
 
 ## Example: memory for an administrative agent
 
-An agent that manages inventory, evaluates suppliers, responds to customers, and acts as a clerk for a wholesale business. There is no code: the **primary source** is the inventory spreadsheet and the billing system, and `docs/` stores procedures and supplier profiles.
+An agent that manages inventory, evaluates suppliers, responds to customers, and acts as a clerk for a beverage distributor. There is no code: the **primary source** is the business files and the billing system; `docs/` explains the procedures and the criteria, and names where each piece of data lives.
 
 ```text
-.agents/memory/semantic/
-├── stack.md            # systems in use and which is the primary source
-├── architecture.md     # functional areas and workflows
-├── conventions.md      # house style
-├── business-rules.md   # business rules
-├── active-tasks.md     # pending items, with dated state
-└── taxonomy.md         # [Stock] [Suppliers] [Customers] [Payments] [Calendar] [Docs] [CortexMD]
+Suppliers/suppliers.xlsx           # business file: suppliers, contacts, prices (primary source)
+Stock/stock.xlsx                   # business file: inventory and minimums (primary source)
+Finance/invoices/                  # business files: invoices and delivery notes
 docs/
-├── 00-PROJECT-BRIEF.md            # problems, goals, SWOT (from alignment interview)
+├── 00-PROJECT-BRIEF.md            # problems, goals, SWOT (from the alignment interview)
 ├── 01-GUIDELINES.md               # decision criteria and zero-error items
-├── procedimientos/reposicion.md
-├── procedimientos/pagos.md
-├── proveedores/evaluacion.md
-└── atencion/respuestas-tipo.md
+├── systems.md                     # which file or system holds each piece of data
+├── procedures/restocking.md       # how to restock
+├── procedures/payments.md         # how to approve and record a payment
+├── suppliers/evaluation.md        # how to evaluate suppliers
+└── customer-service/reply-templates.md
+.agents/memory/semantic/
+└── taxonomy.md                    # [Stock] [Suppliers] [Customers] [Payments] [Docs] [CortexMD]
 ```
 
 **`stack.md`**
 
 ```markdown
-- **Primary source:** `Stock` spreadsheet (inventory and minimums) and the billing system (sales and receipts). In case of discrepancy, they win. → `docs/sistemas.md`
-- **Supplier orders:** via email from the purchasing inbox; WhatsApp only for emergencies, followed by email confirmation. → `docs/procedimientos/reposicion.md`
+- **Primary source:** `Stock/stock.xlsx` (inventory and minimums), `Suppliers/suppliers.xlsx` (suppliers and prices), and the billing system (sales). In case of discrepancy, they win. → `docs/systems.md`
+- **Agent environment:** Claude Cowork with Opus 5.5, subscription plan; bridge `CLAUDE.md`. → `docs/agent-environment.md`
+- **Supplier orders:** via email from the purchasing inbox; WhatsApp only for emergencies, followed by email confirmation. → `docs/procedures/restocking.md`
 ```
 
 **`architecture.md`**
 
 ```markdown
-- **Restocking:** low-stock alert → order to preferred supplier → receipt with delivery note → entry into spreadsheet → payment at 30 days. → `docs/procedimientos/reposicion.md`
-- **Customer complaints:** recorded in the `Reclamos` spreadsheet before responding. → `docs/atencion/reclamos.md`
+- **Restocking:** low-stock alert → order to preferred supplier → receipt with delivery note → entry into the spreadsheet → payment at 30 days. → `docs/procedures/restocking.md`
+- **Customer complaints:** recorded in the `Complaints` spreadsheet before responding. → `docs/customer-service/complaints.md`
 ```
 
 **`business-rules.md`**
 
 ```markdown
-- **Never approve a payment without a signed delivery note:** missing items must be claimed before paying. → `docs/procedimientos/pagos.md §2`
-- **Evaluate suppliers quarterly** for punctuality, shortages, and price; two consecutive late deliveries reduce their priority. → `docs/proveedores/evaluacion.md`
+- **Never approve a payment without a signed delivery note:** missing items must be claimed before paying. → `docs/procedures/payments.md §2`
+- **Evaluate suppliers quarterly** for punctuality, shortages, and price; two consecutive late deliveries reduce their priority. → `docs/suppliers/evaluation.md`
 - **Minimum stock for each product is defined by the spreadsheet**, not memory: memory names the column, never copies values.
 ```
 
 **`conventions.md`**
 
 ```markdown
-- **Respond to every customer in their language, in ≤ 5 lines:** result, thank you, and sign-off, without internal jargon. → `docs/atencion/respuestas-tipo.md`
+- **Respond to every customer in their language, in ≤ 5 lines:** result, thank you, and sign-off, without internal jargon. → `docs/customer-service/reply-templates.md`
 - **Every message to a customer or supplier must be approved by a human before being sent.**
-- **Name files** `AAAA-MM-DD_proveedor_tipo.pdf`.
+- **Name files** `YYYY-MM-DD_supplier_type.pdf`.
 ```
 
 **`active-tasks.md`**
 
 ```markdown
 ## 📍 Status
-- Stock reconciled with physical count (verified 2026-09-20 in spreadsheet).
+- Stock reconciled with physical count (verified 2026-09-20 in the spreadsheet).
 
 ## 🚀 Next Steps
 1. **[🚨 P1] [🟢 Snack]** Claim the 12 missing units from delivery note 4521 with Supplier B before Friday's payment.
@@ -263,94 +321,44 @@ docs/
 ```
 
 ```markdown
-- **Own reasoning error:** assumed order 118 was received because dispatch email was present; spreadsheet did not have the entry.
+- **Own reasoning error:** assumed order 118 was received because the dispatch email was present; the spreadsheet did not have the entry.
   - **Prevention:** receipt is confirmed in the spreadsheet (primary source), never by supplier notification.
 ```
 
-The same applies to any other domain: change what serves as primary source, what `docs/` stores, and what tags taxonomy uses. The workflows do not change.
+The same applies to any other domain: change what serves as primary source, what `docs/` explains, and what tags taxonomy uses. The workflows do not change.
 
 ## Extension Workflows: Adaptive Execution Modes
 
-While the five core workflows manage the memory lifecycle, Cortex-MD also provides **extension workflows** that adapt to the capabilities of the model executing them. They solve two problems simultaneously:
+For software projects, `init` offers three extension workflows: **`deep-plan.md`** (plan before large changes), **`audit.md`** (audit after finishing), and **`commit.md`** (commit with a clear message). The first two adapt to the model that runs them:
 
-1. **Quality degradation** when lightweight models (Haiku, Flash, mini) process complex engineering tasks.
-2. **Latency overhead** when heavyweight models (Opus, o1) are forced through unnecessary micro-management steps.
-
-### The Problem Spectrum
-
-Different models fail in different ways:
-
-| Model Tier | Failure Mode | Root Cause |
-|---|---|---|
-| **Lightweight** (Haiku, Flash, mini) | Attention amnesia, lazy evaluation, context hallucination | Limited FLOPs per token — can't resolve complexity in latent space |
-| **Mid-tier** (Sonnet, GPT-4o, Gemini Pro) | Occasional assumption-based skipping | Sufficient depth but can drift without checkpoints |
-| **Heavyweight** (Opus, o1, Deep Research) | Latency penalty, suppressed holistic reasoning | Micro-management blocks parallel architectural thinking |
-
-### The Solution: Three Execution Modes
-
-Each extension workflow supports **three modes** that the user selects at invocation time (e.g., "Create a strict plan", "Run an autonomous audit"). If the user doesn't specify, the agent asks.
-
-| Mode | Trust Level | For Models Like | How It Works |
+| Model tier | Failure mode | Mode | How it works |
 |---|---|---|---|
-| **`strict`** | Low — externalize everything | Haiku, Flash, mini | Full evidence printing. Blocking gates between phases. Every claim requires printed tool output. Designed to compensate for limited reasoning depth. |
-| **`standard`** | Medium — trust with checkpoints | Sonnet, GPT-4o, Gemini Pro | All phases execute but may be consolidated. Evidence required at key checkpoints, not everywhere. Balanced speed and rigor. |
-| **`autonomous`** | High — trust the model's judgment | Opus, o1, Deep Research | Holistic execution. The model receives phase objectives but chooses how to achieve them. Maximum speed and architectural depth. |
+| **Lightweight** (e.g. Haiku 4.5 and equivalents) | Attention amnesia, lazy evaluation | **`strict`** | Full evidence printing and blocking gates between phases. |
+| **Mid-tier** (e.g. Sonnet 5.5 and equivalents) | Occasional assumption-based skipping | **`standard`** | All phases run, consolidated; evidence at key checkpoints. |
+| **Highest reasoning** (e.g. Opus 5.5 and equivalents) | Micro-management slows holistic reasoning | **`autonomous`** | Phase objectives only; the model chooses how. |
 
-> **Non-negotiable across all modes:** The Technical Validation gateway (lint, typecheck, build) is always mandatory and blocking. No model — regardless of capability — can skip objective compiler verification.
+If the user does not specify a mode, **the agent proposes the one that fits its own model**. In `audit.md`, technical validation (lint, typecheck, build) is mandatory in every mode whenever the project has a toolchain.
 
-### 5. Deep Planning: `deep-plan.md`
-
-A structured planning workflow with three phases (Discovery → Constraints → Partition) that adapts its rigor:
-
-- **`strict`:** Printed search results, blocking gates between phases, stages of max 3-5 files.
-- **`standard`:** Consolidated summaries, no blocking gates, stages up to 8-10 files.
-- **`autonomous`:** Holistic analysis, phases may be combined, monolithic plans permitted if justified.
-
-> **When to use it:** Before implementing any feature that spans more than 3 files or crosses module boundaries.
-
-### 6. Post-Feature Audit: `audit.md`
-
-An evidence-based validation workflow with seven phases (Inventory → Modularity → Redundancy → Conventions → Technical Validation → Roadmap & Feature-Docs Sync → Report):
-
-- **`strict`:** Grep output for every check, line counts for every file, printed evidence at every phase.
-- **`standard`:** Evidence printed only for findings and threshold violations. Summary format.
-- **`autonomous`:** Holistic evaluation with tools used only for uncertainty areas. Only the gateway phase is mandatory.
-
-> **When to use it:** After completing any feature or significant block of work, before memory consolidation (`end.md`).
+- **`deep-plan.md`:** Discovery → Constraints → Partition. Use it before a change that spans more than 3 files or crosses module boundaries.
+- **`audit.md`:** Inventory → Modularity → Redundancy → Conventions → Technical Validation → Roadmap & Feature-Docs Sync → Report. Use it after a feature, before `end.md`.
 
 ## AI Helpers: Stepwise Execution Pipeline
 
-While Cortex-MD excels at managing global memory and episodic context, it doesn't prescribe how to do the actual coding *during* the session. The **AI Helpers** module (`ai-helpers/`) fills this operational gap.
+An optional module (`ai-helpers/`), installed only on request, that fills the operational gap *during* development: a pipeline `Brief → Breakdown → Spec → Prompt → Audit`, in a manual flow or orchestrated by an agent that delegates to sub-agents. Its content is ephemeral: what remains true moves to `docs/` and memory. Details: [AI Helpers Documentation](ai-helpers/README.md).
 
-The module supports **three work modes**:
+## Teams and Multiple Agents
 
-- **Manual Flow:** The user controls each step of the pipeline (`Brief → Breakdown → Spec → Prompt → Audit`).
-- **Orchestrated Flow:** An Orchestrator agent executes the complete cycle, delegating to specialized sub-agents (Architect, Code, Debug).
-- **Independent:** The main agent manages the task directly using global workflows (`/deep-plan`, `/audit`), without the stepwise pipeline.
-
-The `01-brief/` folder acts as an **idea backlog**, allowing multiple briefs to accumulate in parallel. Consolidation into episodic memory (via `end.md`) is **the user's explicit decision**, rather than automatic, enabling the grouping of multiple PRs under a single session.
-
-For full details, read the [AI Helpers Documentation](file:///home/alfonsom0/repos/cortex-md/ai-helpers/README.md).
-
-## Multi-Developer Scalability
-
-When working in teams with more than one developer, using Cortex-MD out-of-the-box can lead to Git merge conflicts in the episodic memory files (`timeline.md` and `YYYY/MM/DD.md`).
-
-To solve this, the architecture can be divided into two layers:
-1. **Centralized Neocortex (Project Repo):** Semantic memory shared by the team.
-2. **Distributed Hippocampus (Personal Memory Repo):** An independent repository for each developer's daily episodic logs.
-
-For setup instructions, read the [Multi-Developer Guide](file:///home/alfonsom0/repos/cortex-md/docs/multi-dev-guide.md).
+The base case is one person, one LLM, one tool. Several providers can be configured and **used one at a time** with the same memory. Working in parallel requires orchestration — a leader agent that delegates and is the only one that consolidates — and several people sharing one memory cause conflicts in episodic memory. Both are complex and outside Cortex-MD's scope; [`docs/agent-bridges.md`](docs/agent-bridges.md) mentions the minimum rules.
 
 ## How to Contribute
 
 Cortex-MD is an open architecture licensed under [MIT](LICENSE). Current research areas include:
 
 - Optimization of the tag taxonomy in `taxonomy.md`.
-- Creation of automation scripts (Bash/Node.js) to initialize the folder structure. _(An optional Node helper, `sync-mcp.js`, already ships to generate per-IDE MCP configs from one canonical source — see [docs/mcp-sync.md](docs/mcp-sync.md).)_
-- Impact evaluation on context retention in projects with over 100k lines of code.
+- Impact evaluation on context retention in large projects and long-lived administrative operations.
 - **More precise token metrics:** `check-memory-contract.js` estimates the always-loaded tier by dividing bytes by 4; an actual tokenizer per model family would improve measurement.
 - **Verification of cited sections:** the verifier confirms that the cited file exists, not that the section (`§2`) addresses the topic.
-- **Extension workflow research:** Testing and refining the Proof of Work methodology across different model families (Claude, GPT, Gemini, open-source) and project sizes.
+- **Tool coverage:** verified bridges for new tools and forms of use ([`docs/agent-bridges.md`](docs/agent-bridges.md)); an optional MCP helper already ships ([`docs/mcp-sync.md`](docs/mcp-sync.md)).
+- **Extension workflow research:** testing the execution modes across model families and project sizes.
 
 If you have improvements to the workflow prompts, please open a Pull Request or start an Issue to discuss the cognitive approach.

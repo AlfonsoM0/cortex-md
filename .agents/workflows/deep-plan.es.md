@@ -1,5 +1,5 @@
 ---
-description: Planificación profunda con Prueba de Trabajo. Fuerza al LLM a mapear el repo, contrastar con reglas de arquitectura y particionar el trabajo en tareas atómicas. Soporta tres modos de ejecución (strict, standard, autonomous) para adaptarse a distintas capacidades de modelo. Nota: el modo autonomous puede eliminarse en proyectos que no usen modelos de alta capacidad.
+description: Planificación profunda con Prueba de Trabajo. Fuerza al LLM a mapear el repo, contrastar con reglas de arquitectura y particionar el trabajo en tareas atómicas. Soporta tres modos de ejecución (strict, standard, autonomous); el agente propone el que corresponde a su modelo.
 ---
 
 # Workflow: Planificación Profunda con Prueba de Trabajo
@@ -8,27 +8,15 @@ description: Planificación profunda con Prueba de Trabajo. Fuerza al LLM a mape
 
 ## Fase 0: Selección de Modo
 
-Determiná el modo de ejecución basándote en la solicitud del usuario.
+Tres modos de ejecución adaptan este workflow al modelo que lo ejecuta:
 
-**Revisá la instrucción del usuario.** Debería haber especificado uno de tres modos:
+- **`strict`** — Evidencia impresa completa y puertas bloqueantes en cada fase. Para modelos ligeros y rápidos (ej. Haiku 4.5 y equivalentes) que se benefician del razonamiento externalizado.
+- **`standard`** — Todas las fases se ejecutan pero pueden consolidarse; evidencia impresa solo en checkpoints clave. Para modelos de rango medio (ej. Sonnet 5.5 y equivalentes).
+- **`autonomous`** — Ejecución holística: recibís los objetivos de cada fase y elegís cómo alcanzarlos; solo el formato de salida final es obligatorio. Para los modelos de mayor razonamiento (ej. Opus 5.5 y equivalentes).
 
-- **`strict`** — Evidencia impresa completa y puertas bloqueantes en cada fase. Diseñado para modelos ligeros y rápidos (ej. Haiku, Flash, GPT-4o-mini) que se benefician del razonamiento externalizado.
-- **`standard`** — Todas las fases se ejecutan pero pueden consolidarse. Evidencia impresa requerida solo en checkpoints clave. Diseñado para modelos de rango medio (ej. Sonnet, GPT-4o, Gemini Pro).
-- **`autonomous`** — Ejecución holística. Recibís los objetivos de cada fase pero elegís cómo alcanzarlos. Solo el formato de salida final es obligatorio. Diseñado para modelos pesados de razonamiento (ej. Opus, o1, Deep Research).
+**Si el usuario especificó un modo, usalo.** Si no, **proponé el que corresponde a tu propio modelo** en una línea y seguí salvo que el usuario elija otro:
 
-**Si el usuario NO especificó un modo**, preguntale antes de continuar:
-
-> Este workflow soporta tres modos de ejecución que se adaptan a distintas capacidades de modelo:
->
-> - **`strict`** — Paso a paso con puertas de evidencia. Ideal para modelos rápidos/ligeros (Haiku, Flash, mini). Maximiza la precisión a costa de la velocidad.
-> - **`standard`** — Balanceado. Todas las fases se ejecutan pero con flexibilidad para consolidar pasos. Ideal para modelos de rango medio (Sonnet, GPT-4o).
-> - **`autonomous`** — Análisis holístico con máxima libertad. Ideal para modelos pesados de razonamiento (Opus, o1). Maximiza velocidad y profundidad.
->
-> ¿Qué modo debo usar? (La próxima vez, podés especificarlo directamente, ej. "Creá un plan estricto" o "Planificá esto autónomamente".)
-
-**Esperá la respuesta del usuario antes de continuar.**
-
-> **Personalización:** Si tu equipo no utiliza modelos de razonamiento de alta capacidad (Opus, o1, Deep Research), podés eliminar el modo `autonomous` de este workflow para reducir la fricción en la selección. Menos opciones = menos overhead cognitivo para el usuario.
+> Voy a planificar en modo **`<modo>`**, que corresponde al modelo en el que estoy corriendo. Si preferís otro — `strict` (paso a paso, con evidencia), `standard` (balanceado) o `autonomous` (holístico) — decímelo.
 
 ---
 

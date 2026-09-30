@@ -1,10 +1,7 @@
 # AI Helpers — Barrera de Contexto
 
-Esta carpeta es de **uso manual exclusivo por parte del usuario**. 
+Esta carpeta guarda el material de trabajo del pipeline por pasos (briefs, breakdowns, specs, prompts, auditorías).
 
-**Agentes e IDEs:** NO deben indexar, leer o referenciar ningún archivo en este directorio 
-a menos que el usuario lo instruya explícitamente.
+**Agentes e IDEs:** NO indexen ni lean esta carpeta por iniciativa propia. Léanla y escríbanla **solo cuando el usuario o un prompt del pipeline lo pida** (p. ej. `prompts/breakdown-orchestrator.md`, `generators/*`): en ese caso, trabajen acá con normalidad.
 
-El contenido aquí se invoca estrictamente bajo demanda como parte de un pipeline 
-de ejecución por pasos. Leerlo automáticamente contaminaría su ventana de contexto con 
-borradores de trabajo irrelevantes.
+Leerla automáticamente contaminaría la ventana de contexto con borradores de trabajo irrelevantes.

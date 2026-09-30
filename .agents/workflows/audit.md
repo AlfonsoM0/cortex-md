@@ -1,5 +1,5 @@
 ---
-description: Post-feature audit with evidence-based validation. Verifies changes against semantic memory rules using real tool output. Supports three execution modes (strict, standard, autonomous) to adapt to different model capabilities. Note: autonomous mode can be removed in projects that do not use high-capacity models.
+description: Post-feature audit with evidence-based validation. Verifies changes against semantic memory rules using real tool output. Supports three execution modes (strict, standard, autonomous); the agent proposes the one that fits its model.
 ---
 
 # Workflow: Post-Feature Audit with Evidence
@@ -8,27 +8,17 @@ description: Post-feature audit with evidence-based validation. Verifies changes
 
 ## Phase 0: Mode Selection
 
-Determine the execution mode based on the user's request.
+Three execution modes adapt this workflow to the model running it:
 
-**Check the user's instruction.** They should have specified one of three modes:
+- **`strict`** — Every check requires printed evidence (tool output, grep results, line counts); each phase is a separate cognitive domain executed sequentially. For lightweight models (e.g., Haiku 4.5 and equivalents).
+- **`standard`** — All phases are executed but evidence printing is required only at key checkpoints; phases may be consolidated. For mid-tier models (e.g., Sonnet 5.5 and equivalents).
+- **`autonomous`** — Holistic evaluation: you receive the audit objectives and choose how to verify them. For the highest-reasoning models (e.g., Opus 5.5 and equivalents).
 
-- **`strict`** — Every check requires printed evidence (tool output, grep results, line counts). Each phase is a separate cognitive domain executed sequentially. Designed for lightweight models (e.g., Haiku, Flash, GPT-4o-mini).
-- **`standard`** — All phases are executed but evidence printing is required only at key checkpoints. Phases may be consolidated. Designed for mid-tier models (e.g., Sonnet, GPT-4o, Gemini Pro).
-- **`autonomous`** — Holistic evaluation. You receive the audit objectives but choose how to verify them. Only the Technical Validation phase (lint/build/typecheck) is mandatory and blocking, regardless of mode. Designed for heavyweight models (e.g., Opus, o1, Deep Research).
+In every mode, the Technical Validation phase is mandatory and blocking.
 
-**If the user did NOT specify a mode**, ask them before proceeding:
+**If the user specified a mode, use it.** If not, **propose the one that fits your own model** in one line and proceed unless the user chooses another:
 
-> This audit workflow supports three execution modes:
->
-> - **`strict`** — Every check requires printed evidence. Best for fast/lightweight models (Haiku, Flash, mini). Maximizes thoroughness.
-> - **`standard`** — Balanced. All checks run but with flexibility. Best for mid-tier models (Sonnet, GPT-4o).
-> - **`autonomous`** — Holistic evaluation with maximum freedom. Best for heavyweight reasoning models (Opus, o1). Only lint/build/typecheck gates are mandatory.
->
-> Which mode should I use? (Next time, you can specify it directly, e.g., "Run a strict audit" or "Audit autonomously".)
-
-**Wait for the user's response before proceeding.**
-
-> **Customization:** If your team does not use high-capacity reasoning models (Opus, o1, Deep Research), you can remove the `autonomous` mode from this workflow to reduce selection friction. Fewer options = less cognitive overhead for the user.
+> I'll audit in **`<mode>`** mode, which fits the model I'm running on. If you prefer another — `strict` (evidence for every check), `standard` (balanced), or `autonomous` (holistic) — just tell me.
 
 ---
 
@@ -123,6 +113,8 @@ Run the project's automated validation tools.
 4. **Run related tests** if they exist for the modified packages/modules.
 
 **Gateway rule:** If any command in this phase fails, do NOT proceed to the report. Fix the issues first, then re-run.
+
+**Without a toolchain:** if the project has no linter, type checker, or build (check `stack.md`), record it in the report and run what does exist (tests, `node .agents/check-memory-contract.js`). The gateway blocks on failures, never on commands that do not exist.
 
 ---
 

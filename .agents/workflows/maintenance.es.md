@@ -11,20 +11,19 @@ description: Chequeo semanal de la memoria (automático, liviano)
 - **Día de mantenimiento:** el que figura en `AGENTS.md § Mantenimiento automático` (por defecto, viernes). Si dice "desactivado", no corre.
 - **Corre en la primera sesión desde ese día en la que todavía no se hizo.** El agente no tiene reloj entre sesiones: si el usuario no trabaja el viernes, corre el lunes. Regla: corre si el último chequeo de `maintenance-log.md` es anterior a la última vez que fue el día de mantenimiento.
 - **Primero lo del usuario.** Si llegó con algo urgente, hacé el chequeo al final de la sesión.
-- **Lo ejecuta un solo agente:** el que conversa con el usuario. En un equipo de personas, el responsable que nombre `AGENTS.md`.
+- **Lo ejecuta un solo agente:** el que conversa con el usuario.
 - Si no sabés la fecha de hoy, obtenela del sistema (ej. `date`) o preguntala; nunca la supongas.
 
 ## Chequeos
 
 1. **Contrato y tamaño:** `node .agents/check-memory-contract.js` — hallazgos y carga fija en tokens. Sin Node: sumá el tamaño de los archivos de carga fija (`start.md § Fase 1`) y revisá a ojo las entradas más largas.
-2. **Sesiones sin consolidar:** trabajo posterior a la última entrada del timeline.
-   - Con git: commits posteriores a esa fecha (`git log --since=<fecha>`).
-   - Sin git: archivos del espacio de trabajo modificados después de esa fecha, fuera de `.agents/` (ej. `find . -newer .agents/memory/episodic/timeline.md -type f -not -path "./.agents/*"`).
+2. **Sesiones sin consolidar (solo con git):** commits posteriores a la última entrada del timeline (`git log --since=<fecha>`); si `start.md` ya lo revisó en esta sesión, reusá su resultado. Sin git no hay chequeo: el trabajo se considera guardado en el momento.
 3. **Higiene de `active-tasks.md`:** ítems con ✅ que deberían haberse borrado, `[Watch]` con el disparador vencido, fechas ya pasadas, "verificar" que llevan semanas.
 4. **Sesiones desde el último defrag:** entradas del timeline posteriores a la fecha del último defrag de `maintenance-log.md`.
 5. **Crecimiento de la carga fija** contra el valor anotado en el último defrag.
 6. **Brief:** fecha de la última revisión (`maintenance-log.md`) y objetivos de `docs/00-PROJECT-BRIEF.md` con fecha vencida.
 7. **Timeline:** más de 50 entradas, o entradas que crecieron a párrafo.
+8. **Entorno del agente:** fecha de verificación en `docs/agent-environment.md`. Las herramientas cambian rápido: pasados más de 90 días, el puente y la configuración pueden estar desactualizados.
 
 ## Decisión: una recomendación, no una lista
 
@@ -35,10 +34,11 @@ description: Chequeo semanal de la memoria (automático, liviano)
 | ≥ 15 sesiones desde el último defrag · carga fija +25 % · hallazgos del verificador · > 60 días y ≥ 5 sesiones desde el último    | Un defrag completo (`defrag.md`).                                                                   |
 | Brief sin revisar hace > 90 días, u objetivos vencidos                                                                           | La revisión rápida del brief (`references/alignment-interview.md § Re-alineación`).                 |
 | Señales de cambio de rumbo en las últimas sesiones                                                                               | Una re-alineación.                                                                                  |
+| Entorno del agente verificado hace > 90 días                                                                                     | Re-verificarlo: investigá la documentación oficial de la herramienta y actualizá `docs/agent-environment.md`. |
 | Nada de lo anterior                                                                                                              | Nada: "Chequeo semanal: la memoria está en orden."                                                  |
 
-- **Si hay varias, ofrecé como mucho dos**, en este orden: consolidar > limpiar > defrag > revisión del brief. Lo demás queda para el próximo chequeo.
-- **Defrag con un modelo liviano:** si el modelo en uso no es de razonamiento fuerte, recomendá hacerlo con uno más capaz en lugar de ejecutarlo.
+- **Si hay varias, ofrecé como mucho dos**, en este orden: consolidar > limpiar > defrag > revisión del brief > entorno. Lo demás queda para el próximo chequeo.
+- **Defrag con un modelo liviano:** si el modelo en uso no está entre los de mayor razonamiento de tu propio servicio (investigalos; nunca recomiendes otro proveedor), recomendá hacer el defrag con uno de ellos en lugar de ejecutarlo; si el usuario no puede cambiarlo, `defrag.md § Fase 0` explica cómo seguir.
 
 ## Cómo decirlo
 

@@ -2,20 +2,16 @@
 
 This document defines the **strict** list of `[Tags]` that can be used in `timeline.md`.
 
-**Rule for the agent:** You must exclusively use the tags listed here. If during a session you detect that no existing tag adequately covers the domain worked on, **recommend a new tag to the user and wait for their approval** before registering it in this file and using it in the timeline.
+**Rule for the agent:** use only the tags listed here. If no existing tag adequately covers the domain worked on, **recommend a new tag to the user and wait for their approval** before adding it to this file and using it in the timeline.
 
 ## Allowed Tags
 
-> These are the default tags for a software project. In another domain, `init.md` proposes replacements or additions (e.g. `[Stock]`, `[Suppliers]`, `[Customers]`, `[Payments]`) and the user approves them. `[CortexMD]` is always preserved.
+> The project's tags come from the domains that emerged in the alignment interview, approved by the user. `[Docs]` and `[CortexMD]` are always retained.
 
-- `[Core]`: Changes to root configuration, initialization, or project tooling.
-- `[UI]`: User interface, visual components, styles, animations.
-- `[Auth]`: Authentication, authorization, session management, security.
-- `[DB]`: Database, schemas, migrations, ORM.
-- `[API]`: Endpoints, network integrations, webhooks, external services.
-- `[Testing]`: Unit tests, integration tests, E2E, QA.
-- `[DevOps]`: CI/CD, deployments, infrastructure, containers.
-- `[Refactor]`: Code restructuring without changes to external functionality.
-- `[Bugfix]`: Resolution of detected errors and bugs.
-- `[Docs]`: Documentation updates, semantic memory, README.
-- `[CortexMD]`: Memory maintenance sessions (defrag, optimization). Sessions tagged **only** with `[CortexMD]` are not relevant to the project and must be skipped during hippocampal routing.
+- `[Docs]`: Project documentation (`docs/`), alignment and re-alignment sessions, README.
+- `[CortexMD]`: Memory maintenance sessions (defrag, purge, optimization). Sessions tagged **only** with `[CortexMD]` are not relevant to the project and must be skipped during hippocampal routing.
+
+<!-- cortex:example — suggestions for init; they are not valid until the user approves them
+Software: [Core] root configuration and tooling · [UI] interface and styles · [Auth] authentication and security · [DB] database and migrations · [API] endpoints and integrations · [Testing] tests and QA · [DevOps] CI/CD and infrastructure · [Refactor] restructuring without functional changes · [Bugfix] error fixes
+Administrative: [Stock] · [Suppliers] · [Customers] · [Payments] · [Calendar] · [Procedures]
+-->

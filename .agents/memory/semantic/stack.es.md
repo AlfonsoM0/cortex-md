@@ -1,33 +1,26 @@
-# Stack Tecnológico
+# Stack y Sistemas
 
 > **Contrato:** cada entrada es una regla en imperativo + a lo sumo una frase de razón + cita al doc canónico (`→ docs/...`), ≤ ~400 caracteres. El detalle vive en `docs/`; la historia, en el episódico. Verificador: `node .agents/check-memory-contract.js`.
 
-- **Fuente primaria:** *Ej: el código de este repositorio — o la planilla `Stock 2026` / el ERP. Es lo que le gana a la memoria ante una discrepancia.*
+<!-- cortex:example — reemplazá los placeholders por entradas reales y borrá este bloque (init.md § Fase 4)
+Software:
+- **Fuente primaria:** el código de este repositorio, y la base de datos de producción para los datos vivos. Le ganan a la memoria. → `docs/architecture/overview.md`
+- **Entorno del agente:** Claude Code con Opus, plan de suscripción; puente `CLAUDE.md` + hook de inicio de sesión. → `docs/agent-environment.md`
+- **Stack:** TypeScript, Next.js, PostgreSQL en Supabase; pnpm, ESLint, Vitest. → `docs/architecture/overview.md`
+Administrativo:
+- **Fuente primaria:** `Proveedores/proveedores.xlsx` (proveedores y precios) y el sistema de facturación (ventas). Le ganan a la memoria. → `docs/sistemas.md`
+- **Entorno del agente:** Claude Cowork con Opus, plan de suscripción; puente `CLAUDE.md`. → `docs/agent-environment.md`
+- **Pedidos a proveedores:** por correo desde la casilla de compras; WhatsApp solo para urgencias. → `docs/procedimientos/reposicion.md`
+-->
 
-## Lenguajes
+## Fuente Primaria
 
-| Lenguaje | Uso |
-|---|---|
-| *TypeScript* | *Ejemplo: Frontend y Backend* |
+_La primera entrada de este archivo: qué archivos o sistemas tienen la verdad de cada tipo de dato — el código, o los archivos del negocio (p. ej. una planilla de proveedores), incluidos los que están fuera de la carpeta (nube, conector, sistema en línea). Le ganan a la memoria ante una discrepancia._
 
-## Frameworks y Librerías Principales
+## Entorno del Agente
 
-| Tecnología | Versión | Rol |
-|---|---|---|
-| *Next.js* | *15.x* | *Ejemplo: Framework full-stack* |
-| *DrizzleORM* | *0.3x* | *Ejemplo: ORM y migraciones* |
+_La herramienta y su forma de uso, el modelo y cómo se carga la memoria; citá el doc de entorno que crea init._
 
-## Base de Datos
+## Herramientas y Servicios
 
-- **Motor:** *Ej: PostgreSQL 16*
-- **Hosting:** *Ej: Supabase / Neon / Local*
-
-## Herramientas de Desarrollo
-
-- **Package Manager:** *Ej: pnpm*
-- **Linter/Formatter:** *Ej: ESLint + Prettier*
-- **Testing:** *Ej: Vitest + Playwright*
-
-## Servicios Externos
-
-*Lista APIs de terceros, servicios de pago, CDNs, etc.*
+_Lenguajes, frameworks y herramientas de desarrollo — o los sistemas, apps y proveedores en los que se apoya la operación._

@@ -2,24 +2,26 @@
 
 > **Contrato:** cada entrada es una regla en imperativo + a lo sumo una frase de razón + cita al doc canónico (`→ docs/...`), ≤ ~400 caracteres. El detalle vive en `docs/`; la historia, en el episódico. Verificador: `node .agents/check-memory-contract.js`.
 
-## Dominio Principal
+<!-- cortex:example — reemplazá los placeholders por entradas reales y borrá este bloque (init.md § Fase 4)
+Software:
+- **Un usuario nunca tiene saldo negativo:** cada débito valida fondos en la misma transacción. → `docs/features/payments.md`
+Administrativo:
+- **Nunca aprobar un pago sin remito conformado:** el faltante se reclama antes de pagar. → `docs/procedimientos/pagos.md §2`
+- **El stock mínimo de cada producto lo define la planilla**, no la memoria: la memoria nombra la columna, nunca copia sus valores. → `docs/sistemas.md`
+-->
 
-*Describe en 2-3 líneas el dominio del negocio (ej. fintech, e-commerce, SaaS B2B) y el problema que resuelve.*
+## Dominio
+
+_En 2-3 líneas: el dominio del negocio y el problema que resuelve._
 
 ## Entidades Clave
 
-| Entidad | Descripción | Relaciones |
-|---|---|---|
-| *Usuario* | *Ejemplo: Persona registrada en la plataforma* | *Tiene muchas Órdenes* |
-| *Orden* | *Ejemplo: Solicitud de compra* | *Pertenece a un Usuario* |
+_Las entidades principales y cómo se relacionan (p. ej. cliente, pedido, proveedor, producto)._
 
 ## Reglas Invariables
 
-*Lista las restricciones que el sistema (o quien opera) debe respetar siempre, sin excepción.*
+_Las restricciones que el sistema — o quien lo opera — respeta siempre, sin excepción (lo que no admite error)._
 
-- *Ej: Un usuario no puede tener un balance negativo.*
-- *Ej: Toda transacción debe registrar un concepto.*
+## Flujos Críticos
 
-## Flujos de Negocio Críticos
-
-*Describe los procesos principales paso a paso (ej. flujo de checkout, flujo de onboarding).*
+_Los procesos donde un error sale caro, cada uno como regla + cita._

@@ -8,7 +8,7 @@
 
 _El estado verificado del sistema, con fecha y cómo verificarlo. Lo externo (configuración de terceros, entregas, pagos programados) lleva cuándo y dónde se comprobó._
 
-- _Ej: Producción al día con la versión `abc1234` (verificado AAAA-MM-DD con `<comando>`)._
+- _Ej.: Stock conciliado con el conteo físico (verificado AAAA-MM-DD en la planilla) · Producción en la versión `abc1234` (verificado AAAA-MM-DD con `<comando>`)._
 
 ## 🚀 Próximos Pasos
 

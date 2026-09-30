@@ -26,11 +26,14 @@ Mantené **una sola fuente de verdad** y generá el resto:
 
 ```bash
 node .agents/sync-mcp.js
+# ✓ .mcp.json synced
 # ✓ .zoo/mcp.json synced
 # ✓ .vscode/mcp.json synced
 ```
 
-Agregar un nuevo IDE destino son ~5 líneas en `sync-mcp.js` (un loop de merge + un `write(...)`).
+Agregar un nuevo IDE destino son ~5 líneas en `sync-mcp.js` (un loop de merge + un `write(...)`). Si un archivo destino ya existe y su contenido cambiaría, el script guarda antes la versión anterior como `<archivo>.bak`: una configuración escrita a mano nunca se pierde en silencio.
+
+Las herramientas que solo leen una configuración de MCP **global** (p. ej. el `~/.codex/config.toml` de Codex sin confianza del proyecto, o el `~/.gemini/config/mcp_config.json` de Antigravity) no se generan: usá `mcp_config.json` como inventario para restaurarlas a mano.
 
 ## Seguridad & .gitignore
 
@@ -38,8 +41,10 @@ Agregar un nuevo IDE destino son ~5 líneas en `sync-mcp.js` (un loop de merge +
 - Los archivos **generados** suelen contener rutas específicas de la máquina o tokens inyectados. Agregalos a `.gitignore`:
 
 ```gitignore
+.mcp.json
 .zoo/mcp.json
 .vscode/mcp.json
+*.bak
 ```
 
 Commiteá solo la `mcp_config.json` canónica (con placeholders) y los archivos de overrides.

@@ -11,11 +11,15 @@
  *                         -> { <serverName>: { ...fields to merge/override } }
  *
  * Outputs (written at the repo root):
- *   .zoo/mcp.json      (Zoo Code)  -> { "mcpServers": { ...base + overrides } }
- *   .vscode/mcp.json   (VS Code)   -> { "servers":    { ...base + "type": "stdio" } }
+ *   .mcp.json          (Claude Code) -> { "mcpServers": { ...base + overrides } }
+ *   .zoo/mcp.json      (Zoo Code)    -> { "mcpServers": { ...base + overrides } }
+ *   .vscode/mcp.json   (VS Code)     -> { "servers":    { ...base + "type": "stdio" } }
+ *
+ * An existing output whose content would change is first copied to `<file>.bak`,
+ * so a hand-written config is never lost silently.
  *
  * Security: keep real secrets OUT of mcp_config.json — use placeholders or env vars.
- * Add the generated files (.zoo/mcp.json, .vscode/mcp.json) to .gitignore if they
+ * Add the generated files (.mcp.json, .zoo/mcp.json, .vscode/mcp.json) to .gitignore if they
  * carry machine-specific paths or tokens. See docs/mcp-sync.md.
  *
  * Run:  node .agents/sync-mcp.js
@@ -36,13 +40,32 @@ function readOverrides(file) {
 }
 
 function write(outPath, data) {
+  const content = JSON.stringify(data, null, 2) + "\n";
+  const rel = path.relative(root, outPath);
+  if (fs.existsSync(outPath)) {
+    const previous = fs.readFileSync(outPath, "utf8");
+    if (previous === content) {
+      console.log(`✓ ${rel} already in sync`);
+      return;
+    }
+    fs.writeFileSync(`${outPath}.bak`, previous);
+    console.log(`  ${rel} existed: previous version saved to ${rel}.bak`);
+  }
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, JSON.stringify(data, null, 2) + "\n");
-  console.log(`✓ ${path.relative(root, outPath)} synced`);
+  fs.writeFileSync(outPath, content);
+  console.log(`✓ ${rel} synced`);
 }
 
 const base = readJson("mcp_config.json");
 const servers = base.mcpServers ?? {};
+
+// --- Claude Code (.mcp.json): { mcpServers } + per-server overrides ---
+const claudeOverrides = readOverrides("mcp_config.claude-overrides.json");
+const claudeServers = {};
+for (const [name, config] of Object.entries(servers)) {
+  claudeServers[name] = { ...config, ...(claudeOverrides[name] ?? {}) };
+}
+write(path.join(root, ".mcp.json"), { mcpServers: claudeServers });
 
 // --- Zoo Code (.zoo/mcp.json): { mcpServers } + per-server overrides ---
 const zooOverrides = readOverrides("mcp_config.zoo-overrides.json");
