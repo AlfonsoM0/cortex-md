@@ -170,4 +170,4 @@ Open a new session and ask, without naming the file: _"What is the first pending
 
 ## Several agents or several people
 
-The base case is one LLM and one tool. Several providers can be configured and **used one at a time** with the same memory. Working in parallel requires orchestration — a leader agent that delegates and is the only one that consolidates — and several people sharing one memory causes conflicts in episodic memory. Both are complex and outside Cortex-MD's scope.
+The base case is one LLM and one tool. Several providers can be configured and **used one at a time** with the same memory. Working in parallel requires orchestration — a leader agent that delegates and is the only one that consolidates — and several people sharing one memory causes conflicts in episodic memory. When the leader delegates a task, its prompt tells the helper to run `start.md` but skip `active-tasks.md` and the roadmap: a task needs neither the pending work nor the scope, and every delegated session pays for what it loads. Both are complex and outside Cortex-MD's scope.

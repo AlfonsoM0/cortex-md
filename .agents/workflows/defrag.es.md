@@ -6,6 +6,21 @@ description: Desfragmentación y Optimización de Memoria (Defrag)
 
 **Contexto del Sistema:** Ejercitar la memoria. Cada `end.md` consolida lo que puede, pero la consolidación es imperfecta: las reglas se acumulan, se repiten o dejan de ser ciertas. El defrag es el ejercicio periódico que lo corrige: eliminar redundancias, comprimir formato, corregir inconsistencias entre archivos y — lo más valioso — **comprobar que lo escrito siga siendo cierto**. Es una operación avanzada: requiere un modelo de razonamiento fuerte y la confirmación del usuario. Se ejecuta a pedido o cuando el chequeo semanal (`maintenance.md`) lo recomienda.
 
+## El modelo que el defrag repara
+
+La memoria es una **pirámide de tres niveles, leída de arriba hacia abajo**. Cada workflow respeta ese flujo; el defrag lo repara donde se rompa.
+
+- **Punta — `AGENTS.md`** (+ el puente del agente): identidad, las reglas transversales más críticas y un mapa de todo lo demás. Se lee siempre.
+- **Centro — memoria semántica** (`architecture`, `stack`, `business-rules`, `active-tasks`; `conventions` y `taxonomy` cuando la tarea los necesita), el roadmap y el timeline: reglas cortas que capturan lo importante. Se leen siempre, completos.
+- **Base — `docs/` y las skills:** el detalle detrás de cada regla. Se abren solo donde la tarea lo necesita, siguiendo citas.
+
+Cuatro reglas la sostienen:
+
+1. **Cada nivel es más chico, más general y más estable que el de abajo.** Lo voluminoso o lo que cambia seguido va hacia abajo; lo crítico y transversal sube a la punta, una sola vez.
+2. **Leé de arriba hacia abajo, escribí de abajo hacia arriba:** el detalle va a `docs/` primero, después el resumen a la memoria semántica y, rara vez, a la punta. Un resumen nunca existe sin su detalle abajo: eso es lo que hace que comprimir sea seguro.
+3. **Las citas son verticales en la punta y en el centro** (hacia `docs/` o una skill; nunca hacia otro archivo de memoria, nunca hacia arriba) **y una red en la base** (doc ↔ doc, doc → skill). La base puede nombrar dónde vive el estado (`active-tasks.md`), pero nunca citar sus secciones o ítems: son volátiles.
+4. **Dos ejes quedan afuera de la pirámide:** la **verdad** yace debajo de la base (la fuente primaria le gana a `docs/`) y el **tiempo** corre al costado (la memoria episódica es historia: se busca por etiqueta, nunca se cita). `active-tasks.md` vive en el centro, pero es **estado**, no reglas.
+
 ## Fase 0: Puerta de Seguridad
 
 Revisá qué cambió desde la última consolidación (con git: `git status`) y mostrá esta advertencia; **esperá una confirmación explícita del usuario**:
@@ -50,6 +65,7 @@ Leé TODO antes de cambiar nada, para detectar degradación entre archivos a la 
 - Listas densas sobre prosa; tablas de 2 columnas → lista de definición.
 - **En los archivos de lectura fija, listas en vez de tablas:** un formateador de Markdown (p. ej. prettier) rellena cada celda hasta la fila más ancha y puede multiplicar el tamaño de la tabla. Medí la carga fija después de que corre el formateador, no antes.
 - Sin relleno ("es importante notar que…"); voz imperativa; encabezados hasta H3.
+- **🔴 jerarquiza, así que es escaso:** reservalo para lo irreversible o silencioso (dinero, datos, seguridad, legal, datos personales), a lo sumo en una de cada cuatro entradas de un archivo (las etiquetas de tamaño como `[🔴 Épica]` no cuentan). Las 5-10 reglas transversales más críticas viven una sola vez, en la punta (`AGENTS.md`). El verificador reporta la proporción por archivo.
 - **Anatomía objetivo** (misma de `end.md § Fase 3`): regla en imperativo + a lo sumo una frase de razón + cita a `docs/`, ≤ ~400 caracteres.
 
 ### 2.3 Enrutar conocimiento a Skills
@@ -62,7 +78,7 @@ Cada archivo reescrito es completo y autocontenido (no un diff), de tamaño ≤ 
 
 ### 2.5 Verificar el contrato (bloqueante)
 
-Corré `node .agents/check-memory-contract.js`. Objetivo: **cero hallazgos**. Cada hallazgo se corrige moviendo el detalle al doc y dejando regla + cita; no se silencia. ⚠️ Mide la **forma**, no la verdad: una entrada corta que miente pasa en verde. Eso lo cubre la Fase 4.6.
+Corré `node .agents/check-memory-contract.js`. Señala entradas largas sin cita, citas muertas, citas a la memoria episódica, **citas laterales o hacia arriba** en el centro, y **citas a una sección de `active-tasks.md` desde `docs/`**; reporta la carga fija, la proporción de 🔴 por archivo y los docs de más de 40 KB. Objetivo: **cero hallazgos**. Cada hallazgo se corrige moviendo el detalle al doc y dejando regla + cita; no se silencia. ⚠️ Mide la **forma**, no la verdad: una entrada corta que miente pasa en verde. Eso lo cubre la Fase 4.6.
 
 ## Fase 3: Optimización Episódica
 
@@ -76,6 +92,7 @@ Corré `node .agents/check-memory-contract.js`. Objetivo: **cero hallazgos**. Ca
 - `business-rules` ↔ `architecture`: entidades del dominio alineadas a la estructura.
 - `taxonomy` ↔ `timeline`: toda etiqueta en uso existe en la taxonomía.
 - `active-tasks` ↔ roadmap: la tarea actual es coherente con la fase.
+- **Dirección de citas** (el modelo, regla 3): el verificador señala citas laterales en el centro y citas de la base a secciones de `active-tasks.md`; revisá a mano que la punta cite hacia abajo y que ninguna regla viva repetida en dos niveles.
 
 **Contradicción →** decidí con la jerarquía de verdad (`start.md`): primero la fuente primaria y las instrucciones vigentes del usuario; la fecha de consolidación solo desempata entre memorias con igual respaldo. No conviertas un comportamiento defectuoso en política ni una fecha programada en un hecho confirmado.
 
@@ -108,8 +125,9 @@ Tomá las afirmaciones **verificables** de la memoria semántica — nombres, l�
 3. 🔴 **Cazá desvío de ESTADO, no solo de forma:** afirmaciones que el tiempo volvió falsas, sobre todo las que **prometen una acción futura** ("antes del lanzamiento", "cuando tengamos clientes", "todavía en modo prueba", "hay que hacerlo antes de…"). Armá un patrón de búsqueda con las frases de tu proyecto; los patrones amplios ("pendiente", "todavía no") solo devuelven ruido y se dejan de correr.
    - **Priorizá la dirección CARA:** un doc que **subestima el riesgo** (dice "entorno de prueba" donde ya hay datos o dinero reales) daña mucho más que uno simplemente viejo.
    - La búsqueda propone; **el veredicto lo das vos**, sabiendo el estado real.
-4. Un doc archivado que ya no representa nada vigente y cuyo valor histórico está cubierto → proponé su eliminación al usuario.
-5. **¿El brief sigue vigente?** Si `docs/00-PROJECT-BRIEF.md` tiene objetivos ya cumplidos o vencidos, o más de seis meses sin revisión, proponé una **re-alineación** (`references/alignment-interview.md`).
+4. **Docs grandes** (el verificador los lista): uno que supere ~40 KB se divide en una carpeta con un `index.md` que sea la punta de la rama (qué es, las reglas clave en una pantalla, un mapa de sus hijos) y archivos temáticos de menos de ~40 KB que mantengan sus títulos de sección y numeración (`end.md § Fase 4`); después reescribí sus citas en memoria, docs y skills. Es trabajo voluminoso: se puede delegar con un brief y verificar con un script de equivalencia (cada símbolo, número, URL, enlace y título del original presente en los archivos nuevos, y ≥ 97 % de sus palabras).
+5. Un doc archivado que ya no representa nada vigente y cuyo valor histórico está cubierto → proponé su eliminación al usuario.
+6. **¿El brief sigue vigente?** Si `docs/00-PROJECT-BRIEF.md` tiene objetivos ya cumplidos o vencidos, o más de seis meses sin revisión, proponé una **re-alineación** (`references/alignment-interview.md`).
 
 ## Fase 6: Higiene y Entorno
 
@@ -137,6 +155,7 @@ Elimina los archivos del framework que dejaron de ser útiles, para evitar basur
 Preparalo ahora y **entregalo al final**, después de las Fases 8 y 9 y de una última corrida de `node .agents/check-memory-contract.js`, para que el tamaño de la carga fija y el resultado del verificador sean los definitivos. Resumí al usuario:
 
 - Archivos reescritos (una línea cada uno) y **tamaño de la carga fija antes → después**.
+- La pirámide: dirección de citas, proporción de 🔴 por archivo y docs grandes divididos.
 - Archivos purgados (Fase 6.5), si corrió la purga.
 - Redundancias eliminadas y entradas comprimidas a regla + cita (con el doc de destino), y el resultado del verificador.
 - **Afirmaciones que la fuente primaria desmintió (Fase 4.6)** — lo más importante del reporte.

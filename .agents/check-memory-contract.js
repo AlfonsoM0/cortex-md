@@ -24,6 +24,14 @@
  *      exist — dead references. URLs are ignored (`https://x.com/docs/...`).
  *   3. Citations to the episodic memory — history is not a valid authority
  *      for the present state (it goes stale by design).
+ *   4. Lateral or upward citations in the MIDDLE of the pyramid (the rule
+ *      files and `active-tasks.md`): a mention of another memory file or of
+ *      `AGENTS.md`. The top and the middle are always read, so a citation
+ *      points down (`docs/` or a skill); if the rule lives in another file,
+ *      it is not repeated (`defrag.md § The model that defrag repairs`).
+ *   5. Citations to a section or item of `active-tasks.md` from `docs/`: the
+ *      base may name where state lives, but its sections change and the
+ *      citation dies.
  *
  * A skill cited as `[skill-name]` counts as a citation only if
  * `.agents/skills/skill-name/` exists.
@@ -31,6 +39,10 @@
  * What it reports without failing:
  *   - Short list items WITHOUT a citation: allowed, but the contract prefers
  *     rule + citation, so the defrag should review them.
+ *   - Share of list items marked 🔴 per middle file (budget ≤ 25 %; size tags
+ *     such as `[🔴 Epic]` do not count).
+ *   - Docs in `docs/` over 40 KB: they split into a folder with an `index.md`
+ *     (`end.md § Phase 4`).
  *   - Size of the ALWAYS-LOADED tier (what every session reads: `AGENTS.md`,
  *     the bridge, `start.md`, the short rules, the timeline and the recent
  *     memory that `--recent` prints), in bytes and estimated tokens, so the
@@ -62,6 +74,14 @@ const RULE_FILES = [
   "business-rules.md",
 ];
 
+/** The MIDDLE of the pyramid: always read, cites only downward. */
+const CENTER_FILES = [...RULE_FILES, "active-tasks.md"];
+
+/** Size past which a doc splits into a folder (`end.md § Phase 4`). */
+const MAX_DOC_BYTES = 40 * 1024;
+/** Budget of 🔴 list items per middle file (`end.md § Phase 3`). */
+const MAX_RED_RATIO = 0.25;
+
 /**
  * Always-loaded tier (read in every session). Missing files are skipped, so
  * optional ones (a bridge, a roadmap) can stay listed.
@@ -92,6 +112,14 @@ const DOC_PATH = /(?<![\p{L}\p{N}_])docs\/[\p{L}\p{N}._\/-]+/gu;
 const SKILL_PATH = /\.agents\/skills\/[\p{L}\p{N}._-]+/gu;
 const SKILL_REF = /\[([a-z][a-z0-9-]+)\]/g;
 const EPISODIC_REF = /episodic\/(\d{4}\/|timeline)/;
+const LIST_ITEM = /^([-*+]|\d+[.)])\s/;
+/** Another memory file or `AGENTS.md`; `03-conventions.md` does not count. */
+const LATERAL_REF =
+  /(?<![\w/.-])(?:architecture|stack|business-rules|conventions|active-tasks|taxonomy|AGENTS)\.md\b/;
+/** A section (`§`) or item (`(P2 …`) of `active-tasks.md`. */
+const VOLATILE_REF = /active-tasks\.md`?\s*(?:§|\(P\d)/;
+/** Backlog size tag, not a severity mark. */
+const SIZE_TAG = /\[🔴 (?:Epic|[ÉE]pica)\]/g;
 
 const trimPunctuation = (p) => p.replace(/[.,;:)]+$/, "");
 
@@ -207,6 +235,55 @@ function auditFile(fileName) {
   return findings;
 }
 
+/** Lateral or upward citations in a middle file. */
+function auditDirection(fileName) {
+  const file = path.join(memoryDir, fileName);
+  if (!fs.existsSync(file)) return [];
+  return entriesOf(fs.readFileSync(file, "utf8"))
+    .filter((entry) => LATERAL_REF.test(entry.text.replace(URL, "")))
+    .map((entry) => ({
+      where: `${fileName}:${entry.line}`,
+      kind: "lateral or upward citation",
+      detail: `${LATERAL_REF.exec(entry.text)[0]} — cite the doc in docs/ or the skill; if the rule lives in another file, do not repeat it`,
+    }));
+}
+
+/** `docs/**\/*.md` except `archive/`, with their size. */
+function docFiles(dir = "docs") {
+  const full = path.join(root, dir);
+  if (!fs.existsSync(full)) return [];
+  return fs.readdirSync(full, { withFileTypes: true }).flatMap((d) => {
+    const rel = `${dir}/${d.name}`;
+    if (d.isDirectory()) return d.name === "archive" ? [] : docFiles(rel);
+    return d.name.endsWith(".md")
+      ? [{ rel, bytes: fs.statSync(path.join(root, rel)).size }]
+      : [];
+  });
+}
+
+/** Base citations to sections or items of `active-tasks.md`. */
+function auditVolatileRefs(docs) {
+  return docs.flatMap(({ rel }) =>
+    fs
+      .readFileSync(path.join(root, rel), "utf8")
+      .split("\n")
+      .flatMap((line, i) =>
+        VOLATILE_REF.test(line)
+          ? [{ where: `${rel}:${i + 1}`, kind: "cites a section of active-tasks.md", detail: "name the file, without a section or item: they are volatile" }]
+          : [],
+      ),
+  );
+}
+
+/** List items marked 🔴 (size tags excluded) over the total, per file. */
+function redRatio(fileName) {
+  const file = path.join(memoryDir, fileName);
+  if (!fs.existsSync(file)) return { red: 0, total: 0 };
+  const items = entriesOf(fs.readFileSync(file, "utf8")).filter((e) => LIST_ITEM.test(e.text));
+  const red = items.filter((e) => e.text.replace(SIZE_TAG, "").includes("🔴"));
+  return { red: red.length, total: items.length };
+}
+
 /** The two sections of a session record that the next session reads. */
 const RECENT_SECTION =
   /^## (Summary|Resumen|Context for Next Session|Contexto para la Pr[oó]xima Sesi[oó]n)\b/;
@@ -294,8 +371,26 @@ function main() {
     console.log(recentMemory());
     return 0;
   }
-  const findings = RULE_FILES.flatMap(auditFile);
+  const docs = docFiles();
+  const findings = [
+    ...RULE_FILES.flatMap(auditFile),
+    ...CENTER_FILES.flatMap(auditDirection),
+    ...auditVolatileRefs(docs),
+  ];
   reportAlwaysLoaded();
+  const ratios = CENTER_FILES.filter((f) => fs.existsSync(path.join(memoryDir, f))).map((f) => {
+    const { red, total } = redRatio(f);
+    const pct = total === 0 ? 0 : red / total;
+    return `${f} ${Math.round(pct * 100)} %${pct > MAX_RED_RATIO ? " ⚠️" : ""}`;
+  });
+  console.log(`ℹ️  List items marked 🔴 (budget ≤ ${MAX_RED_RATIO * 100} %): ${ratios.join(" · ")}`);
+  const bigDocs = docs.filter((d) => d.bytes > MAX_DOC_BYTES).sort((a, b) => b.bytes - a.bytes);
+  if (bigDocs.length > 0) {
+    console.log(
+      `ℹ️  ${bigDocs.length} doc(s) over 40 KB (split into a folder with index.md): ` +
+        bigDocs.map((d) => `${d.rel} ${Math.round(d.bytes / 1024)} KB`).join(" · "),
+    );
+  }
   if (uncited.length > 0) {
     console.log(
       `ℹ️  ${uncited.length} short entr${uncited.length === 1 ? "y" : "ies"} without a citation (allowed; the contract prefers rule + → docs/...): ${uncited.join(", ")}`,
@@ -304,7 +399,7 @@ function main() {
 
   if (findings.length === 0) {
     console.log(
-      `✅ Memory contract: ${RULE_FILES.length} rule files OK (≤${MAX_CHARS} chars or cited, no dead or episodic citations).`,
+      `✅ Memory contract: ${RULE_FILES.length} rule files OK (≤${MAX_CHARS} chars or cited, no dead or episodic citations) and the middle cites only downward.`,
     );
     return 0;
   }

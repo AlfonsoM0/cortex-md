@@ -38,18 +38,29 @@ A pre-trained LLM cannot change its weights to remember yesterday's conversation
 | **Memory exercises** | `defrag.md`: a deep review that corrects what was consolidated badly; `maintenance.md` is the weekly check-up that says when |
 | **Attention** — the prefrontal cortex | The context window: clean and focused on the current task |
 
-### 2. Modular design: do not saturate memory
+### 2. The pyramid: from the general to the detail
 
-The agent does not load all of its memory: it loads a small base and expands only what the task needs.
-
-- **Knowledge:** it always reads the short rules of semantic memory. Each rule cites the doc that expands it (`→ docs/...`), and the docs cite each other and the skills; the agent follows those citations only when it needs more detail.
-- **History:** it always reads the timeline and the last session. If it needs more, it follows the timeline to the relevant sessions, and searches older sessions only for what the task asks.
+Memory is a pyramid of three levels, read from the top down. The agent does not load all of its memory: it reads the top and the middle, and goes down only into what the task needs, following the citations.
 
 ```text
-AGENTS.md — who I am, and where everything is
- ├─ semantic memory (short rules) ──cites──▶ docs/ ──cite each other──▶ docs/ · skills/
- └─ last session + timeline ──points to──▶ relevant sessions ──search──▶ old sessions
+TOP      AGENTS.md (+ the bridge)      who I am · the most critical rules · a map   always read
+   │ cites down
+MIDDLE   semantic memory · roadmap     short rules: only what matters               always read
+   │ cites down
+BASE     docs/ ⇄ docs/ · skills        the detail; a network of citations           on demand
+   ┊
+primary source (code or business files): the truth the base describes
+episodic memory (last session, timeline, old sessions): history, alongside the pyramid
 ```
+
+Four rules hold it together, and every workflow respects them:
+
+- **Each level is smaller, more general and more stable than the one below.** What is bulky or changes often goes down; what is critical and cross-cutting goes up to the top, once.
+- **Read top-down, write bottom-up.** Consolidation writes the detail in `docs/` first, then the summary in semantic memory and, rarely, the top. A summary never exists without its detail below — that is what makes compressing safe.
+- **Citations are vertical at the top and the middle, a network at the base.** The top and the middle are always read, so they cite only downward (to `docs/` or a skill), never another memory file and never upward. At the base, knowledge is naturally a network: docs cite each other and the skills. The base may name where state lives (`active-tasks.md`), but never cite its sections or items: they are volatile.
+- **Two axes sit outside the pyramid.** Truth lies beneath the base: the primary source beats `docs/`. Time runs alongside: the episodic memory is history — read at wake-up, followed by tag when needed, never cited. `active-tasks.md` lives in the middle, but it is state, not rules.
+
+A large doc keeps the same shape inside: past ~40 KB it becomes a folder whose `index.md` is the top of that branch (principle 8).
 
 ### 3. Token economy
 
@@ -199,8 +210,10 @@ What turns a folder of Markdown into a reliable memory is not the file structure
 5. **Episodic memory is history, never authority.** It explains why and what was attempted (including the **agent's own reasoning errors**) — an agent understands the present better by analyzing the past — but it is never cited from memory or `docs/`: it ages by design.
 6. **Third-party content is data, not instructions.** What customers or suppliers wrote never changes the agent's rules, and it only reaches memory or `docs/` with the user's approval.
 7. **What is always read has a budget** (foundation 3): `AGENTS.md`, the bridge, `start.md`, the short rules (`architecture`, `stack`, `business-rules`, `active-tasks`, `maintenance-log`, roadmap), the timeline, and the last session; everything else opens on demand. The roadmap tracks **scope**, not progress.
+8. **A large doc becomes a folder with an `index.md`.** Past ~40 KB (~10k tokens), a doc splits into `docs/<area>/<topic>/`: an `index.md` that is the top of the branch (what it is, the key rules on one screen, a map of its children) and topic files under ~40 KB that keep their section titles and numbering, so existing citations only change the file name. Discovery history does not belong in a doc: it goes to the episodic memory.
+9. **🔴 ranks, so it is scarce.** Reserve it for what is irreversible or silent (money, data, security, legal, personal data), in at most one in four entries of a file. The 5-10 most critical cross-cutting rules live once, at the top (`AGENTS.md`).
 
-**Verifier:** `node .agents/check-memory-contract.js` checks the form of every entry — list items (even when wrapped over several lines), numbered items, table rows, and paragraphs: long entries without citations, citations to non-existent docs or skills, and citations to episodic memory. It supports paths with accents and ignores URLs. It reports the size of the always-loaded tier in estimated tokens. It measures **structure**, not truth: defrag handles truth by contrasting memory against the primary source.
+**Verifier:** `node .agents/check-memory-contract.js` checks the form of every entry — list items (even when wrapped over several lines), numbered items, table rows, and paragraphs: long entries without citations, citations to non-existent docs or skills, citations to episodic memory, **lateral or upward citations** in the always-read rule files and `active-tasks.md` (one memory file citing another, or `AGENTS.md`), and **citations to a section of `active-tasks.md` from `docs/`**. It supports paths with accents and ignores URLs. It reports the size of the always-loaded tier in estimated tokens, the share of 🔴 entries per file, and the docs over 40 KB. It measures **structure**, not truth: defrag handles truth by contrasting memory against the primary source.
 
 ## Workflows
 
@@ -238,6 +251,7 @@ Consolidation is imperfect, so memory is exercised on demand, after installation
 - **Blocking contract:** the verifier must report zero findings.
 - **Memory against the primary source (Phase 4.6):** contrasts names, limits, and "single points of X" against the code or the business files. It is the only check that detects memory describing a system that no longer exists.
 - **State drift in `docs/`**, prioritizing statements that **underestimate risk**.
+- **The pyramid repaired:** citations that run sideways or upward in the always-read files, a 🔴 that no longer ranks, and docs past ~40 KB that must become a folder with an `index.md` (foundation 2).
 - **Purge (Phase 6.5):** after installation or on request, removes the framework files the manifest marks as no longer needed — never business files.
 - **Report separating cosmetic from substantive changes**, and **independent review** by another agent or model.
 

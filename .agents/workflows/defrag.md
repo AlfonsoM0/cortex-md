@@ -6,6 +6,21 @@ description: Memory Defragmentation & Optimization (Defrag)
 
 **System Context:** Exercising memory. Every `end.md` consolidates what it can, but consolidation is imperfect: rules pile up, repeat themselves, or stop being true. Defrag is the periodic exercise that corrects it: eliminate redundancies, compress formatting, fix cross-file inconsistencies, and — most importantly — **verify that what is written remains true**. This is an advanced operation: it requires a high-reasoning model and explicit user confirmation. It is executed on demand or when the weekly check (`maintenance.md`) recommends it.
 
+## The model that defrag repairs
+
+Memory is a **pyramid of three levels, read from the top down**. Every workflow respects that flow; defrag repairs it wherever it breaks.
+
+- **Top — `AGENTS.md`** (+ the agent's bridge): identity, the most critical cross-cutting rules, and a map of everything else. Always read.
+- **Middle — semantic memory** (`architecture`, `stack`, `business-rules`, `active-tasks`; `conventions` and `taxonomy` when the task needs them), the roadmap and the timeline: short rules that capture what matters. Always read, in full.
+- **Base — `docs/` and the skills:** the detail behind each rule. Opened only where the task needs it, by following citations.
+
+Four rules hold it together:
+
+1. **Each level is smaller, more general and more stable than the one below.** What is bulky or changes often goes down; what is critical and cross-cutting goes up to the top, once.
+2. **Read top-down, write bottom-up:** the detail goes into `docs/` first, then the summary into semantic memory and, rarely, the top. A summary never exists without its detail below: that is what makes compressing safe.
+3. **Citations are vertical at the top and the middle** (toward `docs/` or a skill; never toward another memory file, never upward) **and a network at the base** (doc ↔ doc, doc → skill). The base may name where state lives (`active-tasks.md`), but never cite its sections or items: they are volatile.
+4. **Two axes sit outside the pyramid:** **truth** lies beneath the base (the primary source beats `docs/`) and **time** runs alongside (the episodic memory is history: searched by tag, never cited). `active-tasks.md` lives in the middle, but it is **state**, not rules.
+
 ## Phase 0: Safety Gate
 
 Review what changed since the last consolidation (with git: `git status`) and display this warning; **wait for explicit user confirmation**:
@@ -50,6 +65,7 @@ Read EVERYTHING before modifying anything, to detect cross-file degradation all 
 - Dense lists over prose; 2-column tables → definition lists.
 - **In always-loaded files, lists instead of tables:** a Markdown formatter (e.g. prettier) pads every cell to the widest row and can multiply a table's size. Measure the always-loaded tier after the formatter runs, not before.
 - No filler words ("it is important to note that…"); imperative voice; headings up to H3.
+- **🔴 ranks, so it is scarce:** reserve it for what is irreversible or silent (money, data, security, legal, personal data), in at most one in four entries of a file (size tags such as `[🔴 Epic]` do not count). The 5-10 most critical cross-cutting rules live once, at the top (`AGENTS.md`). The checker reports the share per file.
 - **Target anatomy** (same as `end.md § Phase 3`): rule in imperative mood + at most one sentence of rationale + citation to `docs/`, ≤ ~400 characters.
 
 ### 2.3 Route knowledge to Skills
@@ -62,7 +78,7 @@ Each rewritten file is complete and self-contained (not a diff), with size ≤ o
 
 ### 2.5 Verify contract (blocking)
 
-Run `node .agents/check-memory-contract.js`. Target: **zero findings**. Each finding is resolved by moving details to the doc and leaving rule + citation; do not suppress warnings. ⚠️ It checks **form**, not truth: a short entry containing false statements passes in green. That is covered in Phase 4.6.
+Run `node .agents/check-memory-contract.js`. It flags long entries without a citation, dead citations, citations to episodic memory, **lateral or upward citations** in the middle, and **citations to a section of `active-tasks.md` from `docs/`**; it reports the always-loaded tier, the share of 🔴 per file and the docs over 40 KB. Target: **zero findings**. Each finding is resolved by moving details to the doc and leaving rule + citation; do not suppress warnings. ⚠️ It checks **form**, not truth: a short entry containing false statements passes in green. That is covered in Phase 4.6.
 
 ## Phase 3: Episodic Optimization
 
@@ -76,6 +92,7 @@ Run `node .agents/check-memory-contract.js`. Target: **zero findings**. Each fin
 - `business-rules` ↔ `architecture`: domain entities aligned with system structure.
 - `taxonomy` ↔ `timeline`: every tag in use exists in taxonomy.
 - `active-tasks` ↔ roadmap: current task aligns with phase.
+- **Citation direction** (the model, rule 3): the checker flags lateral citations in the middle and base citations to sections of `active-tasks.md`; check by hand that the top cites downward and that no rule lives repeated on two levels.
 
 **Contradiction →** resolve using the truth hierarchy (`start.md`): first the primary source and the user's active instructions; consolidation dates only break ties between memories with equal backing. Do not turn defective behavior into policy or a scheduled date into a confirmed fact.
 
@@ -108,8 +125,9 @@ Take **verifiable** statements from semantic memory — names, limits, values, "
 3. 🔴 **Hunt for STATE drift, not just format drift:** statements made false by the passage of time, especially those that **promise a future action** ("before launch", "once we have customers", "still in testing mode", "must do this before…"). Build a search pattern using phrases specific to your project; broad patterns ("pending", "not yet") only return noise and get abandoned.
    - **Prioritize the COSTLY direction:** a doc that **underestimates risk** (claims "test environment" where real data or money is already present) does far more damage than one that is merely outdated.
    - The search proposes; **you deliver the verdict**, knowing the true state.
-4. An archived doc that no longer represents anything current and whose historical value is covered → propose its removal to the user.
-5. **Is the brief still valid?** If `docs/00-PROJECT-BRIEF.md` contains goals already accomplished or past due, or has gone more than six months without review, propose a **re-alignment** (`references/alignment-interview.md`).
+4. **Large docs** (the checker lists them): one past ~40 KB splits into a folder with an `index.md` that is the top of the branch (what it is, the key rules on one screen, a map of its children) and topic files under ~40 KB that keep their section titles and numbering (`end.md § Phase 4`); then rewrite its citations in memory, docs and skills. It is bulky work: it can be delegated with a brief and checked with an equivalence script (every symbol, number, URL, link and title of the original present in the new files, and ≥ 97 % of its words).
+5. An archived doc that no longer represents anything current and whose historical value is covered → propose its removal to the user.
+6. **Is the brief still valid?** If `docs/00-PROJECT-BRIEF.md` contains goals already accomplished or past due, or has gone more than six months without review, propose a **re-alignment** (`references/alignment-interview.md`).
 
 ## Phase 6: Hygiene and Environment
 
@@ -137,6 +155,7 @@ Removes framework files that are no longer useful, to avoid clutter and redundan
 Prepare it now and **deliver it last**, after Phases 8 and 9 and a final run of `node .agents/check-memory-contract.js`, so that the tier size and the checker result are final. Summarize for the user:
 
 - Rewritten files (one line each) and **always-loaded tier size before → after**.
+- The pyramid: citation direction, share of 🔴 per file and large docs split.
 - Purged files (Phase 6.5), if the purge ran.
 - Removed redundancies and entries compressed to rule + citation (with target doc), and checker results.
 - **Statements refuted by the primary source (Phase 4.6)** — the most important part of the report.

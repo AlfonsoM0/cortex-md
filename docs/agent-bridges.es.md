@@ -170,4 +170,4 @@ Abrí una sesión nueva y preguntá, sin nombrar el archivo: _"¿Cuál es la pri
 
 ## Varios agentes o varias personas
 
-El caso base es un LLM y una herramienta. Se pueden configurar varios proveedores y **usarlos de a uno** con la misma memoria. Trabajar en paralelo requiere orquestación — un agente líder que delega y es el único que consolida — y varias personas compartiendo una memoria generan conflictos en el episódico. Las dos cosas son complejas y quedan fuera del alcance de Cortex-MD.
+El caso base es un LLM y una herramienta. Se pueden configurar varios proveedores y **usarlos de a uno** con la misma memoria. Trabajar en paralelo requiere orquestación — un agente líder que delega y es el único que consolida — y varias personas compartiendo una memoria generan conflictos en el episódico. Cuando el líder delega una tarea, su prompt le indica al ayudante correr `start.md` pero saltear `active-tasks.md` y el roadmap: una tarea no necesita ni el trabajo pendiente ni el alcance, y cada sesión delegada paga por lo que carga. Las dos cosas son complejas y quedan fuera del alcance de Cortex-MD.
