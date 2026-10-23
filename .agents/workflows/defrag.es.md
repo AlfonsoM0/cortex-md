@@ -82,7 +82,7 @@ Corré `node .agents/check-memory-contract.js`. Señala entradas largas sin cita
 
 ## Fase 3: Optimización Episódica
 
-1. **Líneas índice y timeline:** cada registro empieza con **una línea índice (~200 caracteres)**, solo con etiquetas de `taxonomy.md` — si alguna creció a párrafo, verificá que el detalle esté en el registro, comprimí la línea y regenerá el timeline (`end.md § Fase 2`); las líneas con 5+ etiquetas se **señalan** en el reporte (sesiones poco granulares), sin modificarlas. **Registros anteriores al formato** (el verificador dice cuántos siguen en el timeline): con la aprobación del usuario, copiá la línea del timeline de cada uno como su primera línea — `# ` en lugar de `- `, sin el nombre del archivo —, del más nuevo hacia atrás, y regenerá. Agrega un índice; no reescribe la historia.
+1. **Líneas índice y timeline:** cada registro empieza con **una línea índice (~200 caracteres)**, solo con etiquetas de `taxonomy.md` — si alguna creció a párrafo, verificá que el detalle esté en el registro, comprimí la línea y regenerá el timeline (`end.md § Fase 2`); las líneas con 5+ etiquetas se **señalan** en el reporte (sesiones poco granulares), sin modificarlas. **Registros anteriores al formato** (el verificador dice cuántos son, y cuántos siguen en el timeline): con la aprobación del usuario, copiá cada línea del timeline como primera línea de su registro — `# ` en lugar de `- `, sin el nombre del archivo —, del más nuevo hacia atrás, y regenerá. Los registros fuera del timeline no tienen línea que copiar: escribila a partir del principio del registro (suele alcanzar su resumen). Si son muchos, puede hacerlo un agente ayudante que **proponga** las líneas en un archivo aparte (ruta, tabulación, línea) sin tocar la memoria; vos revisás cada línea (formato, la fecha del registro, etiquetas de la taxonomía, largo y, en una muestra, los hechos contra el registro) y las aplicás. Agrega un índice; no reescribe la historia.
 2. **Límite episódico ↔ semántico:** lo episódico infiltrado en la semántica (fechas de sesión, "hoy hicimos X") vuelve a su día o se elimina. Que un día contenga algo ya promovido a la semántica es correcto: el episódico es un registro inmutable.
 
 ## Fase 4: Validación Cruzada
@@ -90,7 +90,7 @@ Corré `node .agents/check-memory-contract.js`. Señala entradas largas sin cita
 - `architecture` ↔ `stack`: cada herramienta reflejada en la estructura y viceversa.
 - `conventions` ↔ `architecture`: sin contradicciones.
 - `business-rules` ↔ `architecture`: entidades del dominio alineadas a la estructura.
-- `taxonomy` ↔ líneas índice: toda etiqueta en uso (`--history` sin etiqueta lista todas las sesiones) existe en la taxonomía, incluidas las retiradas.
+- `taxonomy` ↔ líneas índice: toda etiqueta en uso (`--history --max all` sin etiqueta lista todas las sesiones) existe en la taxonomía, incluidas las retiradas.
 - `active-tasks` ↔ roadmap: la tarea actual es coherente con la fase.
 - **Dirección de citas** (el modelo, regla 3): el verificador señala citas laterales en el centro y citas de la base a secciones de `active-tasks.md`; revisá a mano que la punta cite hacia abajo y que ninguna regla viva repetida en dos niveles.
 

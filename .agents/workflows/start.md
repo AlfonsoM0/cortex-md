@@ -57,7 +57,7 @@ Extract domains from the request (e.g. Auth, DB, UI — or Stock, Suppliers, Cus
 
 - Do not read the entire history: pattern-match for relevant tags.
 - **Omission rule:** ignore entries tagged **only** with `[CortexMD]` (memory maintenance, no project context).
-- **Old memories:** sessions that no longer appear in the timeline remain in `.agents/memory/episodic/YYYY/MM/`, each opening with its index line. When the task concerns something older, search them by tag with `node .agents/check-memory-contract.js --history <Tag> [<Tag>…]` — the timeline's lines without the limit of 50, maintenance skipped — or by word or date.
+- **Old memories:** sessions that no longer appear in the timeline remain in `.agents/memory/episodic/YYYY/MM/`, each opening with its index line. When the task concerns something older, search them by tag with `node .agents/check-memory-contract.js --history <Tag> [<Tag>…]` — the index lines of the whole history, maintenance skipped; narrow it with `--from`/`--to YYYY-MM` and `--max N` (50 by default) — or by word or date.
 
 ⚠️ **Episodic memory is history:** it serves to understand past decisions and errors, not to assert current state. If it contradicts semantic memory, semantic memory wins; if it contradicts the primary source, the primary source wins.
 

@@ -82,7 +82,7 @@ Run `node .agents/check-memory-contract.js`. It flags long entries without a cit
 
 ## Phase 3: Episodic Optimization
 
-1. **Index lines and timeline:** each record opens with **one index line (~200 characters)**, strict tags from `taxonomy.md` only — if one grew into a paragraph, verify the details exist in the record, compress the line and regenerate the timeline (`end.md § Phase 2`); lines with 5+ tags are **flagged** in the report (poorly granular sessions), without modifying them. **Records from before the format** (the checker says how many are still in the timeline): with the user's approval, copy each one's timeline line as its first line — `# ` instead of `- `, without the file name —, from the newest backwards, and regenerate. It adds an index; it does not rewrite the history.
+1. **Index lines and timeline:** each record opens with **one index line (~200 characters)**, strict tags from `taxonomy.md` only — if one grew into a paragraph, verify the details exist in the record, compress the line and regenerate the timeline (`end.md § Phase 2`); lines with 5+ tags are **flagged** in the report (poorly granular sessions), without modifying them. **Records from before the format** (the checker says how many, and how many are still in the timeline): with the user's approval, copy each timeline line as its record's first line — `# ` instead of `- `, without the file name —, from the newest backwards, and regenerate. Records outside the timeline have no line to copy: write one from the beginning of the record (its summary is usually enough). Many of them can go to a helper agent that **proposes** the lines in a separate file (path, tab, line) without touching the memory; you check every line (format, the record's date, taxonomy tags, length, facts against the record on a sample) and apply them. It adds an index; it does not rewrite the history.
 2. **Episodic ↔ semantic boundary:** episodic details infiltrating semantic memory (session dates, "today we did X") return to their day or are deleted. An episodic daily record containing something already promoted to semantic memory is correct: episodic memory is an immutable log.
 
 ## Phase 4: Cross-Validation
@@ -90,7 +90,7 @@ Run `node .agents/check-memory-contract.js`. It flags long entries without a cit
 - `architecture` ↔ `stack`: every tool is reflected in the architecture and vice versa.
 - `conventions` ↔ `architecture`: no contradictions.
 - `business-rules` ↔ `architecture`: domain entities aligned with system structure.
-- `taxonomy` ↔ index lines: every tag in use (`--history` without a tag lists every session) exists in taxonomy, retired ones included.
+- `taxonomy` ↔ index lines: every tag in use (`--history --max all` without a tag lists every session) exists in taxonomy, retired ones included.
 - `active-tasks` ↔ roadmap: current task aligns with phase.
 - **Citation direction** (the model, rule 3): the checker flags lateral citations in the middle and base citations to sections of `active-tasks.md`; check by hand that the top cites downward and that no rule lives repeated on two levels.
 

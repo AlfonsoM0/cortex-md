@@ -9,9 +9,10 @@
  *     project session if the last one was only [CortexMD]) — `start.md § Phase 2`
  *   node .agents/check-memory-contract.js --timeline → regenerates `timeline.md`
  *     from the first line of the 50 most recent session records — `end.md § Phase 2`
- *   node .agents/check-memory-contract.js --history <Tag> [<Tag>…] → the same
- *     index lines for every session with any of those tags, without the limit
- *     of 50 (no tag: all of them) — `start.md § Phase 3`
+ *   node .agents/check-memory-contract.js --history [<Tag>…] [--from YYYY[-MM[-DD]]]
+ *     [--to YYYY[-MM[-DD]]] [--max N|all] → the same index lines for every
+ *     session with any of those tags (no tag: all of them), between dates and
+ *     capped (by default, the 50 most recent) — `start.md § Phase 3`
  *
  * The SESSION INDEX: each record opens with its index line,
  *   `# YYYY-MM-DD: [Tag1] [Tag2] One-line summary.`
@@ -58,8 +59,9 @@
  *     such as `[🔴 Epic]` do not count).
  *   - Docs in `docs/` over 40 KB: they split into a folder with an `index.md`
  *     (`end.md § Phase 4`).
- *   - Timeline sessions whose record has no index line (from before the
- *     format): their tags leave the index when they leave the timeline.
+ *   - Session records without an index line (from before the format):
+ *     `--history` sees only those still in the timeline, and their tags leave
+ *     the index when they leave it.
  *   - Size of the ALWAYS-LOADED tier (what every session reads: `AGENTS.md`,
  *     the bridge, `start.md`, the short rules, the timeline and the recent
  *     memory that `--recent` prints), in bytes and estimated tokens, so the
@@ -461,23 +463,70 @@ function buildTimeline() {
   return problems.length > 0 ? 1 : 0;
 }
 
-/** `--history <Tag>…`: the index lines of every session with any of the tags. */
-function printHistory(wanted) {
-  const tags = wanted.map((t) => t.replace(/^\[|\]$/g, "").toLowerCase());
-  const lines = sessionIndex()
+/** `--history` results without `--max`: a long history would flood the context. */
+const HISTORY_DEFAULT_MAX = 50;
+/** A full or partial date: `2026`, `2026-05` or `2026-05-14`. */
+const PARTIAL_DATE = /^\d{4}(-\d{2}(-\d{2})?)?$/;
+const HISTORY_USAGE =
+  "Usage: node .agents/check-memory-contract.js --history [<Tag>…] [--from YYYY[-MM[-DD]]] [--to YYYY[-MM[-DD]]] [--max N|all]";
+
+/** Tags and options of `--history`; null if one is not valid. */
+function parseHistoryArgs(args) {
+  const query = { tags: [], from: null, to: null, max: HISTORY_DEFAULT_MAX };
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (!arg.startsWith("--")) {
+      query.tags.push(arg.replace(/^\[|\]$/g, "").toLowerCase());
+      continue;
+    }
+    const value = args[++i] || "";
+    if (arg === "--from" || arg === "--to") {
+      if (!PARTIAL_DATE.test(value)) return null;
+      query[arg.slice(2)] = value;
+    } else if (arg === "--max") {
+      if (value === "all") query.max = Infinity;
+      else if (/^[1-9]\d*$/.test(value)) query.max = Number(value);
+      else return null;
+    } else return null;
+  }
+  return query;
+}
+
+/**
+ * `--history`: the index lines of every session with any of the tags, between
+ * dates, newest first and capped. A partial date covers the whole period
+ * (`--from 2026-05 --to 2026-05` is May).
+ */
+function printHistory(args) {
+  const query = parseHistoryArgs(args);
+  if (!query) {
+    console.error(HISTORY_USAGE);
+    return 1;
+  }
+  const { tags, from, to, max } = query;
+  const matches = sessionIndex()
     .entries.filter((e) => {
+      if (from && e.date.slice(0, from.length) < from) return false;
+      if (to && e.date.slice(0, to.length) > to) return false;
       const own = e.tags.map((t) => t.toLowerCase());
       if (isMaintenanceTags(e.tags) && !tags.includes("cortexmd")) return false;
       return tags.length === 0 || own.some((t) => tags.includes(t));
     })
     .map((e) => e.line);
-  console.log(lines.length > 0 ? lines.join("\n") : `(no session tagged ${wanted.join(", ")})`);
+  if (matches.length === 0) {
+    console.log("(no session matches)");
+    return 0;
+  }
+  console.log(matches.slice(0, max).join("\n"));
+  if (matches.length > max) {
+    console.log(`(showing the ${max} most recent of ${matches.length}: narrow with --from/--to or raise --max)`);
+  }
   return 0;
 }
 
 /** Timeline in sync with the session index (`end.md § Phase 2`). */
 function auditTimeline() {
-  const { timeline, entries, problems } = sessionIndex();
+  const { records, timeline, entries, problems } = sessionIndex();
   const findings = [...problems, ...strayFindings(timeline)];
   const expected = entries.slice(0, MAX_TIMELINE).map((e) => e.line);
   if (timeline.stray.length === 0 && expected.join("\n") !== timeline.lines.join("\n")) {
@@ -488,7 +537,8 @@ function auditTimeline() {
     });
   }
   const older = entries.slice(0, MAX_TIMELINE).filter((e) => !e.indexed).length;
-  return { findings, older };
+  const unindexed = records.length - entries.filter((e) => e.indexed).length;
+  return { findings, older, unindexed };
 }
 
 /** Was the session ONLY memory maintenance? Its index line says so. */
@@ -575,9 +625,9 @@ function main() {
       `ℹ️  ${uncited.length} short entr${uncited.length === 1 ? "y" : "ies"} without a citation (allowed; the contract prefers rule + → docs/...): ${uncited.join(", ")}`,
     );
   }
-  if (timeline.older > 0) {
+  if (timeline.unindexed > 0) {
     console.log(
-      `ℹ️  ${timeline.older} timeline session(s) from records without an index line: their tags leave the index when they leave the timeline (defrag.md § Phase 3 adds the line, with the user's approval).`,
+      `ℹ️  ${timeline.unindexed} session record(s) without an index line, ${timeline.older} of them in the timeline: --history sees only those, and their tags leave the index when they leave the timeline (defrag.md § Phase 3 adds the line, with the user's approval).`,
     );
   }
 

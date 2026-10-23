@@ -57,7 +57,7 @@ Extraé los dominios de la solicitud (ej. Auth, DB, UI — o Stock, Proveedores,
 
 - No leas todo el historial: buscá por patrón las etiquetas relevantes.
 - **Regla de omisión:** ignorá las entradas etiquetadas **solo** con `[CortexMD]` (mantenimiento de memoria, sin contexto del proyecto).
-- **Recuerdos antiguos:** las sesiones que ya no aparecen en el timeline siguen en `.agents/memory/episodic/YYYY/MM/`, cada una con su línea índice al principio. Cuando la tarea toca algo más antiguo, buscalas por etiqueta con `node .agents/check-memory-contract.js --history <Tag> [<Tag>…]` — las líneas del timeline sin el límite de 50, sin las de mantenimiento — o por palabra o fecha.
+- **Recuerdos antiguos:** las sesiones que ya no aparecen en el timeline siguen en `.agents/memory/episodic/YYYY/MM/`, cada una con su línea índice al principio. Cuando la tarea toca algo más antiguo, buscalas por etiqueta con `node .agents/check-memory-contract.js --history <Tag> [<Tag>…]` — las líneas índice de toda la historia, sin las de mantenimiento; acotala con `--from`/`--to AAAA-MM` y `--max N` (50 por defecto) — o por palabra o fecha.
 
 ⚠️ **El episódico es historia:** sirve para entender decisiones y errores pasados, no para afirmar el estado actual. Si contradice a la semántica, gana la semántica; si contradice a la fuente primaria, gana la fuente primaria.
 
