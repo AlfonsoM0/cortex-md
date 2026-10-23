@@ -409,7 +409,7 @@ function sessionIndex() {
   }
 
   // Once the format is in use, a newer record in no index was left without its line.
-  records.slice(0, oldestIndexed).forEach((record) => {
+  records.slice(0, Math.max(oldestIndexed, 0)).forEach((record) => {
     const key = `${record.date}#${record.n}`;
     if (!indexed.has(key) && !listed.has(key)) {
       problems.push({ where: record.rel, kind: "record without an index line", detail: "its first line must be `# YYYY-MM-DD: [Tag] One-line summary.` (end.md § Phase 1)" });
