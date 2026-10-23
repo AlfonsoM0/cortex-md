@@ -335,7 +335,8 @@ const timelineFile = path.join(root, ".agents", "memory", "episodic", "timeline.
 const INDEX_LINE = /^# (\d{4}-\d{2}-\d{2}): (.+)$/;
 /** A timeline line: `- YYYY-MM-DD: …`, or `- YYYY-MM-DD (DD-s2.md): …`. */
 const TIMELINE_LINE = /^- (\d{4}-\d{2}-\d{2})\b/;
-const SESSION_FILE = /\b\d{2}-s(\d+)\.md\b/;
+/** `DD-sN.md` in a timeline line; it names the session only if DD is the line's day. */
+const SESSION_FILE = /\b(\d{2})-s(\d+)\.md\b/g;
 /** Unicode-aware, so `[Logística]` is a tag. */
 const TAG = /\[([\p{L}\p{N}_-]+)\]/gu;
 
@@ -401,8 +402,9 @@ function sessionIndex() {
   const listed = new Set();
   for (const line of timeline.lines) {
     const date = line.match(TIMELINE_LINE)[1];
-    const session = line.match(SESSION_FILE);
-    const n = session ? Number(session[1]) : 0;
+    // A summary may name another day's record (`… still in 10-s2.md`): that is not this session.
+    const session = [...line.matchAll(SESSION_FILE)].find(([, day]) => day === date.slice(8));
+    const n = session ? Number(session[2]) : 0;
     if (indexed.has(`${date}#${n}`)) continue;
     listed.add(`${date}#${n}`);
     entries.push({ date, n, indexed: false, tags: tagsOf(line, false), line });
