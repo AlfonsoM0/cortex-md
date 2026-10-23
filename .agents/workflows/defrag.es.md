@@ -90,7 +90,7 @@ Corré `node .agents/check-memory-contract.js`. Señala entradas largas sin cita
 - `architecture` ↔ `stack`: cada herramienta reflejada en la estructura y viceversa.
 - `conventions` ↔ `architecture`: sin contradicciones.
 - `business-rules` ↔ `architecture`: entidades del dominio alineadas a la estructura.
-- `taxonomy` ↔ líneas índice: toda etiqueta en uso (`--history --max all` sin etiqueta lista todas las sesiones) existe en la taxonomía, incluidas las retiradas.
+- `taxonomy` ↔ líneas índice: el verificador marca toda etiqueta de una línea índice que no figure en la taxonomía (las retiradas siguen listadas) o que exceda sus topes; las líneas del timeline de registros sin línea índice no se controlan (`--history --max all` sin etiqueta lista todas las sesiones).
 - `active-tasks` ↔ roadmap: la tarea actual es coherente con la fase.
 - **Dirección de citas** (el modelo, regla 3): el verificador señala citas laterales en el centro y citas de la base a secciones de `active-tasks.md`; revisá a mano que la punta cite hacia abajo y que ninguna regla viva repetida en dos niveles.
 

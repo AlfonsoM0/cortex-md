@@ -90,7 +90,7 @@ Run `node .agents/check-memory-contract.js`. It flags long entries without a cit
 - `architecture` ↔ `stack`: every tool is reflected in the architecture and vice versa.
 - `conventions` ↔ `architecture`: no contradictions.
 - `business-rules` ↔ `architecture`: domain entities aligned with system structure.
-- `taxonomy` ↔ index lines: every tag in use (`--history --max all` without a tag lists every session) exists in taxonomy, retired ones included.
+- `taxonomy` ↔ index lines: the checker flags any index-line tag missing from the taxonomy (retired ones stay listed) or over its caps; timeline lines of records without an index line are not checked (`--history --max all` without a tag lists every session).
 - `active-tasks` ↔ roadmap: current task aligns with phase.
 - **Citation direction** (the model, rule 3): the checker flags lateral citations in the middle and base citations to sections of `active-tasks.md`; check by hand that the top cites downward and that no rule lives repeated on two levels.
 

@@ -9,10 +9,11 @@
  *     project session if the last one was only [CortexMD]) — `start.md § Phase 2`
  *   node .agents/check-memory-contract.js --timeline → regenerates `timeline.md`
  *     from the first line of the 50 most recent session records — `end.md § Phase 2`
- *   node .agents/check-memory-contract.js --history [<Tag>…] [--from YYYY[-MM[-DD]]]
- *     [--to YYYY[-MM[-DD]]] [--max N|all] → the same index lines for every
- *     session with any of those tags (no tag: all of them), between dates and
- *     capped (by default, the 50 most recent) — `start.md § Phase 3`
+ *   node .agents/check-memory-contract.js --history [<Tag>…] [--all-tags]
+ *     [--from YYYY[-MM[-DD]]] [--to YYYY[-MM[-DD]]] [--max N|all] → the same
+ *     index lines for every session with any of those tags (with `--all-tags`,
+ *     with all of them; no tag: every session), between dates and capped (by
+ *     default, the 50 most recent) — `start.md § Phase 3`
  *
  * The SESSION INDEX: each record opens with its index line,
  *   `# YYYY-MM-DD: [Tag1] [Tag2] One-line summary.`
@@ -48,6 +49,12 @@
  *      a record, a record without an index line once the format is in use, an
  *      index line whose date is not the record's, or a timeline line outside
  *      the index format (which `--timeline` refuses to drop).
+ *   7. Index-line tags outside the taxonomy: a tag not listed in
+ *      `taxonomy.md` (a misspelled `[Payment]` drops the session from every
+ *      search), more tags than the taxonomy allows (`(max. N)` in its `#`
+ *      title) or a group allows (`(max. N)` in its `##` heading), or only tags
+ *      from capped groups. Without `(max. N)`, it only checks that tags exist.
+ *      Timeline lines of records without an index line are exempt.
  *
  * A skill cited as `[skill-name]` counts as a citation only if
  * `.agents/skills/skill-name/` exists.
@@ -333,6 +340,7 @@ function sessionRecords() {
 }
 
 const timelineFile = path.join(root, ".agents", "memory", "episodic", "timeline.md");
+const taxonomyFile = path.join(memoryDir, "taxonomy.md");
 /** A record's index line: `# YYYY-MM-DD: [Tag1] [Tag2] One-line summary.` */
 const INDEX_LINE = /^# (\d{4}-\d{2}-\d{2}): (.+)$/;
 /** A timeline line: `- YYYY-MM-DD: …`, or `- YYYY-MM-DD (DD-s2.md): …`. */
@@ -351,6 +359,54 @@ function tagsOf(text, leadingOnly) {
 }
 
 const isMaintenanceTags = (tags) => tags.length > 0 && tags.every((t) => t === "CortexMD");
+
+/**
+ * The valid tags: the `` - `[Tag]` `` list items of `taxonomy.md`, by group
+ * (the `##` heading that lists them). `(max. N)` in the `#` title caps the tags
+ * per line; in a `##` heading, the tags of that group. Null without a taxonomy.
+ */
+function readTaxonomy() {
+  if (!fs.existsSync(taxonomyFile)) return null;
+  const taxonomy = { group: new Map(), max: Infinity, cap: new Map() };
+  const capOf = (heading) => heading.match(/\(m[áa]x\.?\s*(\d+)\b/i)?.[1];
+  let section = "";
+  for (const line of fs.readFileSync(taxonomyFile, "utf8").split("\n")) {
+    if (line.startsWith("# ")) {
+      if (capOf(line)) taxonomy.max = Number(capOf(line));
+    } else if (line.startsWith("## ")) {
+      section = line.slice(3).trim();
+      if (capOf(section)) taxonomy.cap.set(section, Number(capOf(section)));
+    } else {
+      const tag = line.match(/^- `\[([\p{L}\p{N}_-]+)\]`/u)?.[1];
+      if (tag) taxonomy.group.set(tag, section);
+    }
+  }
+  return taxonomy.group.size > 0 ? taxonomy : null;
+}
+
+/** Index lines whose tags are outside the taxonomy or its caps. */
+function auditTags(entries) {
+  const taxonomy = readTaxonomy();
+  if (!taxonomy) return [];
+  const findings = [];
+  for (const e of entries) {
+    if (!e.rel) continue;
+    const problems = [];
+    const unknown = e.tags.filter((t) => !taxonomy.group.has(t));
+    if (unknown.length > 0) problems.push(`not in the taxonomy: ${unknown.map((t) => `[${t}]`).join(" ")}`);
+    if (e.tags.length > taxonomy.max) problems.push(`${e.tags.length} tags (max. ${taxonomy.max})`);
+    for (const [section, cap] of taxonomy.cap) {
+      const n = e.tags.filter((t) => taxonomy.group.get(t) === section).length;
+      if (n > cap) problems.push(`${n} from "${section}"`);
+    }
+    if (taxonomy.cap.size > 0 && unknown.length === 0 && e.tags.every((t) => taxonomy.cap.has(taxonomy.group.get(t))))
+      problems.push("no tag outside the capped groups");
+    if (problems.length > 0) {
+      findings.push({ where: e.rel, kind: "index-line tags", detail: `${problems.join(" · ")} (taxonomy.md)` });
+    }
+  }
+  return findings;
+}
 
 function firstLine(rel) {
   const text = fs.readFileSync(path.join(root, rel), "utf8").replace(/^﻿/, "");
@@ -391,6 +447,7 @@ function sessionIndex() {
     }
     const body = m[2].trim();
     entries.push({
+      rel: record.rel,
       date: record.date,
       n: record.n,
       indexed: true,
@@ -468,15 +525,19 @@ const HISTORY_DEFAULT_MAX = 50;
 /** A full or partial date: `2026`, `2026-05` or `2026-05-14`. */
 const PARTIAL_DATE = /^\d{4}(-\d{2}(-\d{2})?)?$/;
 const HISTORY_USAGE =
-  "Usage: node .agents/check-memory-contract.js --history [<Tag>…] [--from YYYY[-MM[-DD]]] [--to YYYY[-MM[-DD]]] [--max N|all]";
+  "Usage: node .agents/check-memory-contract.js --history [<Tag>…] [--all-tags] [--from YYYY[-MM[-DD]]] [--to YYYY[-MM[-DD]]] [--max N|all]";
 
 /** Tags and options of `--history`; null if one is not valid. */
 function parseHistoryArgs(args) {
-  const query = { tags: [], from: null, to: null, max: HISTORY_DEFAULT_MAX };
+  const query = { tags: [], allTags: false, from: null, to: null, max: HISTORY_DEFAULT_MAX };
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (!arg.startsWith("--")) {
       query.tags.push(arg.replace(/^\[|\]$/g, "").toLowerCase());
+      continue;
+    }
+    if (arg === "--all-tags") {
+      query.allTags = true;
       continue;
     }
     const value = args[++i] || "";
@@ -493,7 +554,8 @@ function parseHistoryArgs(args) {
 }
 
 /**
- * `--history`: the index lines of every session with any of the tags, between
+ * `--history`: the index lines of every session with any of the tags (with
+ * `--all-tags`, with all of them), between
  * dates, newest first and capped. A partial date covers the whole period
  * (`--from 2026-05 --to 2026-05` is May).
  */
@@ -503,14 +565,15 @@ function printHistory(args) {
     console.error(HISTORY_USAGE);
     return 1;
   }
-  const { tags, from, to, max } = query;
+  const { tags, allTags, from, to, max } = query;
   const matches = sessionIndex()
     .entries.filter((e) => {
       if (from && e.date.slice(0, from.length) < from) return false;
       if (to && e.date.slice(0, to.length) > to) return false;
       const own = e.tags.map((t) => t.toLowerCase());
       if (isMaintenanceTags(e.tags) && !tags.includes("cortexmd")) return false;
-      return tags.length === 0 || own.some((t) => tags.includes(t));
+      if (tags.length === 0) return true;
+      return allTags ? tags.every((t) => own.includes(t)) : own.some((t) => tags.includes(t));
     })
     .map((e) => e.line);
   if (matches.length === 0) {
@@ -527,7 +590,7 @@ function printHistory(args) {
 /** Timeline in sync with the session index (`end.md § Phase 2`). */
 function auditTimeline() {
   const { records, timeline, entries, problems } = sessionIndex();
-  const findings = [...problems, ...strayFindings(timeline)];
+  const findings = [...problems, ...strayFindings(timeline), ...auditTags(entries)];
   const expected = entries.slice(0, MAX_TIMELINE).map((e) => e.line);
   if (timeline.stray.length === 0 && expected.join("\n") !== timeline.lines.join("\n")) {
     findings.push({
@@ -633,7 +696,7 @@ function main() {
 
   if (findings.length === 0) {
     console.log(
-      `✅ Memory contract: ${RULE_FILES.length} rule files OK (≤${MAX_CHARS} chars or cited, no dead or episodic citations), the middle cites only downward, and the timeline matches the session index.`,
+      `✅ Memory contract: ${RULE_FILES.length} rule files OK (≤${MAX_CHARS} chars or cited, no dead or episodic citations), the middle cites only downward, and the timeline matches the session index and its tags the taxonomy.`,
     );
     return 0;
   }

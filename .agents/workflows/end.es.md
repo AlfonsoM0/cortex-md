@@ -60,7 +60,7 @@ En un proyecto sin control de versiones, "Control de Versiones" se reemplaza por
 
 ## Fase 2: Índice Hipocampal (timeline)
 
-1. Leé `.agents/memory/semantic/taxonomy.md`. Si ninguna etiqueta cubre el dominio, **recomendá una al usuario y esperá su aprobación**. Una sesión con contexto del proyecto lleva al menos una etiqueta del proyecto; `[CortexMD]` solo es para mantenimiento de la memoria (defrag, purga), que el enrutamiento saltea.
+1. Leé `.agents/memory/semantic/taxonomy.md` y respetá sus topes si los declara (`(máx. N)`; el verificador los controla). Si ninguna etiqueta cubre el dominio, **recomendá una al usuario y esperá su aprobación**. Una sesión con contexto del proyecto lleva al menos una etiqueta del proyecto; `[CortexMD]` solo es para mantenimiento de la memoria (defrag, purga), que el enrutamiento saltea.
 2. Escribí la **línea índice** del registro — su primera línea (Fase 1):
    - Formato: `# YYYY-MM-DD: [Tag1] [Tag2] Resumen de una línea.` — la fecha del propio registro, y las etiquetas justo después de los dos puntos.
    - **~200 caracteres en total**, densa y autocontenida, para decidir relevancia sin abrir el registro. No nombres el archivo: el timeline lo agrega para `DD-s2.md` y siguientes.

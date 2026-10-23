@@ -60,7 +60,7 @@ In a project without version control, "Version Control" is replaced by a referen
 
 ## Phase 2: Hippocampal Index (timeline)
 
-1. Read `.agents/memory/semantic/taxonomy.md`. If no tag covers the domain, **recommend one to the user and wait for their approval**. A session with project context carries at least one project tag; `[CortexMD]` alone is only for memory maintenance (defrag, purge), which routing skips.
+1. Read `.agents/memory/semantic/taxonomy.md`, and respect its caps if it declares them (`(max. N)`; the checker verifies them). If no tag covers the domain, **recommend one to the user and wait for their approval**. A session with project context carries at least one project tag; `[CortexMD]` alone is only for memory maintenance (defrag, purge), which routing skips.
 2. Write the record's **index line** — its first line (Phase 1):
    - Format: `# YYYY-MM-DD: [Tag1] [Tag2] One-line summary.` — the record's own date, and the tags right after the colon.
    - **~200 characters in total**, dense and self-contained, to determine relevance without opening the record. Do not name the file: the timeline adds it for `DD-s2.md` and later.
