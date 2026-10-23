@@ -30,7 +30,7 @@ In case of discrepancy, the higher level wins. 🔴 **Memory ages toward pessimi
 **Read ONLY IF applicable to the task:**
 
 - `conventions.md` — you are going to produce something that follows the house style (code, documents, messages).
-- `taxonomy.md` — you are going to search the timeline or add an entry to it.
+- `taxonomy.md` — you are going to search the timeline or write a session's index line.
 
 **If in doubt whether a file applies, read it:** an extra file costs little; a missing one can cost a broken rule.
 
@@ -57,7 +57,7 @@ Extract domains from the request (e.g. Auth, DB, UI — or Stock, Suppliers, Cus
 
 - Do not read the entire history: pattern-match for relevant tags.
 - **Omission rule:** ignore entries tagged **only** with `[CortexMD]` (memory maintenance, no project context).
-- **Old memories:** sessions that no longer appear in the timeline remain in `.agents/memory/episodic/YYYY/MM/`; search them (by word, date, or tag) when the task concerns something older.
+- **Old memories:** sessions that no longer appear in the timeline remain in `.agents/memory/episodic/YYYY/MM/`, each opening with its index line. When the task concerns something older, search them by tag with `node .agents/check-memory-contract.js --history <Tag> [<Tag>…]` — the timeline's lines without the limit of 50, maintenance skipped — or by word or date.
 
 ⚠️ **Episodic memory is history:** it serves to understand past decisions and errors, not to assert current state. If it contradicts semantic memory, semantic memory wins; if it contradicts the primary source, the primary source wins.
 

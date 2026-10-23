@@ -19,7 +19,7 @@ description: Fin de sesión (Consolidación)
 2. Usá esta estructura y omití las secciones que no apliquen:
 
 ```markdown
-# Sesión: YYYY-MM-DD
+# YYYY-MM-DD: [Tag1] [Tag2] Resumen de una línea.
 
 ## Resumen
 
@@ -50,6 +50,8 @@ description: Fin de sesión (Consolidación)
 Dónde quedó el trabajo y qué sigue. Es lo primero que lee la próxima sesión (`start.md § Fase 2`).
 ```
 
+> **La primera línea es la línea índice de la sesión** (Fase 2): con ella se arman el timeline y la búsqueda de recuerdos antiguos, así que se escribe solo acá.
+
 > El **Resumen** y el **Contexto para la Próxima Sesión** son lo único del registro que lee la sesión siguiente (`node .agents/check-memory-contract.js --recent`): escribilos cortos, autocontenidos y con esos títulos exactos.
 
 > **Registrá también los errores de razonamiento propios**, no solo los del sistema: una hipótesis que el usuario corrigió, un dato que diste por cierto sin verificar, un "bloqueante" que no existía. Son los más caros de repetir y ningún test los detecta. Anotá **qué lo causó** (una doc desactualizada, un registro de otro entorno, asumir un error donde había una decisión) y **cómo evitarlo**.
@@ -59,11 +61,17 @@ En un proyecto sin control de versiones, "Control de Versiones" se reemplaza por
 ## Fase 2: Índice Hipocampal (timeline)
 
 1. Leé `.agents/memory/semantic/taxonomy.md`. Si ninguna etiqueta cubre el dominio, **recomendá una al usuario y esperá su aprobación**. Una sesión con contexto del proyecto lleva al menos una etiqueta del proyecto; `[CortexMD]` solo es para mantenimiento de la memoria (defrag, purga), que el enrutamiento saltea.
-2. Agregá una entrada al **inicio** de `.agents/memory/episodic/timeline.md`:
-   - Formato: `- YYYY-MM-DD: [Tag1] [Tag2] Resumen de una línea.`
-   - **~200 caracteres en total**, densa y autocontenida, para decidir relevancia sin abrir el día. Nombrá el archivo (`DD-s2.md`) si hubo varias sesiones.
-   - El detalle vive en el episódico; no lo dupliques en el índice.
-3. Límite: **50 sesiones**. Si se excede, eliminá las más antiguas del final: el timeline es el índice de la memoria fresca; los registros anteriores siguen en `episodic/YYYY/MM/` y se pueden buscar.
+2. Escribí la **línea índice** del registro — su primera línea (Fase 1):
+   - Formato: `# YYYY-MM-DD: [Tag1] [Tag2] Resumen de una línea.` — la fecha del propio registro, y las etiquetas justo después de los dos puntos.
+   - **~200 caracteres en total**, densa y autocontenida, para decidir relevancia sin abrir el registro. No nombres el archivo: el timeline lo agrega para `DD-s2.md` y siguientes.
+   - El detalle vive en el registro; no lo dupliques en la línea índice.
+3. **Regenerá el timeline** — nunca lo edites a mano:
+
+   ```bash
+   node .agents/check-memory-contract.js --timeline
+   ```
+
+   Rearma `timeline.md` con las líneas índice de los 50 registros más recientes, del más nuevo al más viejo, y conserva las líneas de los registros anteriores a este formato. Los registros que salen del timeline conservan su línea índice, así que los recuerdos antiguos se siguen encontrando por etiqueta (`start.md § Fase 3`). Si actualizás un registro ya consolidado, actualizá su línea índice y regenerá. Sin Node: copiá la línea índice al inicio de `timeline.md` como `- YYYY-MM-DD: …` (`- YYYY-MM-DD (DD-s2.md): …` para las sesiones siguientes del día) y eliminá las líneas que pasen de 50.
 
 ## Fase 3: Consolidación Semántica (Neuroplasticidad)
 

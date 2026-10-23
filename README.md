@@ -32,8 +32,8 @@ A pre-trained LLM cannot change its weights to remember yesterday's conversation
 | **Waking up** — remembering who you are, what you know, and what you did yesterday | `start.md` |
 | **Sleeping** — consolidating the day into memories and learnings | `end.md` |
 | **Yesterday's memories** | The last session's record (`episodic/YYYY/MM/DD.md`), read on waking up |
-| **Recent memories** | The timeline or "hippocampal index" (`episodic/timeline.md`): one line per session, the last 50 |
-| **Old memories** | The sessions that left the timeline: they remain in `episodic/` and are searched only when needed |
+| **Recent memories** | The timeline or "hippocampal index" (`episodic/timeline.md`): one line per session, the last 50, generated from the first line of each record |
+| **Old memories** | The sessions that left the timeline: they remain in `episodic/`, each opening with its index line, and are searched by tag only when needed (`--history`) |
 | **Learnings** | Semantic memory (short rules of the present), `docs/` (detailed knowledge), and skills (abilities) |
 | **Memory exercises** | `defrag.md`: a deep review that corrects what was consolidated badly; `maintenance.md` is the weekly check-up that says when |
 | **Attention** — the prefrontal cortex | The context window: clean and focused on the current task |
@@ -141,6 +141,7 @@ What the framework needs from the environment, and why:
 - **An agentic harness with file system access:** `end.md` reads and writes several files, and `start.md` must run before responding. A harness does this on its own and, if it supports session start hooks, guarantees it; a chat interface forces manual copy and paste.
 - **Predictable cost:** every session pays for the `start` → `end` cycle and, now and then, a `defrag`. On a flat-rate plan that fixed cost goes unnoticed; on an API you pay per token.
 - **A single memory:** tools with their own memory (Claude's auto-memory, Hermes' built-in memory) disable it for the project; when it cannot be disabled (Cowork, ChatGPT Work), it is restricted to personal preferences. Snippets in [`docs/agent-bridges.md`](docs/agent-bridges.md).
+- **Note-taking apps such as Obsidian are not the agent's memory:** at most, a window for the human. Why, and what not to do if you add one: [`docs/obsidian.md`](docs/obsidian.md).
 
 **With an open harness + API key**, also choose a provider **with prompt caching** (without it, every turn pays for the full context) and reserve the most capable model for the installation and `defrag.md`.
 
@@ -180,8 +181,8 @@ Cortex-MD lives next to your files, in the `.agents/` convention used by [AGENTS
     │   │   └── taxonomy.md              #     Closed list of tags for the timeline
     │   ├── maintenance-log.md           #   Installation state, weekly check, last defrag
     │   └── episodic/                    #   Hippocampus: yesterday, recent, and old memories
-    │       ├── timeline.md              #     Recent memories: index of the last 50 sessions, by [Tags]
-    │       └── YYYY/MM/DD.md · DD-s2.md #     One record per session (the last one: yesterday)
+    │       ├── timeline.md              #     Recent memories: the last 50 index lines (generated)
+    │       └── YYYY/MM/DD.md · DD-s2.md #     One record per session; its first line is its index line
     ├── skills/                          # (Convention) Skills, loaded on demand
     ├── sync-mcp.js · mcp_config*.json   # Extension: MCP module, on request
     └── backups/                         # Without git only: backups before each defrag
@@ -191,7 +192,7 @@ Cortex-MD lives next to your files, in the `.agents/` convention used by [AGENTS
 
 # Framework repository only (not copied to your project):
 /INSTALL.md                              # Installation instructions for the agent
-/docs/                                   # Framework guides (agent-bridges, mcp-sync)
+/docs/                                   # Framework guides (agent-bridges, mcp-sync, obsidian)
 ```
 
 `AGENTS.md` is the agent's self and the router of its memory (foundation 5): identity and purpose, autonomy, the memory map and its rules, the lifecycle workflows, and the skill router. It is kept short because every session pays for it; the blocks that only apply to software projects or to extensions are marked (`<!-- cortex:software-only -->`, `<!-- cortex:optional:<name> -->`) so that `init` and the purge can remove them.
@@ -213,7 +214,7 @@ What turns a folder of Markdown into a reliable memory is not the file structure
 8. **A large doc becomes a folder with an `index.md`.** Past ~40 KB (~10k tokens), a doc splits into `docs/<area>/<topic>/`: an `index.md` that is the top of the branch (what it is, the key rules on one screen, a map of its children) and topic files under ~40 KB that keep their section titles and numbering, so existing citations only change the file name. Discovery history does not belong in a doc: it goes to the episodic memory.
 9. **🔴 ranks, so it is scarce.** Reserve it for what is irreversible or silent (money, data, security, legal, personal data), in at most one in four entries of a file. The 5-10 most critical cross-cutting rules live once, at the top (`AGENTS.md`).
 
-**Verifier:** `node .agents/check-memory-contract.js` checks the form of every entry — list items (even when wrapped over several lines), numbered items, table rows, and paragraphs: long entries without citations, citations to non-existent docs or skills, citations to episodic memory, **lateral or upward citations** in the always-read rule files and `active-tasks.md` (one memory file citing another, or `AGENTS.md`), and **citations to a section of `active-tasks.md` from `docs/`**. It supports paths with accents and ignores URLs. It reports the size of the always-loaded tier in estimated tokens, the share of 🔴 entries per file, and the docs over 40 KB. It measures **structure**, not truth: defrag handles truth by contrasting memory against the primary source.
+**Verifier:** `node .agents/check-memory-contract.js` checks the form of every entry — list items (even when wrapped over several lines), numbered items, table rows, and paragraphs: long entries without citations, citations to non-existent docs or skills, citations to episodic memory, **lateral or upward citations** in the always-read rule files and `active-tasks.md` (one memory file citing another, or `AGENTS.md`), **citations to a section of `active-tasks.md` from `docs/`**, and a **timeline out of sync with the index lines of the records**. It supports paths with accents and ignores URLs. It also generates the timeline (`--timeline`) and searches the whole history by tag (`--history`). It reports the size of the always-loaded tier in estimated tokens, the share of 🔴 entries per file, and the docs over 40 KB. It measures **structure**, not truth: defrag handles truth by contrasting memory against the primary source.
 
 ## Workflows
 
@@ -230,13 +231,13 @@ With the synthesis approved by the user, `init` creates the documentation (`docs
 - **Truth hierarchy** and the third-party rule, read before loading anything.
 - **Phase 1 (What I know):** the short rules of the present (`architecture`, `stack`, `business-rules`, `active-tasks`, `maintenance-log`, and roadmap if present); `conventions` and `taxonomy` when the task touches them — if in doubt, it reads them.
 - **Phase 2 (Yesterday and recent memories):** always the timeline and, with an exact command (`node .agents/check-memory-contract.js --recent`), only the Summary and Context for Next Session of the last session. An agent working on a brief skips it.
-- **Phase 3 (Older memories):** only if the task's domains match timeline tags, reads those sessions as history, not current state; searches older sessions when needed.
+- **Phase 3 (Older memories):** only if the task's domains match timeline tags, reads those sessions as history, not current state; older sessions, by tag with an exact command (`--history <Tag>`), when needed.
 - **Phase 4:** reminds what is due (P1 and `[Watch]` items due today or tomorrow) and recommends at most one thing — continue an incomplete installation, the post-installation defrag + purge, logging an unconsolidated session (only with git), or the weekly check-up.
 
 ### 2. Sleeping: `end.md`
 
 - **Episodic:** the day's record with changes, decisions, and errors — including the **agent's own reasoning errors**, the costliest to repeat.
-- **Timeline:** a ~200-character line with tags from taxonomy; `[CortexMD]` alone only for memory maintenance.
+- **Index line and timeline:** the record opens with a ~200-character line with tags from taxonomy (`[CortexMD]` alone only for memory maintenance); the timeline is generated from those lines with a command, so the agent writes each line once.
 - **Semantic consolidation** following the three file-type contracts; no credentials, personal data, or unapproved third-party text.
 - **Documentation and roadmap:** behavior belongs in `docs/`, and docs cite each other; the roadmap changes only if scope changed; **consistency sweeps** whenever a value or name changes.
 - **Skills and workflows:** new patterns go to skills; better ways of running a workflow are proposed to the user.
@@ -328,10 +329,10 @@ docs/
 - **[🧭 P2] [🟡 Session]** Quarterly supplier evaluation (Q3).
 ```
 
-**A timeline entry and a reasoning error in episodic memory:**
+**The index line of a session record — the timeline is generated from it — and a reasoning error:**
 
 ```markdown
-- 2026-09-24: [Suppliers] [Payments] Missing items in delivery note 4521 from Supplier B: payment withheld until claim; Q3 evaluation started.
+# 2026-09-24: [Suppliers] [Payments] Missing items in delivery note 4521 from Supplier B: payment withheld until claim; Q3 evaluation started.
 ```
 
 ```markdown

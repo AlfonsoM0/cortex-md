@@ -1,8 +1,10 @@
 # Tag Taxonomy (Cortex-MD)
 
-This document defines the **strict** list of `[Tags]` that can be used in `timeline.md`.
+This document defines the **strict** list of `[Tags]` that can be used in the index line of each session record — and so in `timeline.md`, which is generated from those lines.
 
-**Rule for the agent:** use only the tags listed here. If no existing tag adequately covers the domain worked on, **recommend a new tag to the user and wait for their approval** before adding it to this file and using it in the timeline.
+**Rule for the agent:** use only the tags listed here. If no existing tag adequately covers the domain worked on, **recommend a new tag to the user and wait for their approval** before adding it to this file and using it.
+
+**A tag in use is never renamed or deleted:** old records keep it in their index line, and episodic memory is not rewritten. Mark it as retired, naming its successor (`[Auth]` — retired, now `[Security]`), and search both: `--history Auth Security`.
 
 ## Allowed Tags
 

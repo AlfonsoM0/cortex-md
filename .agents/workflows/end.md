@@ -19,7 +19,7 @@ description: Session end (Consolidation)
 2. Use this structure and omit sections that do not apply:
 
 ```markdown
-# Session: YYYY-MM-DD
+# YYYY-MM-DD: [Tag1] [Tag2] One-line summary.
 
 ## Summary
 
@@ -50,6 +50,8 @@ description: Session end (Consolidation)
 Where the work left off and what follows. It is the first thing the next session reads (`start.md § Phase 2`).
 ```
 
+> **The first line is the session's index line** (Phase 2): the timeline and the search of old memories are built from it, so it is written only here.
+
 > The **Summary** and the **Context for Next Session** are the only parts of the record that the next session reads (`node .agents/check-memory-contract.js --recent`): keep them short, self-contained and with those exact titles.
 
 > **Also record your own reasoning errors**, not just system errors: a hypothesis that the user corrected, data assumed to be true without verification, a "blocker" that did not exist. These are the most expensive to repeat and no test catches them. Note **what caused it** (outdated documentation, a record from another environment, assuming an error where there was a design decision) and **how to avoid it**.
@@ -59,11 +61,17 @@ In a project without version control, "Version Control" is replaced by a referen
 ## Phase 2: Hippocampal Index (timeline)
 
 1. Read `.agents/memory/semantic/taxonomy.md`. If no tag covers the domain, **recommend one to the user and wait for their approval**. A session with project context carries at least one project tag; `[CortexMD]` alone is only for memory maintenance (defrag, purge), which routing skips.
-2. Add an entry to the **top** of `.agents/memory/episodic/timeline.md`:
-   - Format: `- YYYY-MM-DD: [Tag1] [Tag2] One-line summary.`
-   - **~200 characters in total**, dense and self-contained, to determine relevance without opening the daily file. Name the file (`DD-s2.md`) if there were multiple sessions.
-   - Details live in episodic memory; do not duplicate them in the index.
-3. Limit: **50 sessions**. If exceeded, remove the oldest ones from the bottom: the timeline is the index of fresh memory; older records stay in `episodic/YYYY/MM/` and remain searchable.
+2. Write the record's **index line** — its first line (Phase 1):
+   - Format: `# YYYY-MM-DD: [Tag1] [Tag2] One-line summary.` — the record's own date, and the tags right after the colon.
+   - **~200 characters in total**, dense and self-contained, to determine relevance without opening the record. Do not name the file: the timeline adds it for `DD-s2.md` and later.
+   - Details live in the record; do not duplicate them in the index line.
+3. **Regenerate the timeline** — never edit it by hand:
+
+   ```bash
+   node .agents/check-memory-contract.js --timeline
+   ```
+
+   It rebuilds `timeline.md` from the index lines of the 50 most recent records, newest first, and keeps the lines of records from before this format. Records that leave the timeline keep their index line, so old memories stay searchable by tag (`start.md § Phase 3`). If you update a consolidated record, update its index line and regenerate. Without Node: copy the index line to the top of `timeline.md` as `- YYYY-MM-DD: …` (`- YYYY-MM-DD (DD-s2.md): …` for later sessions of the day) and remove the lines beyond 50.
 
 ## Phase 3: Semantic Consolidation (Neuroplasticity)
 

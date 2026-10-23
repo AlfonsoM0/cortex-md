@@ -78,11 +78,11 @@ Cada archivo reescrito es completo y autocontenido (no un diff), de tamaño ≤ 
 
 ### 2.5 Verificar el contrato (bloqueante)
 
-Corré `node .agents/check-memory-contract.js`. Señala entradas largas sin cita, citas muertas, citas a la memoria episódica, **citas laterales o hacia arriba** en el centro, y **citas a una sección de `active-tasks.md` desde `docs/`**; reporta la carga fija, la proporción de 🔴 por archivo y los docs de más de 40 KB. Objetivo: **cero hallazgos**. Cada hallazgo se corrige moviendo el detalle al doc y dejando regla + cita; no se silencia. ⚠️ Mide la **forma**, no la verdad: una entrada corta que miente pasa en verde. Eso lo cubre la Fase 4.6.
+Corré `node .agents/check-memory-contract.js`. Señala entradas largas sin cita, citas muertas, citas a la memoria episódica, **citas laterales o hacia arriba** en el centro, **citas a una sección de `active-tasks.md` desde `docs/`** y un **timeline desincronizado del índice de sesiones**; reporta la carga fija, la proporción de 🔴 por archivo y los docs de más de 40 KB. Objetivo: **cero hallazgos**. Cada hallazgo se corrige moviendo el detalle al doc y dejando regla + cita; no se silencia. ⚠️ Mide la **forma**, no la verdad: una entrada corta que miente pasa en verde. Eso lo cubre la Fase 4.6.
 
 ## Fase 3: Optimización Episódica
 
-1. **Timeline:** máximo 50 sesiones; cada entrada de **una línea (~200 caracteres)** — si creció a párrafo, verificá que el detalle esté en el día y comprimila; solo etiquetas de `taxonomy.md`; entradas con 5+ etiquetas se **señalan** en el reporte (sesiones poco granulares), sin modificarlas.
+1. **Líneas índice y timeline:** cada registro empieza con **una línea índice (~200 caracteres)**, solo con etiquetas de `taxonomy.md` — si alguna creció a párrafo, verificá que el detalle esté en el registro, comprimí la línea y regenerá el timeline (`end.md § Fase 2`); las líneas con 5+ etiquetas se **señalan** en el reporte (sesiones poco granulares), sin modificarlas. **Registros anteriores al formato** (el verificador dice cuántos siguen en el timeline): con la aprobación del usuario, copiá la línea del timeline de cada uno como su primera línea — `# ` en lugar de `- `, sin el nombre del archivo —, del más nuevo hacia atrás, y regenerá. Agrega un índice; no reescribe la historia.
 2. **Límite episódico ↔ semántico:** lo episódico infiltrado en la semántica (fechas de sesión, "hoy hicimos X") vuelve a su día o se elimina. Que un día contenga algo ya promovido a la semántica es correcto: el episódico es un registro inmutable.
 
 ## Fase 4: Validación Cruzada
@@ -90,7 +90,7 @@ Corré `node .agents/check-memory-contract.js`. Señala entradas largas sin cita
 - `architecture` ↔ `stack`: cada herramienta reflejada en la estructura y viceversa.
 - `conventions` ↔ `architecture`: sin contradicciones.
 - `business-rules` ↔ `architecture`: entidades del dominio alineadas a la estructura.
-- `taxonomy` ↔ `timeline`: toda etiqueta en uso existe en la taxonomía.
+- `taxonomy` ↔ líneas índice: toda etiqueta en uso (`--history` sin etiqueta lista todas las sesiones) existe en la taxonomía, incluidas las retiradas.
 - `active-tasks` ↔ roadmap: la tarea actual es coherente con la fase.
 - **Dirección de citas** (el modelo, regla 3): el verificador señala citas laterales en el centro y citas de la base a secciones de `active-tasks.md`; revisá a mano que la punta cite hacia abajo y que ninguna regla viva repetida en dos niveles.
 
@@ -172,7 +172,7 @@ Si hay otro agente o modelo disponible, pedile que revise los cambios del defrag
 
 ## Fase 9: Registro
 
-- Un registro episódico del día (`end.md § Fase 1`) y una entrada en el timeline etiquetada **solo** `[CortexMD]` (así el enrutamiento la omite).
+- Un registro episódico del día cuya línea índice esté etiquetada **solo** `[CortexMD]` (así el enrutamiento la omite), y el timeline regenerado (`end.md § Fases 1-2`).
 - En `.agents/memory/maintenance-log.md`: fecha del último defrag, carga fija resultante en tokens, y posposiciones en cero. En modo post-instalación: `Post-instalación: hecho AAAA-MM-DD`, quitá la línea `Init:` y borrá el P1 post-instalación de `active-tasks.md`.
 
 _Idempotente: ejecutarlo dos veces seguidas no debería producir más cambios. Si la memoria ya está óptima, informalo y omití reescrituras innecesarias._

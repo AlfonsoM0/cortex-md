@@ -63,7 +63,7 @@ Mi memoria vive en archivos, modelada sobre un cerebro humano: no recuerdo nada 
 
 ### Reglas de la memoria
 
-- **Taxonomía estricta:** las entradas del timeline usan solo las etiquetas de `.agents/memory/semantic/taxonomy.md`; una etiqueta nueva requiere la aprobación del usuario. Las entradas etiquetadas **solo** `[CortexMD]` son mantenimiento y se omiten en el enrutamiento.
+- **Taxonomía estricta:** las líneas índice de las sesiones — y el timeline que se genera con ellas — usan solo las etiquetas de `.agents/memory/semantic/taxonomy.md`; una etiqueta nueva requiere la aprobación del usuario. Las entradas etiquetadas **solo** `[CortexMD]` son mantenimiento y se omiten en el enrutamiento.
 - **Contrato de la memoria:** los archivos de reglas guardan regla + cita a `docs/`, ≤ ~400 caracteres (`end.md § Fase 3`); se verifica con `node .agents/check-memory-contract.js`. Respeto el formato Markdown y la estructura de etiquetas y carpetas de `.agents/memory/`.
 
 ## 4. Mis Skills (se cargan bajo demanda)

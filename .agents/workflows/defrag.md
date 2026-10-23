@@ -78,11 +78,11 @@ Each rewritten file is complete and self-contained (not a diff), with size ≤ o
 
 ### 2.5 Verify contract (blocking)
 
-Run `node .agents/check-memory-contract.js`. It flags long entries without a citation, dead citations, citations to episodic memory, **lateral or upward citations** in the middle, and **citations to a section of `active-tasks.md` from `docs/`**; it reports the always-loaded tier, the share of 🔴 per file and the docs over 40 KB. Target: **zero findings**. Each finding is resolved by moving details to the doc and leaving rule + citation; do not suppress warnings. ⚠️ It checks **form**, not truth: a short entry containing false statements passes in green. That is covered in Phase 4.6.
+Run `node .agents/check-memory-contract.js`. It flags long entries without a citation, dead citations, citations to episodic memory, **lateral or upward citations** in the middle, **citations to a section of `active-tasks.md` from `docs/`**, and a **timeline out of sync with the session index**; it reports the always-loaded tier, the share of 🔴 per file and the docs over 40 KB. Target: **zero findings**. Each finding is resolved by moving details to the doc and leaving rule + citation; do not suppress warnings. ⚠️ It checks **form**, not truth: a short entry containing false statements passes in green. That is covered in Phase 4.6.
 
 ## Phase 3: Episodic Optimization
 
-1. **Timeline:** maximum 50 sessions; each entry **one line (~200 characters)** — if it grew into a paragraph, verify the details exist in the daily file and compress it; strict tags from `taxonomy.md` only; entries with 5+ tags are **flagged** in the report (poorly granular sessions), without modifying them.
+1. **Index lines and timeline:** each record opens with **one index line (~200 characters)**, strict tags from `taxonomy.md` only — if one grew into a paragraph, verify the details exist in the record, compress the line and regenerate the timeline (`end.md § Phase 2`); lines with 5+ tags are **flagged** in the report (poorly granular sessions), without modifying them. **Records from before the format** (the checker says how many are still in the timeline): with the user's approval, copy each one's timeline line as its first line — `# ` instead of `- `, without the file name —, from the newest backwards, and regenerate. It adds an index; it does not rewrite the history.
 2. **Episodic ↔ semantic boundary:** episodic details infiltrating semantic memory (session dates, "today we did X") return to their day or are deleted. An episodic daily record containing something already promoted to semantic memory is correct: episodic memory is an immutable log.
 
 ## Phase 4: Cross-Validation
@@ -90,7 +90,7 @@ Run `node .agents/check-memory-contract.js`. It flags long entries without a cit
 - `architecture` ↔ `stack`: every tool is reflected in the architecture and vice versa.
 - `conventions` ↔ `architecture`: no contradictions.
 - `business-rules` ↔ `architecture`: domain entities aligned with system structure.
-- `taxonomy` ↔ `timeline`: every tag in use exists in taxonomy.
+- `taxonomy` ↔ index lines: every tag in use (`--history` without a tag lists every session) exists in taxonomy, retired ones included.
 - `active-tasks` ↔ roadmap: current task aligns with phase.
 - **Citation direction** (the model, rule 3): the checker flags lateral citations in the middle and base citations to sections of `active-tasks.md`; check by hand that the top cites downward and that no rule lives repeated on two levels.
 
@@ -172,7 +172,7 @@ If another agent or model is available, ask it to review the defrag changes befo
 
 ## Phase 9: Logging
 
-- An episodic record for the day (`end.md § Phase 1`) and a timeline entry tagged **only** `[CortexMD]` (so routing skips it).
+- An episodic record for the day whose index line is tagged **only** `[CortexMD]` (so routing skips it), and the timeline regenerated (`end.md § Phases 1-2`).
 - In `.agents/memory/maintenance-log.md`: date of the last defrag, resulting always-loaded tier in tokens, and postponements reset to zero. In post-installation mode: `Post-install: done YYYY-MM-DD`, remove the `Init:` line, and delete the post-installation P1 from `active-tasks.md`.
 
 _Idempotent: running twice in a row should produce no further changes. If memory is already optimal, report it and skip unnecessary rewrites._

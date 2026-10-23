@@ -7,6 +7,17 @@
  *   node .agents/check-memory-contract.js --recent  → prints yesterday's memory
  *     (Summary + Context for Next Session of the last session, and of the last
  *     project session if the last one was only [CortexMD]) — `start.md § Phase 2`
+ *   node .agents/check-memory-contract.js --timeline → regenerates `timeline.md`
+ *     from the first line of the 50 most recent session records — `end.md § Phase 2`
+ *   node .agents/check-memory-contract.js --history <Tag> [<Tag>…] → the same
+ *     index lines for every session with any of those tags, without the limit
+ *     of 50 (no tag: all of them) — `start.md § Phase 3`
+ *
+ * The SESSION INDEX: each record opens with its index line,
+ *   `# YYYY-MM-DD: [Tag1] [Tag2] One-line summary.`
+ * and the timeline is generated from those lines, so the agent writes the
+ * line once and long-term memory stays indexed by tag. Records from before
+ * this format have no index line: their timeline lines are kept as they are.
  *
  * The contract (see `.agents/workflows/end.md § Phase 3`):
  *   a rule file entry = rule (imperative) + at most 1 sentence of reason
@@ -32,6 +43,10 @@
  *   5. Citations to a section or item of `active-tasks.md` from `docs/`: the
  *      base may name where state lives, but its sections change and the
  *      citation dies.
+ *   6. A timeline out of sync with the session index: not regenerated after
+ *      a record, a record without an index line once the format is in use, an
+ *      index line whose date is not the record's, or a timeline line outside
+ *      the index format (which `--timeline` refuses to drop).
  *
  * A skill cited as `[skill-name]` counts as a citation only if
  * `.agents/skills/skill-name/` exists.
@@ -43,6 +58,8 @@
  *     such as `[🔴 Epic]` do not count).
  *   - Docs in `docs/` over 40 KB: they split into a folder with an `index.md`
  *     (`end.md § Phase 4`).
+ *   - Timeline sessions whose record has no index line (from before the
+ *     format): their tags leave the index when they leave the timeline.
  *   - Size of the ALWAYS-LOADED tier (what every session reads: `AGENTS.md`,
  *     the bridge, `start.md`, the short rules, the timeline and the recent
  *     memory that `--recent` prints), in bytes and estimated tokens, so the
@@ -81,6 +98,8 @@ const CENTER_FILES = [...RULE_FILES, "active-tasks.md"];
 const MAX_DOC_BYTES = 40 * 1024;
 /** Budget of 🔴 list items per middle file (`end.md § Phase 3`). */
 const MAX_RED_RATIO = 0.25;
+/** Sessions in the timeline, the index of fresh memory (`end.md § Phase 2`). */
+const MAX_TIMELINE = 50;
 
 /**
  * Always-loaded tier (read in every session). Missing files are skipped, so
@@ -311,15 +330,169 @@ function sessionRecords() {
   );
 }
 
-/** Was the session ONLY memory maintenance? Its timeline entry says so. */
-function isMaintenanceOnly(record, timeline) {
-  const sameDay = timeline.split("\n").filter((l) => l.startsWith(`- ${record.date}:`));
-  const entry =
-    sameDay.find((l) => l.includes(record.file)) ||
-    (record.n ? undefined : sameDay.find((l) => !/\d{2}-s\d+\.md/.test(l)));
-  if (!entry) return false;
-  const tags = [...entry.matchAll(/\[([A-Za-z0-9]+)\]/g)].map(([, t]) => t);
-  return tags.length > 0 && tags.every((t) => t === "CortexMD");
+const timelineFile = path.join(root, ".agents", "memory", "episodic", "timeline.md");
+/** A record's index line: `# YYYY-MM-DD: [Tag1] [Tag2] One-line summary.` */
+const INDEX_LINE = /^# (\d{4}-\d{2}-\d{2}): (.+)$/;
+/** A timeline line: `- YYYY-MM-DD: …`, or `- YYYY-MM-DD (DD-s2.md): …`. */
+const TIMELINE_LINE = /^- (\d{4}-\d{2}-\d{2})\b/;
+const SESSION_FILE = /\b\d{2}-s(\d+)\.md\b/;
+/** Unicode-aware, so `[Logística]` is a tag. */
+const TAG = /\[([\p{L}\p{N}_-]+)\]/gu;
+
+/** The tags right after the colon; older timeline lines may have them anywhere. */
+function tagsOf(text, leadingOnly) {
+  const body = text.slice(text.indexOf(": ") + 2);
+  const run = body.match(/^(?:\[[\p{L}\p{N}_-]+\]\s*)+/u);
+  if (run) return [...run[0].matchAll(TAG)].map(([, t]) => t);
+  return leadingOnly ? [] : [...text.matchAll(TAG)].map(([, t]) => t);
+}
+
+const isMaintenanceTags = (tags) => tags.length > 0 && tags.every((t) => t === "CortexMD");
+
+function firstLine(rel) {
+  const text = fs.readFileSync(path.join(root, rel), "utf8").replace(/^﻿/, "");
+  return (text.split(/\r?\n/).find((l) => l.trim() !== "") || "").trim();
+}
+
+/** `timeline.md` split into the text above the first line, its lines, and anything else. */
+function readTimeline() {
+  if (!fs.existsSync(timelineFile)) return { preamble: [], lines: [], stray: [] };
+  const all = fs.readFileSync(timelineFile, "utf8").replace(/\r\n?/g, "\n").split("\n");
+  const first = all.findIndex((l) => TIMELINE_LINE.test(l));
+  const timeline = { preamble: first === -1 ? all : all.slice(0, first), lines: [], stray: [] };
+  if (first === -1) return timeline;
+  all.slice(first).forEach((l, i) => {
+    if (TIMELINE_LINE.test(l)) timeline.lines.push(l.trimEnd());
+    else if (l.trim() !== "") timeline.stray.push({ line: first + i + 1, text: l.trim() });
+  });
+  return timeline;
+}
+
+/**
+ * The session index, newest first: one entry per record with an index line,
+ * plus the timeline lines of records that have none (from before the format).
+ */
+function sessionIndex() {
+  const records = sessionRecords();
+  const timeline = readTimeline();
+  const entries = [];
+  const problems = [];
+  const indexed = new Set();
+  let oldestIndexed = -1;
+
+  records.forEach((record, i) => {
+    const m = firstLine(record.rel).match(INDEX_LINE);
+    if (!m) return;
+    if (m[1] !== record.date) {
+      problems.push({ where: record.rel, kind: "index line with another date", detail: `${m[1]} — the record's date is ${record.date}` });
+    }
+    const body = m[2].trim();
+    entries.push({
+      date: record.date,
+      n: record.n,
+      indexed: true,
+      tags: tagsOf(`: ${body}`, true),
+      line: `- ${record.date}${record.n ? ` (${record.file})` : ""}: ${body}`,
+    });
+    indexed.add(`${record.date}#${record.n}`);
+    oldestIndexed = i;
+  });
+
+  const listed = new Set();
+  for (const line of timeline.lines) {
+    const date = line.match(TIMELINE_LINE)[1];
+    const session = line.match(SESSION_FILE);
+    const n = session ? Number(session[1]) : 0;
+    if (indexed.has(`${date}#${n}`)) continue;
+    listed.add(`${date}#${n}`);
+    entries.push({ date, n, indexed: false, tags: tagsOf(line, false), line });
+  }
+
+  // Once the format is in use, a newer record in no index was left without its line.
+  records.slice(0, oldestIndexed).forEach((record) => {
+    const key = `${record.date}#${record.n}`;
+    if (!indexed.has(key) && !listed.has(key)) {
+      problems.push({ where: record.rel, kind: "record without an index line", detail: "its first line must be `# YYYY-MM-DD: [Tag] One-line summary.` (end.md § Phase 1)" });
+    }
+  });
+
+  // Stable sort: older lines of the same day keep their order.
+  entries.sort((a, b) => (a.date === b.date ? b.n - a.n : a.date < b.date ? 1 : -1));
+  return { records, timeline, entries, problems };
+}
+
+/** The timeline that `--timeline` writes. */
+function renderTimeline(timeline, entries) {
+  const preamble = [...timeline.preamble];
+  while (preamble.length > 0 && preamble[preamble.length - 1].trim() === "") preamble.pop();
+  const head = preamble.length > 0 ? preamble.join("\n") : "# Timeline (Hippocampal Index)";
+  const body = entries.slice(0, MAX_TIMELINE).map((e) => e.line);
+  return body.length > 0 ? `${head}\n\n${body.join("\n")}\n` : `${head}\n`;
+}
+
+function strayFindings(timeline) {
+  return timeline.stray.map((s) => ({
+    where: `timeline.md:${s.line}`,
+    kind: "line outside the index format",
+    detail: `${s.text.slice(0, 80)} — every line below the header is \`- YYYY-MM-DD: …\`; move notes above the first one`,
+  }));
+}
+
+function buildTimeline() {
+  const { timeline, entries, problems } = sessionIndex();
+  const stray = strayFindings(timeline);
+  if (stray.length > 0) {
+    console.error("🔴 timeline.md was not regenerated: it has lines that are not session lines, and they would be lost.\n");
+    stray.forEach((f) => console.error(`   ${f.where} — ${f.detail}\n`));
+    return 1;
+  }
+  const content = renderTimeline(timeline, entries);
+  const current = fs.existsSync(timelineFile) ? fs.readFileSync(timelineFile, "utf8") : "";
+  if (content !== current) fs.writeFileSync(timelineFile, content);
+  const kept = entries.slice(0, MAX_TIMELINE);
+  const older = kept.filter((e) => !e.indexed).length;
+  console.log(
+    `✓ timeline.md ${content === current ? "already up to date" : "regenerated"}: ${kept.length} session(s)` +
+      (older > 0 ? `, ${older} of them from records without an index line (kept as they were)` : ""),
+  );
+  problems.forEach((p) => console.error(`⚠️  ${p.where} — ${p.kind}: ${p.detail}`));
+  return problems.length > 0 ? 1 : 0;
+}
+
+/** `--history <Tag>…`: the index lines of every session with any of the tags. */
+function printHistory(wanted) {
+  const tags = wanted.map((t) => t.replace(/^\[|\]$/g, "").toLowerCase());
+  const lines = sessionIndex()
+    .entries.filter((e) => {
+      const own = e.tags.map((t) => t.toLowerCase());
+      if (isMaintenanceTags(e.tags) && !tags.includes("cortexmd")) return false;
+      return tags.length === 0 || own.some((t) => tags.includes(t));
+    })
+    .map((e) => e.line);
+  console.log(lines.length > 0 ? lines.join("\n") : `(no session tagged ${wanted.join(", ")})`);
+  return 0;
+}
+
+/** Timeline in sync with the session index (`end.md § Phase 2`). */
+function auditTimeline() {
+  const { timeline, entries, problems } = sessionIndex();
+  const findings = [...problems, ...strayFindings(timeline)];
+  const expected = entries.slice(0, MAX_TIMELINE).map((e) => e.line);
+  if (timeline.stray.length === 0 && expected.join("\n") !== timeline.lines.join("\n")) {
+    findings.push({
+      where: "timeline.md",
+      kind: "out of date",
+      detail: "it does not match the index lines of the records: run `node .agents/check-memory-contract.js --timeline`",
+    });
+  }
+  const older = entries.slice(0, MAX_TIMELINE).filter((e) => !e.indexed).length;
+  return { findings, older };
+}
+
+/** Was the session ONLY memory maintenance? Its index line says so. */
+function isMaintenanceOnly(record, entries) {
+  const entry = entries.find((e) => e.date === record.date && e.n === record.n);
+  return entry ? isMaintenanceTags(entry.tags) : false;
 }
 
 /** Summary + Context for Next Session of a record. */
@@ -335,12 +508,11 @@ function recentSections(rel) {
 
 /** Yesterday's memory: what `start.md § Phase 2` reads, and what is measured. */
 function recentMemory() {
-  const tl = path.join(root, ".agents", "memory", "episodic", "timeline.md");
-  const timeline = fs.existsSync(tl) ? fs.readFileSync(tl, "utf8") : "";
+  const { records, entries } = sessionIndex();
   const blocks = [];
-  for (const record of sessionRecords()) {
+  for (const record of records) {
     blocks.push(`# ${record.rel}\n\n${recentSections(record.rel)}`);
-    if (!isMaintenanceOnly(record, timeline)) break;
+    if (!isMaintenanceOnly(record, entries)) break;
   }
   return blocks.join("\n\n");
 }
@@ -371,11 +543,16 @@ function main() {
     console.log(recentMemory());
     return 0;
   }
+  if (process.argv.includes("--timeline")) return buildTimeline();
+  const history = process.argv.indexOf("--history");
+  if (history !== -1) return printHistory(process.argv.slice(history + 1));
   const docs = docFiles();
+  const timeline = auditTimeline();
   const findings = [
     ...RULE_FILES.flatMap(auditFile),
     ...CENTER_FILES.flatMap(auditDirection),
     ...auditVolatileRefs(docs),
+    ...timeline.findings,
   ];
   reportAlwaysLoaded();
   const ratios = CENTER_FILES.filter((f) => fs.existsSync(path.join(memoryDir, f))).map((f) => {
@@ -396,19 +573,26 @@ function main() {
       `ℹ️  ${uncited.length} short entr${uncited.length === 1 ? "y" : "ies"} without a citation (allowed; the contract prefers rule + → docs/...): ${uncited.join(", ")}`,
     );
   }
+  if (timeline.older > 0) {
+    console.log(
+      `ℹ️  ${timeline.older} timeline session(s) from records without an index line: their tags leave the index when they leave the timeline (defrag.md § Phase 3 adds the line, with the user's approval).`,
+    );
+  }
 
   if (findings.length === 0) {
     console.log(
-      `✅ Memory contract: ${RULE_FILES.length} rule files OK (≤${MAX_CHARS} chars or cited, no dead or episodic citations) and the middle cites only downward.`,
+      `✅ Memory contract: ${RULE_FILES.length} rule files OK (≤${MAX_CHARS} chars or cited, no dead or episodic citations), the middle cites only downward, and the timeline matches the session index.`,
     );
     return 0;
   }
 
   console.error(`\n🔴 Memory contract: ${findings.length} finding(s).\n`);
-  console.error(
-    "   Memory states RULES; detail lives in docs/. Fix by moving the detail to the\n" +
-      "   canonical doc (create it if missing) and leaving: rule + 1 reason + → docs/...\n",
-  );
+  if (findings.length > timeline.findings.length) {
+    console.error(
+      "   Memory states RULES; detail lives in docs/. Fix by moving the detail to the\n" +
+        "   canonical doc (create it if missing) and leaving: rule + 1 reason + → docs/...\n",
+    );
+  }
   for (const f of findings) {
     console.error(`   ${f.where} — ${f.kind}\n     ${f.detail}\n`);
   }

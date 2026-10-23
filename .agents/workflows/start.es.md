@@ -30,7 +30,7 @@ Ante una discrepancia gana el nivel superior. 🔴 **La memoria envejece hacia e
 **Leé SOLO SI aplica a la tarea:**
 
 - `conventions.md` — vas a producir algo que respeta el estilo de la casa (código, documentos, mensajes).
-- `taxonomy.md` — vas a buscar en el timeline o agregarle una entrada.
+- `taxonomy.md` — vas a buscar en el timeline o escribir la línea índice de una sesión.
 
 **Si dudás de si un archivo aplica, leelo:** un archivo leído de más cuesta poco; uno que faltó puede costar una regla rota.
 
@@ -57,7 +57,7 @@ Extraé los dominios de la solicitud (ej. Auth, DB, UI — o Stock, Proveedores,
 
 - No leas todo el historial: buscá por patrón las etiquetas relevantes.
 - **Regla de omisión:** ignorá las entradas etiquetadas **solo** con `[CortexMD]` (mantenimiento de memoria, sin contexto del proyecto).
-- **Recuerdos antiguos:** las sesiones que ya no aparecen en el timeline siguen en `.agents/memory/episodic/YYYY/MM/`; buscalas (por palabra, fecha o etiqueta) cuando la tarea toca algo más antiguo.
+- **Recuerdos antiguos:** las sesiones que ya no aparecen en el timeline siguen en `.agents/memory/episodic/YYYY/MM/`, cada una con su línea índice al principio. Cuando la tarea toca algo más antiguo, buscalas por etiqueta con `node .agents/check-memory-contract.js --history <Tag> [<Tag>…]` — las líneas del timeline sin el límite de 50, sin las de mantenimiento — o por palabra o fecha.
 
 ⚠️ **El episódico es historia:** sirve para entender decisiones y errores pasados, no para afirmar el estado actual. Si contradice a la semántica, gana la semántica; si contradice a la fuente primaria, gana la fuente primaria.
 

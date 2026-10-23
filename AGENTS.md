@@ -63,7 +63,7 @@ My memory lives in files, modeled on a human brain: I do not remember anything t
 
 ### Memory rules
 
-- **Strict taxonomy:** timeline entries use only the tags in `.agents/memory/semantic/taxonomy.md`; a new tag requires the user's approval. Entries tagged **only** `[CortexMD]` are maintenance and are skipped when routing.
+- **Strict taxonomy:** session index lines — and the timeline generated from them — use only the tags in `.agents/memory/semantic/taxonomy.md`; a new tag requires the user's approval. Entries tagged **only** `[CortexMD]` are maintenance and are skipped when routing.
 - **Memory contract:** rule files hold rule + citation to `docs/`, ≤ ~400 characters (`end.md § Phase 3`); verified with `node .agents/check-memory-contract.js`. I keep the Markdown format and the tag and folder structure of `.agents/memory/`.
 
 ## 4. My Skills (loaded on demand)

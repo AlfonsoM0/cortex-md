@@ -32,8 +32,8 @@ Un LLM pre-entrenado no puede cambiar sus pesos para recordar la conversación d
 | **Despertar** — recordar quién sos, qué sabés y qué hiciste ayer | `start.md` |
 | **Dormir** — consolidar el día en recuerdos y aprendizajes | `end.md` |
 | **Recuerdos de ayer** | El registro de la última sesión (`episodic/YYYY/MM/DD.md`), que se lee al despertar |
-| **Recuerdos recientes** | El timeline o "índice hipocampal" (`episodic/timeline.md`): una línea por sesión, las últimas 50 |
-| **Recuerdos antiguos** | Las sesiones que salieron del timeline: siguen en `episodic/` y se buscan solo cuando hacen falta |
+| **Recuerdos recientes** | El timeline o "índice hipocampal" (`episodic/timeline.md`): una línea por sesión, las últimas 50, generadas a partir de la primera línea de cada registro |
+| **Recuerdos antiguos** | Las sesiones que salieron del timeline: siguen en `episodic/`, cada una con su línea índice al principio, y se buscan por etiqueta solo cuando hacen falta (`--history`) |
 | **Aprendizajes** | La memoria semántica (reglas cortas del presente), `docs/` (conocimiento detallado) y las skills (habilidades) |
 | **Ejercicios de memoria** | `defrag.md`: una revisión profunda que corrige lo que se consolidó mal; `maintenance.md` es el chequeo semanal que dice cuándo |
 | **Atención** — la corteza prefrontal | La ventana de contexto: limpia y enfocada en la tarea actual |
@@ -140,6 +140,7 @@ Lo que el framework necesita del entorno, y por qué:
 - **Un arnés agentil con acceso al sistema de archivos:** `end.md` lee y escribe varios archivos, y `start.md` tiene que ejecutarse antes de responder. Un arnés lo hace solo y, si admite hooks de inicio de sesión, lo garantiza; una interfaz de chat obliga a copiar y pegar a mano.
 - **Costo predecible:** cada sesión paga el ciclo `start` → `end` y, cada tanto, un `defrag`. Con tarifa plana ese costo fijo no se nota; con API se paga por token.
 - **Una sola memoria:** las herramientas con memoria propia (la auto-memoria de Claude, la integrada de Hermes) la desactivan para el proyecto; cuando no se puede desactivar (Cowork, ChatGPT Work), se restringe a preferencias personales. Snippets en [`docs/agent-bridges.es.md`](docs/agent-bridges.es.md).
+- **Las apps de notas como Obsidian no son la memoria del agente:** como mucho, una ventana para el humano. Por qué, y qué no hacer si sumás una: [`docs/obsidian.es.md`](docs/obsidian.es.md).
 
 **Con arnés libre + API key**, además elegí un proveedor **con prompt caching** (sin caché, cada turno paga el contexto completo) y reservá el modelo más capaz para la instalación y `defrag.md`.
 
@@ -179,8 +180,8 @@ Cortex-MD vive junto a tus archivos, en la convención `.agents/` que usan las h
     │   │   └── taxonomy.md              #     Lista cerrada de etiquetas del timeline
     │   ├── maintenance-log.md           #   Estado de la instalación, chequeo semanal, último defrag
     │   └── episodic/                    #   Hipocampo: recuerdos de ayer, recientes y antiguos
-    │       ├── timeline.md              #     Recuerdos recientes: índice de las últimas 50 sesiones, por [Tags]
-    │       └── YYYY/MM/DD.md · DD-s2.md #     Un registro por sesión (el último: ayer)
+    │       ├── timeline.md              #     Recuerdos recientes: las últimas 50 líneas índice (generado)
+    │       └── YYYY/MM/DD.md · DD-s2.md #     Un registro por sesión; su primera línea es su línea índice
     ├── skills/                          # (Convención) Skills, se cargan bajo demanda
     ├── sync-mcp.js · mcp_config*.json   # Extensión: módulo de MCP, a pedido
     └── backups/                         # Solo sin git: copias antes de cada defrag
@@ -190,7 +191,7 @@ Cortex-MD vive junto a tus archivos, en la convención `.agents/` que usan las h
 
 # Solo en el repositorio del framework (no se copia a tu proyecto):
 /INSTALL.md                              # Instrucciones de instalación para el agente
-/docs/                                   # Guías del framework (agent-bridges, mcp-sync)
+/docs/                                   # Guías del framework (agent-bridges, mcp-sync, obsidian)
 ```
 
 `AGENTS.md` es el ser del agente y el enrutador de su memoria (fundamento 5): identidad y propósito, autonomía, el mapa de la memoria y sus reglas, los workflows del ciclo de vida y el router de skills. Se mantiene corto porque cada sesión lo paga; los bloques que solo aplican a proyectos de software o a extensiones están marcados (`<!-- cortex:software-only -->`, `<!-- cortex:optional:<nombre> -->`) para que `init` y la purga los quiten.
@@ -212,7 +213,7 @@ Lo que convierte una carpeta de Markdown en una memoria confiable no es la estru
 8. **Un doc grande se convierte en una carpeta con un `index.md`.** A partir de ~40 KB (~10k tokens), un doc se divide en `docs/<area>/<topic>/`: un `index.md` que es la punta de la rama (qué es, las reglas clave en una pantalla, un mapa de sus hijos) y archivos temáticos por debajo de ~40 KB que mantienen los títulos de sección y su numeración, para que las citas existentes solo cambien el nombre de archivo. La historia del descubrimiento no va en un doc: va a la memoria episódica.
 9. **🔴 jerarquiza, así que es escaso.** Reservalo para lo irreversible o silencioso (dinero, datos, seguridad, legal, datos personales), a lo sumo en una de cada cuatro entradas de un archivo. Las 5-10 reglas transversales más críticas viven una sola vez, en la punta (`AGENTS.md`).
 
-**Verificador:** `node .agents/check-memory-contract.js` controla la forma de cada entrada — viñetas (aunque estén partidas en varias líneas), ítems numerados, filas de tabla y párrafos: entradas largas sin cita, citas a docs o skills inexistentes, citas al episódico, **citas laterales o hacia arriba** en los archivos de reglas que se leen siempre y en `active-tasks.md` (un archivo de memoria que cita a otro, o a `AGENTS.md`), y **citas a una sección de `active-tasks.md` desde `docs/`**. Admite rutas con acentos e ignora las URLs. Reporta el tamaño de la carga fija en tokens estimados, la proporción de entradas con 🔴 por archivo y los docs de más de 40 KB. Mide la **forma**, no la verdad: eso lo hace el defrag contrastando la memoria con la fuente primaria.
+**Verificador:** `node .agents/check-memory-contract.js` controla la forma de cada entrada — viñetas (aunque estén partidas en varias líneas), ítems numerados, filas de tabla y párrafos: entradas largas sin cita, citas a docs o skills inexistentes, citas al episódico, **citas laterales o hacia arriba** en los archivos de reglas que se leen siempre y en `active-tasks.md` (un archivo de memoria que cita a otro, o a `AGENTS.md`), **citas a una sección de `active-tasks.md` desde `docs/`** y un **timeline desincronizado de las líneas índice de los registros**. Admite rutas con acentos e ignora las URLs. También genera el timeline (`--timeline`) y busca en toda la historia por etiqueta (`--history`). Reporta el tamaño de la carga fija en tokens estimados, la proporción de entradas con 🔴 por archivo y los docs de más de 40 KB. Mide la **forma**, no la verdad: eso lo hace el defrag contrastando la memoria con la fuente primaria.
 
 ## Flujos de Trabajo (Workflows)
 
@@ -229,13 +230,13 @@ Con la síntesis aprobada por el usuario, `init` crea la documentación (`docs/0
 - **Jerarquía de verdad** y la regla de contenido de terceros, antes de cargar nada.
 - **Fase 1 (Lo que sé):** las reglas cortas del presente (`architecture`, `stack`, `business-rules`, `active-tasks`, `maintenance-log` y el roadmap si existe); `conventions` y `taxonomy` cuando la tarea los toca — ante la duda, los lee.
 - **Fase 2 (Ayer y los recuerdos recientes):** siempre el timeline y, con un comando exacto (`node .agents/check-memory-contract.js --recent`), solo el Resumen y el Contexto para la Próxima Sesión de la última sesión. Un agente que trabaja por encargo la saltea.
-- **Fase 3 (Recuerdos más antiguos):** solo si los dominios de la tarea coinciden con etiquetas del timeline, lee esas sesiones como historia, no como estado; busca en las sesiones antiguas cuando hace falta.
+- **Fase 3 (Recuerdos más antiguos):** solo si los dominios de la tarea coinciden con etiquetas del timeline, lee esas sesiones como historia, no como estado; las sesiones antiguas, por etiqueta con un comando exacto (`--history <Tag>`), cuando hace falta.
 - **Fase 4:** recuerda lo que vence (P1 y `[Watch]` que vencen hoy o mañana) y recomienda a lo sumo una cosa — continuar una instalación incompleta, el defrag + purga post-instalación, registrar una sesión sin consolidar (solo con git) o el chequeo semanal.
 
 ### 2. Dormir: `end.md`
 
 - **Episódico:** el día con cambios, decisiones y errores — incluidos los **errores de razonamiento propios**, los más caros de repetir.
-- **Timeline:** una línea de ~200 caracteres con etiquetas de la taxonomía; `[CortexMD]` solo, únicamente para mantenimiento de la memoria.
+- **Línea índice y timeline:** el registro empieza con una línea de ~200 caracteres con etiquetas de la taxonomía (`[CortexMD]` solo, únicamente para mantenimiento de la memoria); el timeline se genera con un comando a partir de esas líneas, así que el agente escribe cada línea una sola vez.
 - **Consolidación semántica** con el contrato de tres tipos de archivo; sin credenciales, datos personales ni texto de terceros sin aprobar.
 - **Documentación y roadmap:** el comportamiento va a `docs/`, y los docs se citan entre sí; el roadmap cambia solo si cambió el alcance; **barrido de coherencia** cuando cambia un valor o un nombre.
 - **Skills y workflows:** los patrones nuevos van a skills; las formas mejores de ejecutar un workflow se le proponen al usuario.
@@ -327,10 +328,10 @@ docs/
 - **[🧭 P2] [🟡 Sesión]** Evaluación trimestral de proveedores (T3).
 ```
 
-**Una entrada del timeline y un error de razonamiento en el episódico:**
+**La línea índice de un registro de sesión — con ella se genera el timeline — y un error de razonamiento:**
 
 ```markdown
-- 2026-09-24: [Proveedores] [Pagos] Faltantes en el remito 4521 del Proveedor B: pago retenido hasta el reclamo; empezó la evaluación del T3.
+# 2026-09-24: [Proveedores] [Pagos] Faltantes en el remito 4521 del Proveedor B: pago retenido hasta el reclamo; empezó la evaluación del T3.
 ```
 
 ```markdown
