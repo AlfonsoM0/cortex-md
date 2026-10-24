@@ -33,7 +33,7 @@ node .agents/sync-mcp.js
 
 Adding a new IDE target is ~5 lines in `sync-mcp.js` (one merge loop + one `write(...)`). If a target file already exists and its content would change, the script first saves the previous version as `<file>.bak`: a hand-written config is never lost silently.
 
-Tools that only read a **global** MCP configuration (e.g. Codex's `~/.codex/config.toml` without project trust, or Antigravity's `~/.gemini/config/mcp_config.json`) are not generated: use `mcp_config.json` as the inventory to restore them by hand.
+Tools that only read a **global** MCP configuration (e.g. Codex's `~/.codex/config.toml` without project trust) are not generated: use `mcp_config.json` as the inventory to restore them by hand. **Antigravity** reads the project's `.agents/mcp_config.json` directly (same `mcpServers` format): it needs no copy, but it would try to start any example servers that are not removed.
 
 ## Security & .gitignore
 

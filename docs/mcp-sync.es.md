@@ -33,7 +33,7 @@ node .agents/sync-mcp.js
 
 Agregar un nuevo IDE destino son ~5 líneas en `sync-mcp.js` (un loop de merge + un `write(...)`). Si un archivo destino ya existe y su contenido cambiaría, el script guarda antes la versión anterior como `<archivo>.bak`: una configuración escrita a mano nunca se pierde en silencio.
 
-Las herramientas que solo leen una configuración de MCP **global** (p. ej. el `~/.codex/config.toml` de Codex sin confianza del proyecto, o el `~/.gemini/config/mcp_config.json` de Antigravity) no se generan: usá `mcp_config.json` como inventario para restaurarlas a mano.
+Las herramientas que solo leen una configuración de MCP **global** (p. ej. el `~/.codex/config.toml` de Codex sin confianza del proyecto) no se generan: usá `mcp_config.json` como inventario para restaurarlas a mano. **Antigravity** lee directamente `.agents/mcp_config.json` del proyecto (mismo formato `mcpServers`): no necesita copia, pero intentaría levantar los servidores de ejemplo que no se quiten.
 
 ## Seguridad & .gitignore
 

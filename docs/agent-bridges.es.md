@@ -22,7 +22,7 @@ Cortex-MD es agnóstico, pero **la memoria solo funciona si cada sesión la carg
 
 Claude Code y Claude Cowork son el mismo servicio en dos formas de uso; lo mismo Codex y ChatGPT Work. El agente recomienda la forma que corresponde al trabajo, sin exigirla.
 
-**Cambiar el modelo** (la instalación y el defrag piden el más capaz): en las CLIs, normalmente el comando `/model` (Claude Code, Codex); en las apps de escritorio (Claude Cowork, ChatGPT Work), el selector de modelo junto al cuadro de mensaje; en Antigravity, su configuración (`agy models` lista los disponibles); en Hermes, la configuración de proveedor y modelo. Las interfaces cambian: verificalo en la documentación de la herramienta antes de indicárselo al usuario.
+**Cambiar el modelo** (la instalación y el defrag piden el más capaz): en las CLIs, normalmente el comando `/model` (Claude Code, Codex); en las apps de escritorio (Claude Cowork, ChatGPT Work), el selector de modelo junto al cuadro de mensaje; en Antigravity, el selector debajo del cuadro de mensaje (en la CLI, `/model`); en Hermes, la configuración de proveedor y modelo. Las interfaces cambian: verificalo en la documentación de la herramienta antes de indicárselo al usuario.
 
 **Regla de convivencia** (para herramientas cuya memoria no se puede desactivar) — agregala al puente o a las instrucciones de la herramienta:
 
@@ -114,11 +114,39 @@ _Verificado: 2026-09 · [AGENTS.md en Codex](https://learn.chatgpt.com/docs/agen
 
 ## Google Antigravity
 
-_Verificado: 2026-09 (medido con `agy` 1.2)._
+_Verificado: 2026-10-24 · [Reglas](https://antigravity.google/docs/rules) · [Skills](https://antigravity.google/docs/skills) · [Hooks](https://antigravity.google/docs/hooks) · [Permisos](https://antigravity.google/docs/permissions) · [Configuración](https://antigravity.google/docs/settings) · [Términos](https://antigravity.google/terms). Vale para la app de escritorio y la CLI `agy`._
 
-- **Contexto:** lee `AGENTS.md` de forma nativa; no lee la configuración de otras herramientas.
-- **Memoria:** un `~/.gemini/GEMINI.md` global acumula "Gemini Added Memories" de todos los proyectos: aplicá la **regla de convivencia** y no consolides ahí.
-- **Workflows:** Antigravity ejecuta workflows en Markdown como comandos con barra desde `.agent/workflows/` (en algunas versiones, `.agents/workflows/`). Si lista `/start`, `/end` o `/defrag`, son los workflows de Cortex-MD: sirven como atajos.
+- **Contexto:** lee `AGENTS.md` de forma nativa y siempre activo, sin frontmatter. Tope de **24 KB por archivo** y unos **20.000 tokens** entre todas las reglas activas (si se pasa, degrada los archivos más grandes a un puntero): otra razón para mantener `AGENTS.md` corto. No lee la configuración de otras herramientas (`.claude/`, `CLAUDE.md`).
+- **Skills:** las lee de `.agents/skills/<nombre>/SKILL.md`, la misma carpeta de Cortex-MD, y cada una se puede pedir como `/<nombre>`.
+- **Workflows:** los comandos con barra de `.agent/workflows/` **dejaron de funcionar el 2026-10-19** y se reemplazaron por skills. Los workflows de Cortex-MD no dependen de eso: el agente los lee porque `AGENTS.md` lo indica. 🔴 **No corras `/migrate-workflows`**: convertiría `.agents/workflows/` en skills.
+- **Arranque:** el equivalente del hook de Claude es `.agents/hooks.json` con un `SessionStart`, que corre una vez al empezar cada conversación e inyecta un mensaje con `injectSteps`. El comando recibe por stdin un JSON con `workspacePaths`. Ejemplo probado en Windows (cmd y PowerShell), con el texto en `.agents/hooks/session-start.json`:
+
+  ```json
+  {
+    "cortex-arranque": {
+      "SessionStart": [
+        {
+          "type": "command",
+          "command": "node -e \"const f=require('fs'),p=require('path');let w=[];try{w=JSON.parse(f.readFileSync(0,'utf8')).workspacePaths||[]}catch(e){}const a=[...w,'.'].map(d=>p.join(d,'.agents','hooks','session-start.json')).find(x=>f.existsSync(x));if(a)process.stdout.write(f.readFileSync(a,'utf8'))\"",
+          "timeout": 10
+        }
+      ]
+    }
+  }
+  ```
+
+  ```json
+  { "injectSteps": [ { "systemMessage": { "systemMessage": "PROTOCOLO DE ARRANQUE: antes de responder el primer mensaje, leé AGENTS.md y ejecutá .agents/workflows/start.md. La memoria vive en .agents/memory/; no uses la memoria propia de Antigravity para el estado del proyecto." } } ] }
+  ```
+
+  Un `PreToolUse` en el mismo archivo puede bloquear acciones por código (`"decision": "deny"`).
+- **Memoria:** la app guarda "knowledge items" propios en `~/.gemini/antigravity/`, y las reglas globales de `~/.gemini/GEMINI.md` y `~/.gemini/AGENTS.md` valen para todos los proyectos. Aplicá la **regla de convivencia** y no consolides ahí. 🔴 **No uses `/learn`:** propone reglas a partir de la conversación y, si se aprueban, las escribe en `AGENTS.md` o en `.agents/rules/`, por fuera del contrato de la memoria.
+- **MCP:** lee los servidores del proyecto de `.agents/mcp_config.json`, con el mismo formato `mcpServers` del inventario de Cortex-MD: no hace falta generarlo (`docs/mcp-sync.md`). Quitá los servidores de ejemplo que no uses, porque Antigravity intentaría levantarlos.
+- **Permisos:** listas Deny > Ask > Allow por acción (`read_file`, `write_file`, `command`, `read_url`, `execute_url`, `mcp`), globales o por proyecto. Los presets: **Request Review** (cada comando pide aprobación; el recomendado para quien no es experto), **Default** (los comandos corren sin preguntar dentro de un sandbox sin red; en Windows requiere Windows 11 24H2 con la actualización de agosto de 2026), **Auto** y **Turbo** (sin restricciones: nunca con datos sensibles). En Windows, las reglas de comandos van con `command(regex:…)`. Lo aprobado durante una conversación puede quedar fijo en el proyecto.
+- **Privacidad:** con una cuenta personal, Google puede usar las interacciones para mejorar sus modelos y su personal puede revisarlas, salvo que se desactive **Enable Telemetry** (Configuración → Account). Si el proyecto tiene datos de terceros, se desactiva antes de empezar. Solo Gemini Enterprise garantiza que no se entrena con los datos.
+- **Rutinas:** las **Scheduled Tasks** de la app (conversaciones periódicas, visibles y controlables desde la barra lateral) son el equivalente de las rutinas de Claude: corren en la computadora y no guardan la memoria. `/schedule` vale solo dentro de una conversación.
+- **Desde el celular:** **Remote Control** (Configuración → App) permite usar el agente de la PC desde el navegador del teléfono, con la misma cuenta de Google. La PC tiene que estar encendida.
+- **Modelos:** el selector debajo del cuadro de mensaje (en la CLI, `/model`), con nivel de razonamiento Low, Medium o High. El plan gratuito tiene una cuota semanal; los planes pagos de Google AI suman modelos más capaces.
 
 ## Hermes Agent (avanzado: arnés libre + API key)
 

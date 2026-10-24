@@ -22,7 +22,7 @@ Cortex-MD is agnostic, but **memory only works if every session loads it**. Thre
 
 Claude Code and Claude Cowork are the same service in two forms of use; likewise Codex and ChatGPT Work. The agent recommends the form that fits the work, without requiring it.
 
-**Changing the model** (the installation and the defrag ask for the most capable one): in CLIs, usually the `/model` command (Claude Code, Codex); in desktop apps (Claude Cowork, ChatGPT Work), the model selector next to the message box; in Antigravity, its settings (`agy models` lists the available ones); in Hermes, the provider and model configuration. Interfaces change: verify it in the tool's documentation before telling the user.
+**Changing the model** (the installation and the defrag ask for the most capable one): in CLIs, usually the `/model` command (Claude Code, Codex); in desktop apps (Claude Cowork, ChatGPT Work), the model selector next to the message box; in Antigravity, the selector under the message box (in the CLI, `/model`); in Hermes, the provider and model configuration. Interfaces change: verify it in the tool's documentation before telling the user.
 
 **Coexistence rule** (for tools whose memory cannot be disabled) — add it to the bridge or to the tool's instructions:
 
@@ -114,11 +114,39 @@ _Verified: 2026-09 · [AGENTS.md in Codex](https://learn.chatgpt.com/docs/agent-
 
 ## Google Antigravity
 
-_Verified: 2026-09 (measured with `agy` 1.2)._
+_Verified: 2026-10-24 · [Rules](https://antigravity.google/docs/rules) · [Skills](https://antigravity.google/docs/skills) · [Hooks](https://antigravity.google/docs/hooks) · [Permissions](https://antigravity.google/docs/permissions) · [Settings](https://antigravity.google/docs/settings) · [Terms](https://antigravity.google/terms). Applies to the desktop app and the `agy` CLI._
 
-- **Context:** reads `AGENTS.md` natively; it does not read other tools' configuration.
-- **Memory:** a global `~/.gemini/GEMINI.md` accumulates "Gemini Added Memories" for every project: apply the **coexistence rule** and do not consolidate there.
-- **Workflows:** Antigravity runs Markdown workflows as slash commands from `.agent/workflows/` (in some versions, `.agents/workflows/`). If it lists `/start`, `/end`, or `/defrag`, they are the Cortex-MD workflows: usable as shortcuts.
+- **Context:** reads `AGENTS.md` natively and always on, without frontmatter. Limit of **24 KB per file** and about **20,000 tokens** across all active rules (past that, it demotes the largest files to a pointer): one more reason to keep `AGENTS.md` short. It does not read other tools' configuration (`.claude/`, `CLAUDE.md`).
+- **Skills:** it reads them from `.agents/skills/<name>/SKILL.md`, the same Cortex-MD folder, and each one can be requested as `/<name>`.
+- **Workflows:** the slash commands from `.agent/workflows/` **stopped working on 2026-10-19** and were replaced by skills. Cortex-MD's workflows do not depend on that: the agent reads them because `AGENTS.md` says so. 🔴 **Do not run `/migrate-workflows`**: it would turn `.agents/workflows/` into skills.
+- **Startup:** the equivalent of Claude's hook is `.agents/hooks.json` with a `SessionStart`, which runs once when each conversation starts and injects a message with `injectSteps`. The command receives on stdin a JSON with `workspacePaths`. Example tested on Windows (cmd and PowerShell), with the text in `.agents/hooks/session-start.json`:
+
+  ```json
+  {
+    "cortex-startup": {
+      "SessionStart": [
+        {
+          "type": "command",
+          "command": "node -e \"const f=require('fs'),p=require('path');let w=[];try{w=JSON.parse(f.readFileSync(0,'utf8')).workspacePaths||[]}catch(e){}const a=[...w,'.'].map(d=>p.join(d,'.agents','hooks','session-start.json')).find(x=>f.existsSync(x));if(a)process.stdout.write(f.readFileSync(a,'utf8'))\"",
+          "timeout": 10
+        }
+      ]
+    }
+  }
+  ```
+
+  ```json
+  { "injectSteps": [ { "systemMessage": { "systemMessage": "STARTUP PROTOCOL: before answering the first message, read AGENTS.md and run .agents/workflows/start.md. Memory lives in .agents/memory/; do not use Antigravity's own memory for the project's state." } } ] }
+  ```
+
+  A `PreToolUse` in the same file can block actions in code (`"decision": "deny"`).
+- **Memory:** the app keeps its own "knowledge items" in `~/.gemini/antigravity/`, and the global rules in `~/.gemini/GEMINI.md` and `~/.gemini/AGENTS.md` apply to every project. Apply the **coexistence rule** and do not consolidate there. 🔴 **Do not use `/learn`:** it proposes rules from the conversation and, if approved, writes them to `AGENTS.md` or `.agents/rules/`, outside the memory contract.
+- **MCP:** it reads the project's servers from `.agents/mcp_config.json`, with the same `mcpServers` format as the Cortex-MD inventory: no need to generate it (`docs/mcp-sync.md`). Remove the example servers you do not use, because Antigravity would try to start them.
+- **Permissions:** Deny > Ask > Allow lists per action (`read_file`, `write_file`, `command`, `read_url`, `execute_url`, `mcp`), global or per project. The presets: **Request Review** (every command asks for approval; the recommended one for non-experts), **Default** (commands run without asking inside a sandbox with no network; on Windows it requires Windows 11 24H2 with the August 2026 update), **Auto**, and **Turbo** (no restrictions: never with sensitive data). On Windows, command rules use `command(regex:…)`. What is approved during a conversation can stay fixed in the project.
+- **Privacy:** with a personal account, Google may use interactions to improve its models and its staff may review them, unless **Enable Telemetry** is turned off (Settings → Account). If the project holds third-party data, turn it off before starting. Only Gemini Enterprise guarantees that the data is not used for training.
+- **Routines:** the app's **Scheduled Tasks** (periodic conversations, visible and controllable from the sidebar) are the equivalent of Claude's routines: they run on the computer and do not save memory. `/schedule` only applies within a conversation.
+- **From the phone:** **Remote Control** (Settings → App) lets you use the PC's agent from the phone's browser, with the same Google account. The PC has to be on.
+- **Models:** the selector under the message box (in the CLI, `/model`), with a Low, Medium, or High reasoning level. The free plan has a weekly quota; paid Google AI plans add more capable models.
 
 ## Hermes Agent (advanced: open harness + API key)
 
