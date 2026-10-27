@@ -134,6 +134,7 @@ Take **verifiable** statements from semantic memory — names, limits, values, "
 1. **Sensitive data:** with git, every folder with credentials, sessions, or personal data must be ignored and have no versioned files — anything versioned is a **critical** finding. Without git, the same: if the folder syncs to the cloud or is shared, memory must not contain sensitive data.
 2. **Caches (optional):** if the project accumulates heavy caches, purge them with your toolchain command — verifying beforehand what it deletes (some `clean` tasks also remove dependencies).
 3. If working inside a virtual disk (e.g. WSL2), remind in the report that reclaiming disk space may require compacting the image from the host system.
+4. **Weekly check:** the defrag includes it. Run the checks in `maintenance.md § Checks` that the previous phases did not cover — at least the brief review date and the agent environment verification, plus any the project added — and decide with its table (`maintenance.md § Decision`), without the defrag row. The outcome goes to the report (Phase 7) and the log (Phase 9).
 
 ## Phase 6.5: Purge (post-installation, or on request)
 
@@ -161,6 +162,7 @@ Prepare it now and **deliver it last**, after Phases 8 and 9 and a final run of 
 - **Statements refuted by the primary source (Phase 4.6)** — the most important part of the report.
 - State drift corrected in `docs/`, highlighting any that underestimated risk.
 - Router, dead paths, and updated skills; timeline health and tag distribution; hygiene.
+- **Weekly check (Phase 6 § 4):** the outcome in one line and its recommendation, if any.
 - **Pending items that only the user can confirm**, numbered, so they can cross off any that no longer apply.
 - Suggested next defrag (e.g. after 15-20 sessions).
 
@@ -173,6 +175,6 @@ If another agent or model is available, ask it to review the defrag changes befo
 ## Phase 9: Logging
 
 - An episodic record for the day whose index line is tagged **only** `[CortexMD]` (so routing skips it), and the timeline regenerated (`end.md § Phases 1-2`).
-- In `.agents/memory/maintenance-log.md`: date of the last defrag, resulting always-loaded tier in tokens, and postponements reset to zero. In post-installation mode: `Post-install: done YYYY-MM-DD`, remove the `Init:` line, and delete the post-installation P1 from `active-tasks.md`.
+- In `.agents/memory/maintenance-log.md`: date of the last defrag, resulting always-loaded tier in tokens, `Last weekly check: YYYY-MM-DD — in the defrag; <outcome>` with the same date, and postponements reset to zero. In post-installation mode: `Post-install: done YYYY-MM-DD`, remove the `Init:` line, and delete the post-installation P1 from `active-tasks.md`.
 
 _Idempotent: running twice in a row should produce no further changes. If memory is already optimal, report it and skip unnecessary rewrites._

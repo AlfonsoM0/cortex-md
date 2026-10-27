@@ -49,3 +49,5 @@ description: Chequeo semanal de la memoria (automático, liviano)
 ## Registro
 
 Actualizá `.agents/memory/maintenance-log.md`: fecha del chequeo, resultado en una línea y, si se pospuso algo, la cuenta de posposiciones. El chequeo **no va al timeline** (sería ruido semanal); el defrag y la re-alineación sí.
+
+Un defrag incluye el chequeo y también lo registra (`defrag.md § Fase 9`): con esa fecha, la regla de _Cuándo corre_ ya lo da por hecho.

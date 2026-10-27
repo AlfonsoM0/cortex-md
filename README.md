@@ -260,7 +260,7 @@ Consolidation is imperfect, so memory is exercised on demand, after installation
 
 ### 4. The weekly check-up: `maintenance.md`
 
-Triggered automatically by `start.md` on the first session on or after the **maintenance day**. Lightweight, it never rewrites memory: it runs the verifier, looks for unconsolidated sessions (with git), expired pending items, sessions since the last defrag, always-loaded tier growth, the age of the brief, and the age of the agent environment verification. It makes **one recommendation, not a list**, in three lines at most; if the user postpones, it does not insist until the following week.
+Triggered automatically by `start.md` on the first session on or after the **maintenance day**. Lightweight, it never rewrites memory: it runs the verifier, looks for unconsolidated sessions (with git), expired pending items, sessions since the last defrag, always-loaded tier growth, the age of the brief, and the age of the agent environment verification. It makes **one recommendation, not a list**, in three lines at most; if the user postpones, it does not insist until the following week. A defrag includes and logs it, so the next session does not repeat it.
 
 ## Example: memory for an administrative agent
 

@@ -134,6 +134,7 @@ Tomá las afirmaciones **verificables** de la memoria semántica — nombres, l�
 1. **Datos sensibles:** con git, cada carpeta con credenciales, sesiones o datos personales tiene que estar ignorada y sin archivos versionados — algo versionado es un hallazgo **crítico**. Sin git, igual: si la carpeta se sincroniza con la nube o se comparte, la memoria no contiene datos sensibles.
 2. **Cachés (opcional):** si el proyecto acumula cachés pesadas, purgalas con el comando de tu herramienta — verificando antes qué borra (algunas tareas `clean` también borran dependencias).
 3. Si trabajás en un disco virtual (ej. WSL2), recordá en el reporte que recuperar espacio puede requerir compactar la imagen desde el sistema anfitrión.
+4. **Chequeo semanal:** el defrag lo incluye. Corré los chequeos de `maintenance.md § Chequeos` que las fases anteriores no cubrieron — como mínimo, la fecha de revisión del brief y la verificación del entorno del agente, más los que haya agregado el proyecto — y decidí con su tabla (`maintenance.md § Decisión`), sin la fila del defrag. El resultado va al reporte (Fase 7) y al registro (Fase 9).
 
 ## Fase 6.5: Purga (post-instalación, o a pedido)
 
@@ -161,6 +162,7 @@ Preparalo ahora y **entregalo al final**, después de las Fases 8 y 9 y de una �
 - **Afirmaciones que la fuente primaria desmintió (Fase 4.6)** — lo más importante del reporte.
 - Desvío de estado corregido en `docs/`, marcando el que subestimaba riesgo.
 - Router, rutas muertas y skills actualizadas; salud del timeline y distribución de etiquetas; higiene.
+- **Chequeo semanal (Fase 6 § 4):** el resultado en una línea y su recomendación, si la hay.
 - **Pendientes que solo el usuario puede confirmar**, numerados, para que marque los que ya no aplican.
 - Próximo defrag sugerido (ej. tras 15-20 sesiones).
 
@@ -173,6 +175,6 @@ Si hay otro agente o modelo disponible, pedile que revise los cambios del defrag
 ## Fase 9: Registro
 
 - Un registro episódico del día cuya línea índice esté etiquetada **solo** `[CortexMD]` (así el enrutamiento la omite), y el timeline regenerado (`end.md § Fases 1-2`).
-- En `.agents/memory/maintenance-log.md`: fecha del último defrag, carga fija resultante en tokens, y posposiciones en cero. En modo post-instalación: `Post-instalación: hecho AAAA-MM-DD`, quitá la línea `Init:` y borrá el P1 post-instalación de `active-tasks.md`.
+- En `.agents/memory/maintenance-log.md`: fecha del último defrag, carga fija resultante en tokens, `Último chequeo semanal: AAAA-MM-DD — en el defrag; <resultado>` con la misma fecha, y posposiciones en cero. En modo post-instalación: `Post-instalación: hecho AAAA-MM-DD`, quitá la línea `Init:` y borrá el P1 post-instalación de `active-tasks.md`.
 
 _Idempotente: ejecutarlo dos veces seguidas no debería producir más cambios. Si la memoria ya está óptima, informalo y omití reescrituras innecesarias._

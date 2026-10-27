@@ -259,7 +259,7 @@ La consolidación es imperfecta, así que la memoria se ejercita a pedido, despu
 
 ### 4. El chequeo semanal: `maintenance.md`
 
-`start.md` lo dispara solo en la primera sesión desde el **día de mantenimiento**. Es liviano y nunca reescribe la memoria: corre el verificador, busca sesiones sin consolidar (con git), pendientes vencidos, sesiones desde el último defrag, crecimiento de la carga fija, la antigüedad del brief y la de la verificación del entorno del agente. Hace **una recomendación, no una lista**, en tres líneas como máximo; si el usuario pospone, no insiste hasta la semana siguiente.
+`start.md` lo dispara solo en la primera sesión desde el **día de mantenimiento**. Es liviano y nunca reescribe la memoria: corre el verificador, busca sesiones sin consolidar (con git), pendientes vencidos, sesiones desde el último defrag, crecimiento de la carga fija, la antigüedad del brief y la de la verificación del entorno del agente. Hace **una recomendación, no una lista**, en tres líneas como máximo; si el usuario pospone, no insiste hasta la semana siguiente. Un defrag lo incluye y lo registra, así que la sesión siguiente no lo repite.
 
 ## Ejemplo: memoria de un agente administrativo
 

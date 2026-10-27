@@ -49,3 +49,5 @@ description: Weekly memory check (automatic, lightweight)
 ## Logging
 
 Update `.agents/memory/maintenance-log.md`: check date, outcome in a single line, and if postponed, the postponement count. The check **is not logged to the timeline** (that would be weekly noise); defrag and re-alignment are.
+
+A defrag includes the check and logs it too (`defrag.md § Phase 9`): with that date, the _When it runs_ rule already counts it as done.
